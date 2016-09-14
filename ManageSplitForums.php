@@ -154,8 +154,7 @@ Function EditSubForum($sub)
 			$modSettings['subforum_modify_sp_portal'] = $modSettings['sp_portal_mode'];
 		if (!isset($modSettings['subforum_modify_sp_standalone']))
 			$modSettings['subforum_modify_sp_standalone'] = $modSettings['sp_standalone_url'];
-		if ($_REQUEST['sa'] == 'newsub')
-			$modSettings['subforum_modify_sp_blocks'] = -2;
+		$modSettings['subforum_modify_sp_blocks'] = ($_REQUEST['sa'] == 'newsub' ? -2 : -1);
 		$txt['subforum_modify_sp_portal'] = $txt['sp_portal_mode'];
 		$txt['subforum_modify_sp_standalone'] = $txt['sp_standalone_url'];
 	}
@@ -226,12 +225,12 @@ function SaveSubForum($sub)
 	add_subforum($arr);
 
 	// Populate the Simple Portal blocks for this subforum:
-	if ($_POST['subforum_modify_sp_blocks'] == -2)
+	if (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -2)
 	{
 		delete_sp_blocks($arr['forumid']);
 		use_default_sp_blocks($arr['forumid']);
 	}
-	elseif ($_POST['subforum_modify_sp_blocks'] > -1)
+	elseif (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] > -1)
 	{
 		delete_sp_blocks($arr['forumid']);
 		copy_sp_blocks($_POST['subforum_modify_sp_blocks'], $arr['forumid']);

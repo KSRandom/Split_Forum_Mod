@@ -401,39 +401,52 @@ function copy_sp_blocks($from, $forum)
 	$from = (int) $from;
 	$forum = (int) $forum;
 
+	$request = $smcFunc['db_query']('', '
+		SELECT MAX(id_block) AS id_block
+		FROM {db_prefix}sp_blocks'
+	);
+	list($max) = $smcFunc['db_fetch_row']($request);
+	$smcFunc['db_free_result']($request);
+	
 	// Retrieve & modify all blocks for specified forum:
 	$request = $smcFunc['db_query']('', '
-		SELECT
-			b.label, b.type, b.col, b.row, b.permission_set, b.display, b.display_custom
-			b.style, b.forum, p.variable, p.value
+		SELECT 
+			b.id_block, b.label, b.type, b.col, b.row, b.permission_set, b.display,
+			b.display_custom, b.style, b.forum, p.variable, p.value
 		FROM {db_prefix}sp_blocks AS b
-			LEFT JOIN {db_prefix}sb_parameters AS p ON (p.id_block = b.id_block)
-		WHERE p.forum = {int:forum}',
+			LEFT JOIN {db_prefix}sp_parameters AS p ON (p.id_block = b.id_block)
+		WHERE b.forum = {int:from}
+		ORDER BY b.id_block ASC',
 		array(
-			'forum' => $forum,
+			'from' => $from,
 		)
 	);
 	$blocks	= array();
+	$parameters = array();
 	while ($row = $smcFunc['db_fetch_assoc']($request))
 	{
+		$max++;
+		$row['id_block'] = $max;
 		if (!empty($row['variable']))
 		{
-			$parameters[$row['type']] = array(
+			$parameters[] = array(
+				'id_block' => $row['id_block'],
 				'variable' => $row['variable'],
 				'value' => $row['value']
 			);
-			unset($row['variable']);
-			unset($row['value']);
 		}
 		$row['forum'] = $forum;
+		unset($row['variable']);
+		unset($row['value']);
 		$blocks[] = $row;
 	}
 	$smcFunc['db_free_result']($request);
 
 	// Place the new blocks into the Simple Portal table:
-	$smcFunc['db_insert']('ignore',
+	$smcFunc['db_insert']('replace',
 		'{db_prefix}sp_blocks',
 		array(
+			'id_block' => 'int',
 			'label' => 'text',
 			'type' => 'text',
 			'col' => 'int',
@@ -447,22 +460,6 @@ function copy_sp_blocks($from, $forum)
 		$blocks,
 		array('id_block')
 	);
-
-	// Try to associate the parameters with the block needing them:
-	$request = $smcFunc['db_query']('', '
-		SELECT MIN(id_block) AS id, type
-		FROM {db_prefix}sp_blocks
-		WHERE type IN ({array_string:types}) AND forum = {int:forum}
-		GROUP BY type
-		LIMIT 4',
-		array(
-			'types' => array('sp_html', 'sp_boardNews', 'sp_calendar', 'sp_recent'),
-			'forum' => $from,
-		)
-	);
-	while ($row = $smcFunc['db_fetch_assoc']($request))
-		$block_ids[$row['type']] = $row['id'];
-	$smcFunc['db_free_result']($request);
 
 	// Place the parameters into the Simple Portal table:
 	$smcFunc['db_insert']('replace',
@@ -482,6 +479,7 @@ function delete_sp_blocks($forum)
 	global $smcFunc;
 
 	isAllowedTo('admin_forum');
+	$forum = (int) $forum;
 
 	// Get the id number for blocks with parameters:
 	$request = $smcFunc['db_query']('', '
@@ -502,7 +500,7 @@ function delete_sp_blocks($forum)
 		DELETE FROM {db_prefix}sp_blocks
 		WHERE forum = {int:forum}',
 		array(
-			'forum' => (int) $forum,
+			'forum' => $forum,
 		)
 	);
 
@@ -513,7 +511,7 @@ function delete_sp_blocks($forum)
 			DELETE FROM {db_prefix}sp_parameters
 			WHERE id_block IN ({array_int:id_blocks})',
 			array(
-				'id_block' => $parameters
+				'id_blocks' => $parameters
 			)
 		);
 	}

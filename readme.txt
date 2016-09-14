@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.7[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.8[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -51,27 +51,36 @@ o Language settings restricted to members registered on a subforum
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x is not and will not be supported.
 
-[url=http://custom.simplemachines.org/mods/index.php?mod=1104]Simple Portal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within Simple Portal.  Earlier versions of Simple Portal have not been tested for compatibility with this mod.
+[url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  Earlier versions of SimplePortal have not been tested for compatibility with this mod.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.2 thru v1.6[/b] to [b]v1.7[/b].
+Upgrade is possible from [b]v1.2 thru v1.7[/b] to [b]v1.8[/b].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
-[b][u]v1.7 - August 16th, 2014, 2014[/u][/b]
+[b][u]v1.8 - August 24th, 2014[/u][/b]
+o Fixed some undefined errors found in [b]ManageSplitForums.php[/b].
+o Fixed issue with Manage Boards UI installed where copying blocks was selected by default.
+o Modified code so that domain names with and without [b]www.[/b] are properly recognized.
+o Rewrote function that copies SimplePortal blocks from one subforum to another.
+o Fixed bug with SimplePortal saving configuration settings because variable wasn't globalized.
+o Fixed variable type-casting bug with deleting SimplePortal blocks from a subforum.
+o Fixed mod installer issue for people without SimplePortal installed.
+
+[b][u]v1.7 - August 16th, 2014[/u][/b]
 o Added script to rebuild the subforum tree array correctly.
 o Fixed the javascript conditional statements so that subforum ID and path are editable.
 o Moved subdomain removal hook function so it is done immediately before removal of subforum.
-o Added fields to Manage Subforum UI to populate and/or copy Simple Portal blocks.
-o Added ability to change the portal mode per subforum for Simple Portal.
-o Modified Simple Portal's General Settings UI to update subforum settings.
+o Added fields to Manage Subforum UI to populate and/or copy SimplePortal blocks.
+o Added ability to change the portal mode per subforum for SimplePortal.
+o Modified SimplePortal's General Settings UI to update subforum settings.
 
 [b][u]v1.6 - August 11th, 2014[/u][/b]
 o Modified Create Subforum functions to properly create new subforums without conflicts
 o Modified Manage Boards UI so that when changing subforum and/or category, category and board list now changes.
 o Fixed browser compatibility issue with revised Manage Category UI.
-o Addition of a tabbed interface for Simple Portal block listing template.
-o Rewrite of Simple Portal template modifications introduced in version 1.5.
+o Addition of a tabbed interface for SimplePortal block listing template.
+o Rewrite of SimplePortal template modifications introduced in version 1.5.
 o Added tab system to Blocks listing UI to make it easier to put seperate blocks in subforums.
 o Modified several SSI functions so that they return results for only that subforum.
 
@@ -79,7 +88,7 @@ o Modified several SSI functions so that they return results for only that subfo
 o Fixed the subforum URL detection code that resulted in board doesn't exist errors....
 o Fixed Manage Boards UI so that boards aren't hidden when entering Manage Boards UI...
 o Updated [b]package-info.xml[/b] so that it redirects to clears the SMF file cache
-o Modified Simple Portal code to support subforums selection for blocks.
+o Modified SimplePortal code to support subforums selection for blocks.
 
 [b][u]v1.4 - July 26th, 2014[/u][/b]
 o While changing the subforum a category is assigned to, the category order list now changes.
@@ -106,7 +115,7 @@ o Added English UTF8 language strings
 o Changed the method that subforum boards and categories are listed to a tabbed system
 o [b]edit_db.php[/b] modification to attempt to eliminate some weird error...
 
-[b][u]v1.0 - May 17th, 2013[/u][/b]
+[b][u]v1.0 - May 27th, 2014[/u][/b]
 o Initial Release
 [/quote]
 
