@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.15[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.16[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -44,7 +44,6 @@ o [b]integrate_subforum_subdomain[/b] - Hook for creating/deleting subdomains an
 
 [color=blue][b][size=12pt][u]To-Do List[/u][/size][/b][/color]
 o Add compatibility with [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards[/url] mod...
-o Add compatibility with [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] mod...
 o Copy a category/board from one subforum to another
 o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
@@ -58,13 +57,22 @@ This mod was tested on SMF 2.0.9, but should work on earlier versions.  SMF 1.x 
 
 [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.2+[/url] should be installed prior to this mod.  Alias Boards mod has been altered so that it works only within a single subforum, meaning board 1 from category 1 can be aliased into category 2 in subforum 1, but [b]NOT[/b] into any category in subforum 2....
 
-This mod DOES NOT correctly work with [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url]!!!
+[url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] should be installed prior to this mod.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.3[/b] to this version.
+Upgrade is possible from [b]v1.12[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.16 - November 19th, 2014[/u][/b]
+o Fixed a few security issues within database queries in the mod.
+o Fixed some query variable type-casting issues within the mod.
+o Modified Edit Category UI so that SubForum selection box is on top of the form.
+o Modified Recent Posts code so that it is limited to the subforum it is displaying for.
+o Fixed compatibility with [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] mod...
+o Fixed both the SSI bug report and undefined array element report in [b]Load.php[/b] by [b]SauloA[/b]...
+o Fixed a small bug for Manage Board UI.
+
 [b][u]v1.15 - November 1st, 2014[/u][/b]
 o Moved code responsible for primary membership setting after loading forum settings...
 o Removed seperate cookie per subforum in favor of a more unified login process....

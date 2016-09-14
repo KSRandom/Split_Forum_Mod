@@ -282,8 +282,8 @@
 		)]]></search>
 		<add><![CDATA[SELECT t.id_first_msg
 		FROM {db_prefix}topics as t
-			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 			LEFT JOIN {db_prefix}boards as b ON (b.id_board = t.id_board)
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 		WHERE t.id_board = {int:current_board}' . ($modSettings['postmod_active'] ? '
 			AND t.approved = {int:is_approved}' : '') . '
 			AND {query_see_board}
@@ -340,13 +340,14 @@
 			ORDER BY start_date',
 			array(
 				'current_topic' => $topic,
-				'forumid' => $forumid,]]></add>
+				'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Load.php">
 	<operation>
 		<search position="after"><![CDATA[// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></search>
-		<add><![CDATA[// Replace certain settings with the Subforum setting if available:
+		<add><![CDATA[// Overwrite certain settings with the Subforum setting if available:
+	$modSettings['pretty_root_url'] = $subforum_tree[$forumid]['boardurl'];
 	$modSettings['primary_membergroup'] = $subforum_tree[$forumid]['primary_membergroup'];
 	if (isset($subforum_tree[$forumid]['sp_portal']))
 		$modSettings['sp_portal_mode'] = $subforum_tree[$forumid]['sp_portal'];
@@ -367,12 +368,10 @@
 	<operation>
 		<search position="replace"><![CDATA[// Most database systems have not set UTF-8 as their default input charset.]]></search>
 		<add><![CDATA[// Define primary subforum entry if it is not already defined:
-	global $cookiename, $boardurl, $mbname, $language, $boarddir;
 	if (!is_array($subforum_tree))
 		$subforum_tree = array(
 			0 => array(		// Primary subforum
 				'forumid' => 0,
-				'cookiename' => $cookiename,
 				'boardurl' => $boardurl,
 				'boardname' => $mbname,
 				'language' => $language,
@@ -391,28 +390,30 @@
 		$url = parse_url($row['boardurl']);
 		$test1 = strtolower($url['host']);
 		$test2 = strtolower(str_replace('www.', '', $test1));
-		$check = (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
-		if (!empty($row['sp_standalone']))
+		$check = ($test1 == $host || $test2 == $host);
+		if (isset($url['path']))
+			$check = $check && (strpos($uri, substr($url['path'], 1)) > 0);
+		if (!$check && !empty($row['sp_standalone']))
 		{
 			$url = parse_url($row['sp_standalone']);
 			$test1 = strtolower($url['host']);
 			$test2 = strtolower(str_replace('www.', '', $test1));
-			$check = $check || (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
+			$check = ($test1 == $host || $test2 == $host);
+			if (isset($url['path']))
+				$check = ($check && $url['path'] == $uri);
 		}			
 		if ($check)
 		{
 			// Assign global variables with row gleaned from database:
-			$forumid = $row['forumid'];
+			$forumid = (int) $row['forumid'];
 			$boardurl = $row['boardurl'];
 			$forumdir = $row['forumdir'];
 			$subtheme = $row['subtheme'];
 			$mbname = $row['boardname'];
 			$language = $row['language'];
 			$favicon = $row['favicon'];
-			break;
 		}
 	}
-	$forumid = (int) $forumid;
 
 	// Most database systems have not set UTF-8 as their default input charset.]]></add>
 	</operation>
@@ -433,9 +434,9 @@
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[// Set the current board.]]></search>
-		<add><![CDATA[if ((int)$row['forumid'] != $forumid) {
-				// Find the right subforum to redirect to:
-				global $subforum_tree;
+		<add><![CDATA[// Find the right subforum to redirect to:
+			if ((int) $row['forumid'] != $forumid)
+			{
 				$sub = (isset($subforum_tree[(int) $row['forumid']]) ? $subforum_tree[(int) $row['forumid']] : 0);
 
 				// If the "subforum_redirect_wrong" variable is set and $sub isn't empty, then redirect:
@@ -450,6 +451,10 @@
 
 			]]></add>
 	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $board_info, $board, $topic, $user_info, $smcFunc;]]></search>
+		<add><![CDATA[global $board_info, $board, $topic, $user_info, $smcFunc, $subforum_tree;]]></add>
+	</operation>
 </file>
 <file name="$sourcedir/ManageBoards.php">
 	<operation>
@@ -457,8 +462,13 @@
 		<add><![CDATA[global $forumid, $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+		WHERE redirect = {string:empty_string}',
+		array(]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid}')
+		WHERE redirect = {string:empty_string}',
+		array(
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA['can_collapse' => true,]]></search>
@@ -710,13 +720,13 @@ function EditBoard()
 			$boardOptions['target_board'] = (int) $_POST['board_order'];]]></search>
 		<add><![CDATA[$boardOptions = array();
 		$sub = (!empty($_POST['new_forum']) ? $_POST['new_forum'] : $forumid);
+		$cat = (!empty($_POST['new_cat' . $sub]) ? $_POST['new_cat' . $sub] : '');
 		
 		// Move this board to a new category?
-		$cat = (!empty($_GET['cat']) ? $_GET['cat'] : '');
-		if (!empty($_POST['new_cat' . $sub]))
+		if (!empty($cat))
 		{
 			$boardOptions['move_to'] = 'bottom';
-			$boardOptions['target_category'] = $cat = (int) $_POST['new_cat' . $sub];
+			$boardOptions['target_category'] = $cat;
 		}			
 			
 		// Change the boardorder of this board?
@@ -755,8 +765,11 @@ function EditBoard()
 		<add><![CDATA[global $forumid, $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)',
+		array(]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})',
+		array(
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManageMaintenance.php">
@@ -769,8 +782,15 @@ function EditBoard()
 	// Let's load up the boards in case they are useful.]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+		WHERE {query_see_board}
+			AND redirect = {string:blank_redirect}',
+		array(]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})
+		WHERE {query_see_board}
+			AND redirect = {string:blank_redirect}',
+		array(
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManageNews.php">
@@ -954,7 +974,7 @@ function EditBoard()
 	<operation>
 		<search position="before"><![CDATA['is_approved' => 1,]]></search>
 		<add><![CDATA[
-			'forumid' => $forumid,]]></add>
+				'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA['current_board' => $board,
@@ -963,7 +983,7 @@ function EditBoard()
 		<add><![CDATA['current_board' => $board,
 				'is_approved' => 1,
 				'optimize_msg' => $optimize_msg,
-				'forumid' => $forumid,]]></add>
+				'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Packages.php">
@@ -1015,7 +1035,7 @@ function EditBoard()
 				LIMIT 1',
 				array(
 					'id_event' => $context['event']['id'],
-					'forumid' => $forumid,]]></add>
+					'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[global $user_info, $board_info, $options, $smcFunc;]]></search>
@@ -1037,7 +1057,7 @@ function EditBoard()
 					AND forumid = {int:forumid}',
 				array(
 					'id_event' => $_REQUEST['eventid'],
-					'forumid' => $forumid,]]></add>
+					'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// Delete it?
@@ -1055,7 +1075,7 @@ function EditBoard()
 					AND forumid = {int:forumid}',
 				array(
 					'id_event' => $_REQUEST['eventid'],
-					'forumid' => $forumid,]]></add>
+					'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[UPDATE {db_prefix}calendar
@@ -1071,7 +1091,7 @@ function EditBoard()
 				WHERE id_event = {int:id_event}
 					AND forumid = {int:forumid}',
 				array(
-					'forumid' => $forumid,]]></add>
+					'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/PostModeration.php">
@@ -1081,7 +1101,18 @@ function EditBoard()
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LIMIT ' . $context['start'] . ', 10',
+		array(
+			'not_approved' => 0,
+		)]]></search>
+		<add><![CDATA[LIMIT ' . $context['start'] . ', 10',
+		array(
+			'forumid' => (int) $forumid,
+			'not_approved' => 0,
+		)]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Profile-Modify.php">
@@ -1090,8 +1121,15 @@ function EditBoard()
 		<add><![CDATA[global $forumid, $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+		WHERE {query_see_board}
+			AND redirect = {string:empty_string}',
+		array(]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})
+		WHERE {query_see_board}
+			AND redirect = {string:empty_string}',
+		array(
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Recent.php">
@@ -1113,7 +1151,7 @@ function EditBoard()
 		<search position="before"><![CDATA['recycle_board' => $modSettings['recycle_board'],
 			'is_approved' => 1,]]></search>
 		<add><![CDATA[
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[$sourcedir, $board, $smcFunc]]></search>
@@ -1122,7 +1160,7 @@ function EditBoard()
 	<operation>
 		<search position="before"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board)]]></search>
 		<add><![CDATA[
-			INNER JOIN {db_prefix}categories AS c ON (b.id_cat = c.id_cat)]]></add>
+					INNER JOIN {db_prefix}categories AS c ON (b.id_cat = c.id_cat)]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[AND m.approved = {int:is_approved}]]></search>
@@ -1132,7 +1170,7 @@ function EditBoard()
 	<operation>
 		<search position="before"><![CDATA['limit' => 10,]]></search>
 		<add><![CDATA[
-					'forumid' => $forumid,]]></add>
+					'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[$scripturl, $sourcedir]]></search>
@@ -1165,7 +1203,7 @@ function EditBoard()
 			array(
 				'no_child' => 0,
 				'boards' => $boards,
-				'forumid' => $forumid,
+				'forumid' => (int) $forumid,
 			)
 		);]]></add>
 	</operation>
@@ -1182,13 +1220,13 @@ function EditBoard()
 		<add><![CDATA[		$request = $smcFunc['db_query']('', '
 			SELECT b.id_board
 			FROM {db_prefix}boards AS b
-				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_Cat)
+				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 			WHERE {query_see_board}
 				AND b.id_board IN ({array_int:board_list})' . ($_REQUEST['action'] == 'unreadglobal' ? '' : '
 				AND c.forumid = {int:forumid}'),
 			array(
 				'board_list' => $_REQUEST['boards'],
-				'forumid' => $forumid,
+				'forumid' => (int) $forumid,
 			)
 		);]]></add>
 	</operation>
@@ -1211,7 +1249,7 @@ function EditBoard()
 				AND c.forumid = {int:forumid}'),
 			array(
 				'id_cat' => $_REQUEST['c'],
-				'forumid' => $forumid,
+				'forumid' => (int) $forumid,
 			)
 		);]]></add>
 	</operation>
@@ -1234,7 +1272,7 @@ function EditBoard()
 				AND c.forumid = {int:forumid}'),
 			array(
 				'recycle_board' => (int) $modSettings['recycle_board'],
-				'forumid' => $forumid
+				'forumid' => (int) $forumid
 			)
 		);]]></add>
 	</operation>
@@ -1274,6 +1312,63 @@ function EditBoard()
 		<search position="replace"><![CDATA[$txt['unread_topics_visit_none'] = strtr($txt['unread_topics_visit_none'], array('?action=unread;all' => '?action=unread;all' . sprintf($context['querystring_board_limits'], 0) . $context['querystring_sort_limits']));]]></search>
 		<add><![CDATA[$txt['unread_topics_visit_none'] = strtr($txt['unread_topics_visit_none'], array('?action=unread;all' => '?action=' . ($_REQUEST['action'] == 'unreadglobal' ? 'unreadglobal' : 'unread') . ';all' . sprintf($context['querystring_board_limits'], 0) . $context['querystring_sort_limits']));]]></add>
 	</operation>
+	<operation>
+		<search position="replace"><![CDATA[WHERE id_cat = {int:id_cat}
+				LIMIT 1',
+				array(]]></search>
+		<add><![CDATA[WHERE id_cat = {int:id_cat}
+					AND forumid = {int:forumid}
+				LIMIT 1',
+				array(
+					'forumid' => (int) $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[FROM {db_prefix}boards AS b
+			WHERE b.id_cat IN ({array_int:category_list})
+				AND {query_see_board}',
+			array(
+				'category_list' => $_REQUEST['c'],]]></search>
+		<add><![CDATA[FROM {db_prefix}boards AS b
+				LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			WHERE b.id_cat IN ({array_int:category_list})
+				AND c.forumid = {int:forumid}
+				AND {query_see_board}',
+			array(
+				'forumid' => (int) $forumid,
+				'category_list' => $_REQUEST['c'],]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[FROM {db_prefix}boards AS b
+			WHERE b.id_board IN ({array_int:board_list})
+				AND {query_see_board}
+			LIMIT {int:limit}',
+			array(
+				'board_list' => $_REQUEST['boards'],]]></search>
+		<add><![CDATA[FROM {db_prefix}boards AS b
+				LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			WHERE b.id_board IN ({array_int:board_list})
+				AND c.forumid = {int:forumid}
+				AND {query_see_board}
+			LIMIT {int:limit}',
+			array(
+				'forumid' => (int) $forumid,
+				'board_list' => $_REQUEST['boards'],]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[FROM {db_prefix}boards
+			WHERE id_board = {int:current_board}
+			LIMIT 1',
+			array(
+				'current_board' => $board,]]></search>
+		<add><![CDATA[FROM {db_prefix}boards
+				LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			WHERE id_board = {int:current_board}
+				AND c.forumid = {int:forumid}
+			LIMIT 1',
+			array(
+				'forumid' => (int) $forumid,
+				'current_board' => $board,]]></add>
+	</operation>
 </file>
 <file name="$sourcedir/Register.php">
 	<operation>
@@ -1309,7 +1404,7 @@ function EditBoard()
 			AND forumid = {int:forumid}',
 		array(
 			'topics' => $topics,
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Reports.php">
@@ -1319,7 +1414,12 @@ function EditBoard()
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['name' => 'name',]]></search>
+		<add><![CDATA['name' => 'name',
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Search.php">
@@ -1343,7 +1443,14 @@ function EditBoard()
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<add><![CDATA[INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['message_list' => $msg_list,
+				'is_approved' => 1,]]></search>
+		<add><![CDATA['message_list' => $msg_list,
+				'is_approved' => 1,
+				'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/SplitTopics.php">
@@ -1365,7 +1472,7 @@ function EditBoard()
 		WHERE id_topic IN ({array_int:deleted_topics})
 			AND forumid = {int:forumid}',
 		array(
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs.php">
@@ -1427,7 +1534,12 @@ function EditBoard()
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['current_member' => $user_info['id'],]]></search>
+		<add><![CDATA['forumid' => (int) $forumid,
+			'current_member' => $user_info['id'],]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[// Haven't set this category yet.]]></search>
@@ -1438,6 +1550,17 @@ function EditBoard()
 	</operation>
 </file>
 <file name="$sourcedir/Subs-Boards.php">
+	<operation>
+		<search position="replace"><![CDATA[// Set moderators of this board.]]></search>
+		<add><![CDATA[// Edit the aliases to make sure they are valid for this subforum:
+	if (array_key_exists('alias_child', $boardOptions))
+	{
+		require_once($sourcedir . '/Subs-ManageSplitForums.php');
+		remove_bad_aliases();
+	}
+
+	// Set moderators of this board.]]></add>
+	</operation>
 	<operation>
 		<search position="before"><![CDATA[global $sourcedir, $cat_tree, $boards, $boardList, $modSettings, $smcFunc]]></search>
 		<add><![CDATA[, $forumid]]></add>
@@ -1513,7 +1636,7 @@ function EditBoard()
 		WHERE id_board IN ({array_int:boards_to_remove})
 			AND forumid = {int:forumid}',
 		array(
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs-Calendar.php">
@@ -1527,7 +1650,7 @@ function EditBoard()
 		<add><![CDATA[AND (cal.id_board = {int:no_board_link} OR {query_wanna_see_board})' : '') .'
 			AND cal.forumid = {int:forumid}',
 		array(
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[global $smcFunc;
@@ -1549,7 +1672,7 @@ function EditBoard()
 			AND forumid = {int:forumid}
 		LIMIT 1',
 		array(
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[global $modSettings, $smcFunc;]]></search>
@@ -1583,7 +1706,7 @@ function EditBoard()
 		WHERE id_event = {int:id_event}
 			AND forumid = {int:forumid}',
 		array(
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[global $smcFunc;
@@ -1599,7 +1722,7 @@ function EditBoard()
 		WHERE id_event = {int:id_event}
 			AND forumid = {int:forumid}',
 		array(
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[function getEventProperties($event_id)
@@ -1617,7 +1740,7 @@ function EditBoard()
 		WHERE c.id_event = {int:id_event}
 			AND c.forumid = {int:forumid}',
 		array(
-			'forumid' => $forumid,]]></add>
+			'forumid' => (int) $forumid,]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs-Categories.php">
@@ -1647,12 +1770,16 @@ function EditBoard()
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[	$request = $smcFunc['db_query']('messageindex_fetch_boards', ']]></search>
 		<add><![CDATA[	$where[] = 'b.id_cat = c.id_cat';
 ]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$where_parameters = array();]]></search>
+		<add><![CDATA[$where_parameters = array('forumid' => (int) $forumid);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/PortalAdminBlocks.php" error="skip">

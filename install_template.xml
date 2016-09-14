@@ -127,38 +127,6 @@ function template_modify_category()
 			<input type="hidden" name="forumid" value="', $context['category']['forumid'], '" />]]></add>
 	</operation>
 	<operation>
-		<search position="before"><![CDATA[<dt>
-							<strong>' . $txt['collapse_enable'] . '</strong><br />
-							<span class="smalltext">' . $txt['collapse_desc'] . '</span>
-						</dt>
-						<dd>
-							<input type="checkbox" name="collapse"', $context['category']['can_collapse'] ? ' checked="checked"' : '', ' tabindex="', $context['tabindex']++, '" class="input_check" />
-						</dd>';]]></search>
-		<add><![CDATA[
-	// If this isn't the only subforum, let the user choose which subforum it should be placed in:
-	if (count($subforum_tree) > 1)
-	{
-		echo '
-						<dt>
-							<strong>' . $txt['forumid_title']. '</strong><br />
-							<span class="smalltext">' . $txt['forumid_desc'] . '</span>
-						</dt>
-						<dd>
-							<select name="forum_id" onchange="SubForumsCategories(this.options[this.selectedIndex].value); return false;">';
-		// Print every existing category into a select box.
-		foreach ($subforum_tree as $row)
-			echo '
-								<option', $context['category']['forumid'] == $row['forumid'] ? ' selected="selected"' : '', ' value="', $row['forumid'], '">', $row['boardname'], '</option>';
-		echo '
-							</select>
-						</dd>';
-	} else {
-		echo '
-						<input type="hidden" name="forum_id" value="', $forumid, '" size="4" tabindex="', $context['tabindex']++, '" />';
-	}
-]]></add>
-	</operation>
-	<operation>
 		<search position="replace"><![CDATA[// Link to modify the category.
 		echo '
 			<div class="cat_bar">
@@ -221,15 +189,14 @@ function template_modify_category()
 		function hideBoards(cat)
 		{';
 	foreach ($context['board_order'] as $cat => $boards)
-		foreach ($boards as $board)
-			echo '
+		echo '
 			document.getElementById("cat_txt', $cat, '").style.display = (cat == ' . $cat . ' ? "" : "none");
 			document.getElementById("cat_opt', $cat, '").style.display = (cat == ' . $cat . ' ? "" : "none");';
 	echo '
 		}
 	// ]]]]><![CDATA[></script>
 	<div id="manage_boards">
-		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2', (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''), (!empty($_REQUEST['cat']) ? ';cat=' . $_REQUEST['cat'] : ''), '" method="post" accept-charset="', $context['character_set'], '">]]></add>
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2', (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''), '" method="post" accept-charset="', $context['character_set'], '">]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[function template_confirm_board_delete()
@@ -250,14 +217,16 @@ function template_modify_category()
 		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;', $board['move'] ? 'color: red;' : '', '"><span class="floatleft"><a href="', $scripturl, '?board=', $board['id'], '">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? '<a href="' . $scripturl . '?action=admin;area=manageboards;sa=settings"> <img src="' . $settings['images_url'] . '/post/recycled.gif" alt="' . $txt['recycle_board'] . '" /></a></span>' : '</span>', '
-							<span class="floatright">', $context['can_manage_permissions'] ? '<span class="modify_boards"><a href="' . $scripturl . '?action=admin;area=permissions;sa=index;pid=' . $board['permission_profile'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $txt['mboards_permissions'] . '</a></span>' : '', '
-							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;move=', $board['id'], '">', $txt['mboards_move'], '</a></span>
-							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], '">', $txt['mboards_modify'], '</a></span></span><br style="clear: right;" />]]></search>
-		<add><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;', $board['move'] ? 'color: red;' : '', '"><span class="floatleft"><a href="', $subforum_tree[$category['forumid']]['boardurl'], '/index.php?board=', $board['id'], '">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? '<a href="' . $subforum_tree[$category['forumid']]['boardurl'] . '?action=admin;area=manageboards;sa=settings"> <img src="' . $settings['images_url'] . '/post/recycled.gif" alt="' . $txt['recycle_board'] . '" /></a></span>' : '</span>', '
-							<span class="floatright">', $context['can_manage_permissions'] ? '<span class="modify_boards"><a href="' . $scripturl . '?action=admin;area=permissions;sa=index;pid=' . $board['permission_profile'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $txt['mboards_permissions'] . '</a></span>' : '', '
-							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;move=', $board['id'], ($forumid == 0 ? ';sub=' . $category['forumid'] : ''), '">', $txt['mboards_move'], '</a></span>
-							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], ($forumid == 0 ? ';sub=' . $category['forumid'] : ''), '">', $txt['mboards_modify'], '</a></span></span><br style="clear: right;" />]]></add>
+		<search position="replace"><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;', $board['move'] ? 'color: red;' : '', '"><span class="floatleft"><a href="', $scripturl, '?board=', $board['id'], '">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? '<a href="' . $scripturl . '?action=admin;area=manageboards;sa=settings"> <img src="' . $settings['images_url'] . '/post/recycled.gif" alt="' . $txt['recycle_board'] . '" /></a></span>' : '</span>', ']]></search>
+		<add><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;', $board['move'] ? 'color: red;' : '', '"><span class="floatleft"><a href="', $subforum_tree[$category['forumid']]['boardurl'], '/index.php?board=', $board['id'], '">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? '<a href="' . $subforum_tree[$category['forumid']]['boardurl'] . '?action=admin;area=manageboards;sa=settings"> <img src="' . $settings['images_url'] . '/post/recycled.gif" alt="' . $txt['recycle_board'] . '" /></a></span>' : '</span>', ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;move=', $board['id'], '">]]></search>
+		<add><![CDATA[<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;move=', $board['id'], ($forumid == 0 ? ';sub=' . $category['forumid'] : ''), '">]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], '">]]></search>
+		<add><![CDATA[<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], ($forumid == 0 ? ';sub=' . $category['forumid'] : ''), '">]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// No categories so show a label.
@@ -329,7 +298,7 @@ function template_modify_category()
 	foreach ($subforum_tree as $subforum)
 	{
 		echo '
-							<select name="new_cat', $subforum['forumid'], '" id="new_cat', $subforum['forumid'], '" onchange="hideBoards(this.options[this.selectedIndex].value);"', ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : ''), '>';
+							<select name="new_cat', $subforum['forumid'], '" id="new_cat', $subforum['forumid'], '" onchange="hideBoards(this.options[this.selectedIndex].value);"', ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : ''), ((isset($context['board']['is_new']) && count($context['categories'][$subforum['forumid']]) > 0) || count($context['categories'][$subforum['forumid']]) > 1 ? '' : ' disabled="disabled"'), '>';
 		foreach ($context['categories'][$subforum['forumid']] as $category)
 			echo '
 								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
@@ -382,7 +351,7 @@ function template_modify_category()
 
 			// The first select box gives the user the option to position it before, after or as a child of another board.
 			echo '
-							<select id="order" name="placement', $cat, '">
+							<select id="order', $cat, '" name="placement', $cat, '" onchange="this.form.board_order', $cat, '.disabled = this.options[this.selectedIndex].value == \'\';">
 								', !isset($context['board']['is_new']) ? '<option value="">(' . $txt['mboards_unchanged'] . ')</option>' : '', '
 								<option value="after">' . $txt['mboards_order_after'] . '...</option>
 								<option value="child">' . $txt['mboards_order_child_of'] . '...</option>
@@ -426,26 +395,44 @@ function template_modify_category()
 							</select>
 						</dd>';
 	}]]></search>
-		<add><![CDATA[// If this isn't the only category, let the user choose where this category should be positioned down the board index.
+		<add><![CDATA[// If this isn't the only subforum, let the user choose which subforum it should be placed in:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+						<dt>
+							<strong>' . $txt['forumid_title']. '</strong><br />
+							<span class="smalltext">' . $txt['forumid_desc'] . '</span>
+						</dt>
+						<dd>
+							<select name="forum_id" onchange="SubForumsCategories(this.options[this.selectedIndex].value); return false;">';
+		// Print every existing category into a select box.
+		foreach ($subforum_tree as $row)
+			echo '
+								<option', $context['category']['forumid'] == $row['forumid'] ? ' selected="selected"' : '', ' value="', $row['forumid'], '">', $row['boardname'], '</option>';
+		echo '
+							</select>
+						</dd>';
+	} else {
+		echo '
+						<input type="hidden" name="forum_id" value="', $forumid, '" size="4" tabindex="', $context['tabindex']++, '" />';
+	}
+
+	// If this isn't the only category, let the user choose where this category should be positioned down the board index.
 	foreach ($subforum_tree as $id => $subforum)
 	{
-		if (isset($context['category_order'][$subforum['forumid']]) && count($context['category_order'][$subforum['forumid']]) > 1)
-		{
-			echo '
-						<dt id="cat_txt' . $subforum['forumid'] . '">
+		echo '
+						<dt id="cat_txt' . $id . '"' . ($id <> $_REQUEST['sub'] ? ' style="display: none;"' : '') . '>
 							<strong>', $txt['order'], ':</strong>
 						</dt>
-						<dd id="cat_ord' . $subforum['forumid'] . '">
-							<select name="cat_order' . $subforum['forumid'] . '" id="cat_order' . $subforum['forumid'] . '"' . ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : '') . '>';
+						<dd id="cat_ord' . $id . '"' . ($id <> $_REQUEST['sub'] ? ' style="display: none;"' : '') . '>
+							<select name="cat_order' . $id . '"">';
 
-			// Print every existing category into a select box.
-			foreach ($context['category_order'][$subforum['forumid']] as $order)
-				echo '
-									<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
+		// Print every existing category into a select box.
+		foreach ($context['category_order'][$id] as $order)
 			echo '
-							</select>';
-		}
+									<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
 		echo '
+							</select>
 						</dd>';
 	}]]></add>
 	</operation>
@@ -473,7 +460,9 @@ function template_modify_category()
 									<option', !isset($context['board']['is_new']) && in_array($category['node']['id'], $context['board']['alias_cat']) ? ' selected="selected"' : '', ' value="', $category['node']['id'], '">', $category['node']['name'], '</option>';
 		echo '
 								</select>
-							</dd>';]]></add>
+							</dd>';
+	}
+	echo ']]></add>
 	</operation>
 	<operation error="ignore">
 		<search position="replace"><![CDATA[</dt>

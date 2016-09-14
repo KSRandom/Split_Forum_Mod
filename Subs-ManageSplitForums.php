@@ -104,10 +104,12 @@ function delete_subforum($sub, $write_settings = true)
 
 	isAllowedTo('admin_forum');
 	if ($sub == 0) return;
-	require_once($sourcedir.'/Subs-Admin.php');
 	unset($subforum_tree[(int) $sub]);
 	if ($write_settings)
+	{
+		require_once($sourcedir.'/Subs-Admin.php');
 		updateSettingsFile(array('subforum_tree' => str_replace("\n", "", var_export($subforum_tree, true))));
+	}
 }
 
 function move_attached_categories($from, $dest)
@@ -407,11 +409,11 @@ function copy_sp_blocks($from, $forum)
 	);
 	list($max) = $smcFunc['db_fetch_row']($request);
 	$smcFunc['db_free_result']($request);
-	
+
 	// Retrieve & modify all blocks for specified forum:
 	$request = $smcFunc['db_query']('', '
-		SELECT 
-			b.id_block, b.label, b.type, b.col, b.row, b.permission_set, b.groups_allowed, b.groups_denied, 
+		SELECT
+			b.id_block, b.label, b.type, b.col, b.row, b.permission_set, b.groups_allowed, b.groups_denied,
 			b.state, b.force_view, b.display, b.display_custom, b.style, b.forum, b.style, p.variable, p.value
 		FROM {db_prefix}sp_blocks AS b
 			LEFT JOIN {db_prefix}sp_parameters AS p ON (p.id_block = b.id_block)
@@ -539,4 +541,78 @@ function relativePath($from, $to, $ps = DIRECTORY_SEPARATOR)
 	}
 	return str_pad("", count($arFrom) * 3, '..' . $ps) . implode($ps, $arTo);
 }
+
+function remove_bad_aliases()
+{
+	global $smcFunc;
+	return;
+
+	// Gather some basic board information together:
+	$result = $smcFunc['db_query']('', '
+		SELECT
+			IFNULL(b.id_board, 0) AS id_board, b.id_cat, c.forumid, b.alias_cat, b.alias_child
+		FROM {db_prefix}categories AS c
+			LEFT JOIN {db_prefix}boards AS b ON (b.id_cat = c.id_cat)'
+	);
+	$b = $c = array();
+	while ($row = $smcFunc['db_fetch_assoc']($result))
+	{
+		if (!empty($row['alias_cat']))
+			$row['alias_cat'] = explode(',', $row['alias_cat']);
+		else
+			$row['alias_cat'] = array();
+
+		if (!empty($row['alias_child']))
+			$row['alias_child'] = explode(',', $row['alias_child']);
+		else
+			$row['alias_child'] = array();
+
+		$b[$row['forumid']][$row['id_board']] = $row;
+		$c[$row['forumid']][$row['id_cat']] = true;
+	}
+	$smcFunc['db_free_result']($result);
+
+	// Process the entire array, looking for categories/boards that don't exist:
+	foreach ($b as $forumid => $boards)
+	{
+		foreach ($boards as $id_board => $board)
+		{
+			// Remove aliased categories/boards that don't exist in that subforum:
+			$update = false;
+			foreach ($board['alias_cat'] as $id => $alias_cat)
+			{
+				if (empty($c[$forumid][$alias_cat]))
+				{
+					unset($b[$forumid][$id_board]['alias_cat'][$id]);
+					$update = true;
+				}
+			}
+			foreach ($board['alias_child'] as $id => $alias_child)
+			{
+				if (empty($b[$forumid][$alias_child]))
+				{
+					unset($b[$forumid][$id_board]['alias_child'][$id]);
+					$update = true;
+				}
+			}
+
+			// Do we need to update the database?  If not, continue on processing....
+			if (!$update)
+				continue;
+
+			// Evidentally, we need to update the database with the new info:
+			$smcFunc['db_query']('', '
+				UPDATE {db_prefix}boards
+				SET alias_cat = {string:alias_cat}, alias_child = {string:alias_child}
+				WHERE id_board = {int:id_board}',
+				array(
+					'id_board' => (int) $board,
+					'alias_cat' => implode(',', $board['alias_cat']),
+					'alias_child' => implode(',', $board['alias_child']),
+				)
+			);
+		}
+	}
+}
+
 ?>

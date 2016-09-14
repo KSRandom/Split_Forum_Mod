@@ -42,7 +42,6 @@ if (empty($subforum_tree))
 	$subforum_tree = array(
 		0 => array(		// Primary subforum
 			'forumid' => 0,
-			'cookiename' => $cookiename,
 			'boardurl' => $boardurl,
 			'boardname' => $mbname,
 			'language' => $language,
@@ -58,7 +57,10 @@ if (empty($subforum_tree))
 // Rearrange the subforum tree array so that the forumid is also the array index:
 $tree = array();
 foreach ($subforum_tree as $subforum)
+{
+	unset($subforum['cookiename']);
 	$tree[$subforum['forumid']] = $subforum;
+}
 $subforum_tree = $tree;
 
 // Insert the current board path as the default server path for subforums:
