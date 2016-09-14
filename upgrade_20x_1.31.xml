@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.31</version>
+
+<file name="$sourcedir/Who.php">
+	<operation error="ignore">
+		<search position="replace"><![CDATA[global $context, $scripturl, $user_info, $txt, $modSettings, $memberContext, $smcFunc;]]></search>
+		<add><![CDATA[global $context, $scripturl, $user_info, $txt, $modSettings, $memberContext, $smcFunc, $forumid;]]></add>
+	</operation>
+</file>
+</modification>

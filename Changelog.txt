@@ -1,3 +1,6 @@
+v1.31 - January 22nd, 2016
+o Fixed undefined variable error in [b]Sources/Who.php[/b].
+
 v1.30 - January 19th, 2016
 o Added donate button to Subforum management page.
 o Added several settings to subforum UI in order to control EzPortal per subforum.

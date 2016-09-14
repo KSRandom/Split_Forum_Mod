@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.29</version>
+<version>1.31</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source File Edits														-->
@@ -1756,7 +1756,7 @@ function EditBoard()
 <file name="$sourcedir/Who.php">
 	<operation>
 		<search position="before"><![CDATA[global $context, $scripturl, $user_info, $txt, $modSettings, $memberContext, $smcFunc]]></search>
-		<add><![CDATA[, $forumid]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[$conditions = array();]]></search>
