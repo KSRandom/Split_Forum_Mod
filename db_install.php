@@ -32,7 +32,8 @@ $subforum_tree = array(
 );
 
 // Insert the current subforum information settings into the Settings.php file:
-updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));
+if (empty($subforum_tree))
+	updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));
 
 // Insert the current board path as the default server path for subforums:
 require_once($sourcedir.'/Subs-Admin.php');

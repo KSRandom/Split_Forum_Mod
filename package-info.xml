@@ -5,12 +5,13 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.3</version>
+	<version>1.4</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
 		<database>db_install.php</database>
 		<modification>install.xml</modification>
+		<modification>upgrade_1.4.xml</modification>
 		<modification>language_english.xml</modification>
 		<modification>language_english-utf8.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
@@ -24,6 +25,7 @@
 	</install>
 	<uninstall for="2.0 - 2.0.99">
 		<readme parsebbc="true">uninstall.txt</readme>
+		<modification reverse="true">upgrade_1.4.xml</modification>
 		<modification reverse="true">install.xml</modification>
 		<modification reverse="true">language_english.xml</modification>
 		<modification reverse="true">language_english-utf8.xml</modification>
@@ -41,8 +43,13 @@
 		<readme parsebbc="true">upgrade.txt</readme>
 		<database>db_upgrade_1.3_only.php</database>
 		<modification>upgrade_1.3.xml</modification>
+		<modification>upgrade_1.4.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english-utf8.php" destination="$boarddir/Themes/default/languages" />
+	</upgrade>
+	<upgrade from="1.3">
+		<readme parsebbc="true">upgrade.txt</readme>
+		<modification>upgrade_1.4.xml</modification>
 	</upgrade>
 </package-info>

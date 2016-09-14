@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.3[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.4[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -43,7 +43,7 @@ All recent posts, xml-based feeds, and other forum-related functionality works f
 o [b]integrate_subforum_subdomain[/b] - Hook for creating/deleting subdomains and/or domains
 
 [color=blue][b][size=12pt][u]To-Do List[/u][/size][/b][/color]
-o While modifying a category, changing the subforum a category is assigned to does not change the board order list.
+o While modifying a board, it is not possible to move the board to another subforum.
 o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
 o Theme settings restricted to members registered on a subforum
@@ -58,9 +58,19 @@ This mod shares the [b]realtabs.css[/b] from [url=http://custom.simplemachines.o
 If you installed [b]Version 1.1[/b] and are having errors at the admin screen, go to [url=http://www.simplemachines.org/community/index.php?topic=523055.msg3712535#msg3712535]this post[/url] and follow the instructions given.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.2[/b] to [b]v1.3[/b].
+Upgrade is possible from [b]v1.2 and v1.3[/b] to [b]v1.4[/b].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
+[quote]
+[b][u]v1.4 - July 26th, 2014[/u][/b]
+o While changing the subforum a category is assigned to, the category order list now changes.
+o Added the ability to move boards between subforums
+o Fixed multiple Manage Boards UI bugs, resulting from subforum ID not being passed
+o Fixed an undeclared array element error found in [b]Load.php[/b]
+o Modified tab system so that it works better with revised move boards ability
+o Modified [b]db_install.php[/b] so that it doesn't overwrite previous subforum settings when installing
+o Removed code from [b]uninstall.php[/b] that automatically removes subforum files...
+
 [b][u]v1.3 - July 4th, 2014[/u][/b]
 o Changed name of new subforums to "SubForum # [n]" (where [n] is the new subforum ID)
 o Total rewrite of [b]edit_db.php[/b], now renamed to [b]db_install.php[/b]....
@@ -79,6 +89,7 @@ o [b]edit_db.php[/b] modification to attempt to eliminate some weird error...
 
 [b][u]v1.0 - May 17th, 2013[/u][/b]
 o Initial Release
+[/quote]
 
 [hr]
 [url=http://creativecommons.org/licenses/by/3.0][img]http://i.creativecommons.org/l/by/3.0/80x15.png[/img][/url]

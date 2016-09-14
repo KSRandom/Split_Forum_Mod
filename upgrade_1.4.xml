@@ -1,0 +1,431 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.4</version>
+
+<!-------------------------------------------------------------------------->
+<!-- Fix for undeclared array element error (Load.php)                    -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/Load.php">
+	<operation>
+		<search position="replace"><![CDATA[if ($modSettings['subforum_redirect_wrong'] == 1 && (!empty($sub)))]]></search>
+		<add><![CDATA[if (!empty($modSettings['subforum_redirect_wrong']) && (!empty($sub)))]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Multiple Manage Boards UI bug fixes (ManageBoards.php)               -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[$context['categories'][$catid] = array(]]></search>
+		<add><![CDATA[$context['categories'][$catid] = array(
+			'forumid' => $tree['node']['forumid'],]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[}
+	// Category doesn't exist, man... sorry.
+	elseif (!isset($cat_tree[$_REQUEST['cat']]))
+		redirectexit('action=admin;area=manageboards');]]></search>
+		<add><![CDATA[}
+	// Category doesn't exist, man... sorry.
+	elseif (!isset($cat_tree[$_REQUEST['cat']]))
+		redirectexit('action=admin;area=manageboards' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''));]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[redirectexit('action=admin;area=manageboards');
+}
+
+// Modify a specific board...
+function EditBoard()
+{
+	global $txt, $context, $cat_tree, $boards, $boardList, $sourcedir, $smcFunc, $modSettings;
+
+	loadTemplate('ManageBoards');
+	require_once($sourcedir . '/Subs-Boards.php');
+	getBoardTree();]]></search>
+		<add><![CDATA[redirectexit('action=admin;area=manageboards' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''));
+}
+
+// Modify a specific board...
+function EditBoard()
+{
+	global $txt, $context, $cat_tree, $boards, $boardList, $sourcedir, $smcFunc, $modSettings, $forumid;
+
+	loadTemplate('ManageBoards');
+	require_once($sourcedir . '/Subs-Boards.php');
+	getBoardTree( ($forumid == 0 ? -1 : $forumid) );]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[if ($_REQUEST['sa'] == 'newboard')
+	{
+		// Category doesn't exist, man... sorry.
+		if (empty($_REQUEST['cat']))
+			redirectexit('action=admin;area=manageboards');]]></search>
+		<add><![CDATA[if ($_REQUEST['sa'] == 'newboard')
+	{
+		// Category doesn't exist, man... sorry.
+		if (empty($_REQUEST['cat']))
+			redirectexit('action=admin;area=manageboards' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''));]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Category doesn't exist, man... sorry.
+	if (!isset($boardList[$curBoard['category']]))
+		redirectexit('action=admin;area=manageboards');
+
+	foreach ($boardList[$curBoard['category']] as $boardid)]]></search>
+		<add><![CDATA[// Category doesn't exist, man... sorry.
+	if (!isset($boardList[$curBoard['category']]))
+		redirectexit('action=admin;area=manageboards' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''));
+
+	foreach ($boardList[$curBoard['category']] as $boardid)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[if (isset($_REQUEST['rid']) && $_REQUEST['rid'] == 'permissions')
+		redirectexit('action=admin;area=permissions;sa=board;' . $context['session_var'] . '=' . $context['session_id']);
+	else
+		redirectexit('action=admin;area=manageboards');]]></search>
+		<add><![CDATA[if (isset($_REQUEST['rid']) && $_REQUEST['rid'] == 'permissions')
+		redirectexit('action=admin;area=permissions;sa=board' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') . ';' . $context['session_var'] . '=' . $context['session_id']);
+	else
+		redirectexit('action=admin;area=manageboards' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''));]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['editable_name' => htmlspecialchars($txt['mboards_new_cat_name']),
+			'can_collapse' => true,
+			'forumid' => 0,]]></search>
+		<add><![CDATA['editable_name' => htmlspecialchars($txt['mboards_new_cat_name']),
+			'can_collapse' => true,
+			'forumid' => (!empty($_REQUEST['sub']) ? $_REQUEST['sub'] : 0),]]></add>
+	</operation>
+	
+<!-------------------------------------------------------------------------->
+<!-- Revisement of the Tabs system used by this mod (ManageBoards.php)    -->
+<!-------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[function EditCategory()
+{
+	global $txt, $context, $cat_tree, $boardList, $boards, $sourcedir;
+
+	loadTemplate('ManageBoards');
+	require_once($sourcedir . '/Subs-Boards.php');
+	getBoardTree();]]></search>
+		<add><![CDATA[function EditCategory()
+{
+	global $txt, $context, $cat_tree, $boardList, $boards, $sourcedir, $forumid, $subforum_tree;
+
+	loadTemplate('ManageBoards');
+	require_once($sourcedir . '/Subs-Boards.php');
+	getBoardTree( ($forumid == 0 ? -1 : $forumid) );]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[getBoardTree();
+
+	$context['move_board'] = !empty($_REQUEST['move']) && isset($boards[(int) $_REQUEST['move']]) ? (int) $_REQUEST['move'] : 0;]]></search>
+		<add><![CDATA[getBoardTree( ($forumid == 0 ? -1 : $forumid) );
+
+	$context['move_board'] = !empty($_REQUEST['move']) && isset($boards[(int) $_REQUEST['move']]) ? (int) $_REQUEST['move'] : 0;]]></add>
+	</operation>
+
+<!-------------------------------------------------------------------------->
+<!-- Better Edit Category subforum management (ManageBoards.php)          -->
+<!-------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[// Start with one - "In first place".
+	$context['category_order'] = array(
+		array(
+			'id' => 0,
+			'name' => $txt['mboards_order_first'],
+			'selected' => !empty($_REQUEST['cat']) ? $cat_tree[$_REQUEST['cat']]['is_first'] : false,
+			'true_name' => ''
+		)
+	);]]></search>
+		<add><![CDATA[// Start with one - "In first place".
+	$context['category_order'] = array();
+	foreach ($subforum_tree as $stuff)
+		$context['category_order'][$stuff['forumid']] = array(
+			array(
+				'id' => 0,
+				'name' => $txt['mboards_order_first'],
+				'selected' => !empty($_REQUEST['cat']) ? $cat_tree[$_REQUEST['cat']]['is_first'] : false,
+				'true_name' => ''
+			)
+		);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$context['category_order'][$prevCat]['selected'] = true;
+		elseif ($catid != $_REQUEST['cat'])
+			$context['category_order'][$catid] = array(]]></search>
+		<add><![CDATA[$context['category_order'][$tree['node']['forumid']][$prevCat]['selected'] = true;
+		elseif ($catid != $_REQUEST['cat'])
+			$context['category_order'][$tree['node']['forumid']][$catid] = array(
+				'forumid' => $tree['node']['forumid'],]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[if (isset($_POST['cat_order']))
+			$catOptions['move_after'] = (int) $_POST['cat_order'];]]></search>
+		<add><![CDATA[if (isset($_POST['cat_order' . ((int) $_POST['forum_id'])]))
+			$catOptions['move_after'] = (int) $_POST['cat_order' . ((int) $_POST['forum_id'])];]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Revisement of the Tabs system used by this mod (Subs-Boards.php)     -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/Subs-Boards.php">
+	<operation>
+		<search position="replace"><![CDATA[global $sourcedir, $cat_tree, $boards, $boardList, $modSettings, $smcFunc;
+
+	// Get some basic information about all boards and categories.
+	getBoardTree();]]></search>
+		<add><![CDATA[global $sourcedir, $cat_tree, $boards, $boardList, $modSettings, $smcFunc, $forumid;
+
+	// Get some basic information about all boards and categories.
+	getBoardTree( ($forumid == 0 ? -1 : $forumid) );]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$reqid = (int) ($forumid == 0 ? (isset($_REQUEST['sub']) ? $_REQUEST['sub'] : $reqid) : $forumid);]]></search>
+		<add><![CDATA[$reqid = (int) ($forumid == 0 ? $reqid : $forumid);]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Multiple Manage Boards UI fixes (ManageBoards.template.php)          -->
+<!-------------------------------------------------------------------------->
+<file name="$themedir/ManageBoards.template.php">
+	<operation>
+		<search position="replace"><![CDATA[// Link to modify the category.
+		echo '
+			<div class="cat_bar">
+				<h3 class="catbg">
+					<a href="' . $scripturl . '?action=admin;area=manageboards;sa=cat;cat=' . $category['id'] . '">', $category['name'], '</a> <a href="' . $scripturl . '?action=admin;area=manageboards;sa=cat;cat=' . $category['id'] . '">', $txt['catModify'], '</a>]]></search>
+		<add><![CDATA[// Link to modify the category.
+		echo '
+			<div class="cat_bar">
+				<h3 class="catbg">
+					<a href="' . $scripturl . '?action=admin;area=manageboards;sa=cat;cat=' . $category['id'] . ($forumid == 0 ? ';sub=' . $category['forumid'] : '') . '">', $category['name'], '</a> <a href="' . $scripturl . '?action=admin;area=manageboards;sa=cat;cat=' . $category['id'] . ';sub=' . $category['forumid'] . '">', $txt['catModify'], '</a>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<form action="', $scripturl, '?action=admin;area=manageboards;sa=newboard;cat=', $category['id'], '" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[<form action="', $scripturl, '?action=admin;area=manageboards;sa=newboard;cat=', $category['id'], ($forumid == 0 ? ';sub=' . $category['forumid'] : ''), '" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function template_confirm_category_delete()
+{
+	global $context, $settings, $options, $scripturl, $txt;
+
+	// Print table header.
+	echo '
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=cat2" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[function template_confirm_category_delete()
+{
+	global $context, $settings, $options, $scripturl, $txt;
+
+	// Print table header.
+	echo '
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=cat2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function template_modify_board()
+{
+	global $context, $settings, $options, $scripturl, $txt, $modSettings;
+
+	// The main table header.
+	echo '
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[function template_modify_board()
+{
+	global $context, $settings, $options, $scripturl, $txt, $modSettings;
+
+	// The main table header.
+	echo '
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function template_confirm_board_delete()
+{
+	global $context, $settings, $options, $scripturl, $txt;
+
+	// Print table header.
+	echo '
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[function template_confirm_board_delete()
+{
+	global $context, $settings, $options, $scripturl, $txt;
+
+	// Print table header.
+	echo '
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;', $board['move'] ? 'color: red;' : '', '"><span class="floatleft"><a href="', $scripturl, '?board=', $board['id'], '">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? '<a href="' . $scripturl . '?action=admin;area=manageboards;sa=settings"> <img src="' . $settings['images_url'] . '/post/recycled.gif" alt="' . $txt['recycle_board'] . '" /></a></span>' : '</span>', '
+							<span class="floatright">', $context['can_manage_permissions'] ? '<span class="modify_boards"><a href="' . $scripturl . '?action=admin;area=permissions;sa=index;pid=' . $board['permission_profile'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $txt['mboards_permissions'] . '</a></span>' : '', '
+							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;move=', $board['id'], '">', $txt['mboards_move'], '</a></span>
+							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], '">', $txt['mboards_modify'], '</a></span></span><br style="clear: right;" />]]></search>
+		<add><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;', $board['move'] ? 'color: red;' : '', '"><span class="floatleft"><a href="', $subforum_tree[$category['forumid']]['boardurl'], '/index.php?board=', $board['id'], '">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? '<a href="' . $subforum_tree[$category['forumid']]['boardurl'] . '?action=admin;area=manageboards;sa=settings"> <img src="' . $settings['images_url'] . '/post/recycled.gif" alt="' . $txt['recycle_board'] . '" /></a></span>' : '</span>', '
+							<span class="floatright">', $context['can_manage_permissions'] ? '<span class="modify_boards"><a href="' . $scripturl . '?action=admin;area=permissions;sa=index;pid=' . $board['permission_profile'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . $txt['mboards_permissions'] . '</a></span>' : '', '
+							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;move=', $board['id'], ($forumid == 0 ? ';sub=' . $category['forumid'] : ''), '">', $txt['mboards_move'], '</a></span>
+							<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], ($forumid == 0 ? ';sub=' . $category['forumid'] : ''), '">', $txt['mboards_modify'], '</a></span></span><br style="clear: right;" />]]></add>
+	</operation>
+
+<!-------------------------------------------------------------------------->
+<!-- Revisement of the Tabs system used (ManageBoards.template.php)       -->
+<!-------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[// Table header.
+	echo ']]></search>
+		<add><![CDATA[// Table header.
+	echo '
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Display the subforums as a tab at the top of the screen:]]></search>
+		<add><![CDATA[// Display the subforums as a tab at the top of the screen:
+	$flagged = array( 0 => false );]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// No categories so show a label.
+	if (empty($context['categories']))
+		echo '
+		<div class="windowbg">
+			<span class="topslice"><span></span></span>
+			<div class="content centertext">
+				', $txt['mboards_no_cats'], '
+			</div>
+			<span class="botslice"><span></span></span>
+		</div>';
+
+	// Loop through every category, listing the boards in each as we go.
+	foreach ($context['categories'] as $category)
+	{
+		]]></search>
+		<add><![CDATA[// Loop through every category, listing the boards in each as we go.
+	$last_forumid = -1;
+	foreach ($context['categories'] as $category)
+	{
+		// If this is a different subforum, place it in a div:
+		if ($last_forumid <> $category['forumid'])
+		{
+			if ($last_forumid > -1)
+				echo '</div>';
+			echo '<div id="subforum' . $category['forumid'] . '"' . ($context['req_forumid'] <> $category['forumid'] ? ' style="display: none;"' : '') . '>';
+			$last_forumid = $category['forumid'];
+			$flagged[$category['forumid']] = true;
+		}
+	
+		]]></add>
+	</operation>
+	<operation>
+	<operation>
+		<search position="replace"><![CDATA[</div>
+	<br class="clear" />';
+}
+
+// Template for editing/adding a category on the forum.
+function template_modify_category()
+{
+	global $context, $settings, $options, $scripturl, $txt, $subforum_tree, $forumid;
+
+	// Print table header.
+	echo '
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=cat2" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[</div></div>';
+	foreach ($flagged as $id => $flag)
+	{
+		if (!$flag)
+			echo '
+	<div id="subforum' . $id . '"' . ($context['req_forumid'] <> $id ? ' style="display: none;"' : '') . '>
+		<div class="windowbg">
+			<span class="topslice"><span></span></span>
+			<div class="content centertext">
+				', $txt['mboards_no_cats'], '
+			</div>
+			<span class="botslice"><span></span></span>
+		</div>
+	</div>';
+	}
+	echo '
+	<br class="clear" />';
+}
+
+// Template for editing/adding a category on the forum.
+function template_modify_category()
+{
+	global $context, $settings, $options, $scripturl, $txt, $subforum_tree, $forumid;
+
+	// Print table header.
+	echo '
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("cat_order' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>
+	<div id="manage_boards">
+		<form action="', $scripturl, '?action=admin;area=manageboards;sa=cat2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), '><a href="', $scripturl, '?action=admin;area=manageboards;sa=main;sub=', $id, '">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';]]></search>
+		<add><![CDATA[<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+			$flagged[$id] = false;]]></add>
+	</operation>
+
+<!-------------------------------------------------------------------------->
+<!-- Better Edit Category subforum management (ManageBoards.template.php) -->
+<!-------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[<option', $context['category']['forumid'] == $row['forumid'] ? ' selected="selected"' : '', ' value="', $row['forumid'], '">', $row['boardname'], '</option>';]]></search>
+		<add><![CDATA[<option', $context['category']['forumid'] == $row['forumid'] ? ' selected="selected"' : '', ' value="', $row['forumid'], '" onclick="expandTabs(' . $row['forumid'] . '); return false;">', $row['boardname'], '</option>';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<dt><strong>', $txt['order'], ':</strong></dt>
+						<dd>
+							<select name="cat_order">';
+		// Print every existing category into a select box.
+		foreach ($context['category_order'] as $order)
+			echo '
+								<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
+		echo '
+							</select>
+						</dd>';]]></search>
+		<add><![CDATA[<dt><strong>', $txt['order'], ':</strong></dt>
+						<dd>';
+		foreach ($subforum_tree as $id => $subforum)
+		{
+			echo '
+							<select name="cat_order' . $subforum['forumid'] . '" id="cat_order' . $subforum['forumid'] . '"' . ($subforum['forumid'] <> $_REQUEST['sub'] ? 'style="display: none;"' : '') . '>';
+
+			// Print every existing category into a select box.
+			foreach ($context['category_order'][$subforum['forumid']] as $order)
+				echo '
+									<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
+			echo '
+							</select>';
+		}
+		echo '
+						</dd>';]]></add>
+	</operation>
+</file>
+</modification>

@@ -10,17 +10,6 @@ if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
 elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then throw an error
 	die('<b>Error:</b> Cannot install - please verify you put this file in the same place as SMF\'s SSI.php.');
 
-// Per SMF mod-creation guidelines, the directories that the mod has created need to be removed:
-foreach ($subforum_tree as $id => $row)
-{
-	// Remove the index.php file we placed in the specified folder:
-	unlink($row['forumdir'] . '/index.php');
-	// Remove the specified folder....  Will fail if not empty:
-	rmdir($row['forumdir']);
-	// Remove the agreement.forum[n].txt file in the main forum folder:
-	unlink($boarddir . '/agreement.forum' . $row['forumid'] . '.txt');
-}
-	
 // Order the categories according to the forum id, then category order:
 $request = $smcFunc['db_query']('', '
 	SELECT id_cat
