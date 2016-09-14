@@ -7,7 +7,9 @@ elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then t
 if (SMF == 'SSI')
 	db_extend('packages');
 	
+//==============================================================================
 // Define the hooks
+//==============================================================================
 $hook_functions = array(
 	// >> General hooks <<
 	'integrate_pre_include' => '$sourcedir/Subs-SplitForumHooks.php',

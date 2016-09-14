@@ -724,8 +724,8 @@ function EditBoard()
 			$boardOptions['move_to'] = $_POST['placement'];
 			$boardOptions['target_board'] = (int) $_POST['board_order'];]]></search>
 		<add><![CDATA[$boardOptions = array();
-		$sub = (!empty($_POST['new_forum']) ? $_POST['new_forum'] : $forumid);
-		$cat = (!empty($_POST['new_cat' . $sub]) ? $_POST['new_cat' . $sub] : '');
+		$sub = (isset($_POST['new_forum']) ? $_POST['new_forum'] : $forumid);
+		$cat = (isset($_POST['new_cat' . $sub]) ? $_POST['new_cat' . $sub] : '');
 		
 		// Move this board to a new category?
 		if (!empty($cat))
@@ -735,6 +735,7 @@ function EditBoard()
 		}			
 			
 		// Change the boardorder of this board?
+		$cat = (!empty($cat) ? $cat : (isset($_POST['current_cat']) ? $_POST['current_cat'] : ''));
 		if (!empty($_POST['placement' . $cat]) && !empty($_POST['board_order' . $cat]))
 		{
 			if (!in_array($_POST['placement' . $cat], array('before', 'after', 'child')))
@@ -1993,6 +1994,16 @@ function EditBoard()
 		redirectexit('action=admin;area=portalconfig;sub=' . $context['req_forumid']);]]></add>
 	</operation>
 </file>
+<file name="$sourcedir/Subs-PrettyUrls.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[function pretty_update_filters($installing = false)]]></search>
+		<add><![CDATA[function pretty_update_filters($installing = false, $base = false)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$base = dirname($_SERVER['SCRIPT_NAME']);]]></search>
+		<add><![CDATA[$base = (!empty($base) ? parse_url($base, PHP_URL_PATH) : dirname($_SERVER['SCRIPT_NAME']));]]></add>
+	</operation>
+</file>
 
 <!---------------------------------------------------------------------------->
 <!-- Template Edits															-->
@@ -2183,7 +2194,8 @@ function template_modify_category()
 			hideBoards(document.getElementById("new_cat" + forum).options[document.getElementById("new_cat" + forum).selectedIndex].value);
 		}
 		function hideBoards(cat)
-		{';
+		{
+			cat = (cat == 0 ? ' . $context['board']['id'] . ' : cat);';
 	foreach ($context['board_order'] as $cat => $boards)
 		echo '
 			document.getElementById("cat_txt', $cat, '").style.display = (cat == ' . $cat . ' ? "" : "none");
@@ -2327,18 +2339,16 @@ function template_modify_category()
 		echo '
 							<select name="new_cat', $subforum['forumid'], '" id="new_cat', $subforum['forumid'], '" onchange="hideBoards(this.options[this.selectedIndex].value);"', ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : ''), ((isset($context['board']['is_new']) && count($context['categories'][$subforum['forumid']]) > 0) || count($context['categories'][$subforum['forumid']]) > 1 ? '' : ' disabled="disabled"'), '>';
 		foreach ($context['categories'][$subforum['forumid']] as $category)
-		{
-			$first = $category['id'];
 			echo '
 								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
-		}
 		echo '
 							</select>';
 		if (!((isset($context['board']['is_new']) && count($context['categories'][$subforum['forumid']]) > 0) || count($context['categories'][$subforum['forumid']]) > 1))
 			echo '
-							<input type="hidden" name="new_cat', $subforum['forumid'], '" value="', $first, '" />';
+							<input type="hidden" name="new_cat', $subforum['forumid'], '" value="', $context['categories'][$subforum['forumid']][0]['id'], '" />';
 	}
 	echo '
+							<input type="hidden" name="current_cat" value="', $context['board']['category'], '" />
 						</dd>';
 
 	// If this isn't the only board in this category let the user choose where the board is to live.

@@ -296,7 +296,7 @@ function SaveSubForum($sub)
 			updateSettings(array('news' . $sub => $modSettings['news']));
 	}
 
-	// Make sure we update the .htaccess for Pretty URLs if it is installed:
+	// Rewrite .htaccess for Pretty URLs only if Pretty URLs is installed:
 	if (file_exists($sourcedir . '/Subs-PrettyUrls.php'))
 	{
 		if (file_exists($arr['forumdir'] . '/.htaccess'))
@@ -306,12 +306,12 @@ function SaveSubForum($sub)
 		$boarddir = (isset($arr['forumdir']) ? $arr['forumdir'] : $old_boarddir);
 		$old_boardurl = $boardurl;
 		$boardurl = (isset($arr['boardurl']) ? $arr['boardurl'] : $old_boardurl);
-		pretty_update_filters();
+		pretty_update_filters(false, $arr['boardurl']);
 		$boarddir = $old_boarddir;
 		$boardurl = $old_boardurl;
 	}
 
-	// Write out the new ".htaccess" file for the subforum:
+	// Attach some other crap to .htaccess for subforums to prevent 404 errors:
 	if ($arr['forumid'] != 0 && is_dir($arr['forumdir']))
 	{
 		$path = relativePath($arr['forumdir'], $boarddir);

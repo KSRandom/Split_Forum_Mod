@@ -11,17 +11,10 @@ if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
 elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then throw an error
 	die('<b>Error:</b> Cannot install - please verify you put this file in the same place as SMF\'s SSI.php.');
 db_extend('packages');
-require_once($sourcedir.'/Subs-Admin.php');
 
-// Capture mod version number during the run of this script:
-$new = array();
-$contents = file( dirname(__FILE__) . '/package-info.xml' );
-if (preg_match('#\<version\>(.+?)\</version\>#i', implode('', $contents), $version))
-	$mod_version = $version[0];
-else
-	$mod_version = '';
-
-// Insert forumid column into categories and calendar table to associate with a particular forum:
+//==============================================================================
+// Insert column into categories and calendar table to associate with a subforum:
+//==============================================================================
 $smcFunc['db_add_column'](
 	'{db_prefix}categories', 
 	array(
@@ -43,46 +36,9 @@ $smcFunc['db_add_column'](
 	)
 );
 
-// If we have one or no subforums defined as an array, check the table (if it exists):
-if (empty($subforum_tree))
-{
-	// Define the subforum_tree variable's default content:
-	$subforum_tree = array(
-		0 => array(		// Primary subforum
-			'forumid' => 0,
-			'boardurl' => $boardurl,
-			'boardname' => $mbname,
-			'language' => $language,
-			'forumdir' => $boarddir,
-			'favicon' => '',
-			'primary_membergroup' => 0,
-			'subtheme' => 0,
-		),
-	);
-	updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));
-}
-
-// Rearrange the subforum tree array so that the forumid is also the array index:
-$tree = array();
-foreach ($subforum_tree as $subforum)
-{
-	unset($subforum['cookiename']);
-	$tree[$subforum['forumid']] = $subforum;
-}
-$subforum_tree = $tree;
-
-// Insert the current board path as the default server path for subforums:
-require_once($sourcedir.'/Subs-Admin.php');
-updateSettings(
-	array(
-		'subforum_server_url' => $boardurl, 
-		'subforum_server_root' => $boarddir,
-		'subforum_sister_site_title' => '',
-		'subforum_mod_version' => $mod_version,
-	)
-);
-
+//==============================================================================
 // Figure out where the attachment path(s) are:
+//==============================================================================
 $tblchk = $smcFunc['db_query']('', 'show tables like "' . $db_prefix . 'sp_blocks"', array());
 while ($row = $smcFunc['db_fetch_row']($tblchk))
 {

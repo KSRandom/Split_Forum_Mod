@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.22[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.23[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -62,7 +62,7 @@ This mod was tested on SMF 2.0.9, but should work on earlier versions.  SMF 1.x 
 [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] should be installed prior to this mod.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.15[/b] to this version.
+Upgrade is possible from previous version of this mod to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 The changelog has been removed and can be seen at [url=http://www.xptsp.com/board/index.php?topic=17.msg328#msg328]XPtsp.com[/url].

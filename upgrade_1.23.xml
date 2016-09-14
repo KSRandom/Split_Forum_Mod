@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.23</version>
+
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[$sub = (!empty($_POST['new_forum']) ? $_POST['new_forum'] : $forumid);
+		$cat = (!empty($_POST['new_cat' . $sub]) ? $_POST['new_cat' . $sub] : '');]]></search>
+		<add><![CDATA[$sub = (isset($_POST['new_forum']) ? $_POST['new_forum'] : $forumid);
+		$cat = (isset($_POST['new_cat' . $sub]) ? $_POST['new_cat' . $sub] : '');]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Change the boardorder of this board?
+		if (!empty($_POST['placement' . $cat]) && !empty($_POST['board_order' . $cat]))]]></search>
+		<add><![CDATA[// Change the boardorder of this board?
+		$cat = (!empty($cat) ? $cat : (isset($_POST['current_cat']) ? $_POST['current_cat'] : ''));
+		if (!empty($_POST['placement' . $cat]) && !empty($_POST['board_order' . $cat]))]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-PrettyUrls.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[function pretty_update_filters($installing = false)]]></search>
+		<add><![CDATA[function pretty_update_filters($installing = false, $base = false)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$base = dirname($_SERVER['SCRIPT_NAME']);]]></search>
+		<add><![CDATA[$base = (!empty($base) ? parse_url($base, PHP_URL_PATH) : dirname($_SERVER['SCRIPT_NAME']));]]></add>
+	</operation>
+</file>
+<file name="$themedir/ManageBoards.template.php">
+	<operation>
+		<search position="replace"><![CDATA[foreach ($subforum_tree as $subforum)
+	{
+		echo '
+							<select name="new_cat', $subforum['forumid'], '" id="new_cat', $subforum['forumid'], '" onchange="hideBoards(this.options[this.selectedIndex].value);"', ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : ''), ((isset($context['board']['is_new']) && count($context['categories'][$subforum['forumid']]) > 0) || count($context['categories'][$subforum['forumid']]) > 1 ? '' : ' disabled="disabled"'), '>';
+		foreach ($context['categories'][$subforum['forumid']] as $category)
+		{
+			$first = $category['id'];
+			echo '
+								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
+		}
+		echo '
+							</select>';
+	}
+	echo '
+						</dd>';]]></search>
+		<add><![CDATA[foreach ($subforum_tree as $subforum)
+	{
+		echo '
+							<select name="new_cat', $subforum['forumid'], '" id="new_cat', $subforum['forumid'], '" onchange="hideBoards(this.options[this.selectedIndex].value);"', ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : ''), ((isset($context['board']['is_new']) && count($context['categories'][$subforum['forumid']]) > 0) || count($context['categories'][$subforum['forumid']]) > 1 ? '' : ' disabled="disabled"'), '>';
+		foreach ($context['categories'][$subforum['forumid']] as $category)
+			echo '
+								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
+		echo '
+							</select>';
+		if (!((isset($context['board']['is_new']) && count($context['categories'][$subforum['forumid']]) > 0) || count($context['categories'][$subforum['forumid']]) > 1))
+			echo '
+							<input type="hidden" name="new_cat', $subforum['forumid'], '" value="', $context['categories'][$subforum['forumid']][0]['id'], '" />';
+	}
+	echo '
+							<input type="hidden" name="current_cat" value="', $context['board']['category'], '" />
+						</dd>';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function hideBoards(cat)
+		{';]]></search>
+		<add><![CDATA[function hideBoards(cat)
+		{
+			cat = (cat == 0 ? ' . $context['board']['id'] . ' : cat);';]]></add>
+	</operation>
+</file>
+</modification>
