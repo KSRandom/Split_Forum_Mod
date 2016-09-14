@@ -17,7 +17,7 @@ if (!defined('SMF'))
 **********************************************************************************/
 function SplitForum_PreLoad()
 {
-	global $boardurl, $cookiename, $boarddir, $forumid, $mbname;
+	global $boardurl, $cookiename, $boarddir, $forumid, $mbname, $forumdir;
 	global $subtheme, $language, $favicon, $subforum_tree, $modSettings;
 
 	// Define primary subforum entry if it is not already defined:
@@ -84,13 +84,13 @@ function SplitForum_PreLoad()
 		// Overwrite settings related to Pretty URLs:
 		if (isset($modSettings['pretty_root_url']))
 			$modSettings['pretty_root_url'] = !empty($row['boardurl']) ? $row['boardurl'] : $modSettings['pretty_root_url'];
-		if (isset($row['enable_pretty']))
+		if (isset($row['enable_pretty']) && isset($modSettings['pretty_enable_filters']))
 			$modSettings['pretty_enable_filters'] = !empty($row['enable_pretty']) ? $row['enable_pretty'] : $modSettings['pretty_enable_filters'];
 
 		// Overwrite settings related to Simple Portal:
-		if (isset($row['sp_portal']))
+		if (isset($row['sp_portal']) && isset($modSettings['sp_portal_mode']))
 			$modSettings['sp_portal_mode'] = !empty($row['sp_portal']) ? $row['sp_portal'] : $modSettings['sp_portal_mode'];
-		if (isset($row['sp_standalone']))
+		if (isset($row['sp_standalone']) && isset($modSettings['sp_standalone_url']))
 			$modSettings['sp_standalone_url'] = !empty($row['sp_standalone']) ? $row['sp_standalone'] : $modSettings['sp_standalone_url'];
 	}
 
@@ -123,6 +123,29 @@ function SplitForum_EzPortal_Init()
 function SplitForum_Actions(&$actions)
 {
 	$actions['unreadglobal'] = array('Recent.php', 'UnreadTopics');
+}
+
+/**********************************************************************************
+* Load Theme hook (workaround for restrictions before any action taken)
+**********************************************************************************/
+function SplitForum_DenyAccess()
+{
+	global $forumid, $user_info, $modSettings;
+
+	// Make sure we can log out.  Otherwise, we stuck in an endless loop:
+	if (isset($_GET['action']) && $_GET['action'] == 'logout')
+		return;
+	
+	// Make sure we are NOT ADMIN and have not been denied access to this subforum....
+	// NOTE: If we skip the admin check, all admins will be denied access to all subforums!!!
+	if (empty($user_info['is_admin']) && !empty($modSettings['subforum_settings_permission_access']))
+	{
+		if (allowedTo('deny_subforum' . $forumid))
+		{
+			loadLanguage('ManageSplitForum');
+			fatal_lang_error('subforum_access_denied', 'user', !empty($modSettings['subforum_settings_permission_access_log']));
+		}
+	}
 }
 
 /**********************************************************************************

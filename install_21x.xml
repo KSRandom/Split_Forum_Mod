@@ -2,11 +2,20 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.35</version>
+<version>1.36</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source File Edits														-->
 <!---------------------------------------------------------------------------->
+<file name="$boarddir/index.php">
+	<operation>
+		<search position="after"><![CDATA[// Check if the user should be disallowed access.]]></search>
+		<add><![CDATA[// Make sure that the user has access to this subforum:
+	SplitForum_DenyAccess();
+	
+	]]></add>
+	</operation>
+</file>
 <file name="$boarddir/SSI.php">
 	<operation>
 		<search position="before"><![CDATA[function ssi_queryPosts($query_where = '', $query_where_params = array(), $query_limit = 10, $query_order = 'm.id_msg DESC', $output_method = 'echo', $limit_body = false, $override_permissions = false)

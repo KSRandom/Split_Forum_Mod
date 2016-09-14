@@ -16,9 +16,11 @@ $hook_functions = array(
 	'integrate_menu_buttons' => 'SplitForum_Menu_Buttons',
 	'integrate_actions' => 'SplitForum_Actions',
 	'integrate_pre_load' => 'SplitForum_PreLoad',
+	'integrate_load_theme' => 'SplitForum_LoadTheme',
 	// >>  Admin hooks  <<
 	'integrate_admin_include' => '$sourcedir/Subs-SplitForumAdminHooks.php',
 	'integrate_admin_areas' => 'SplitForum_Admin_Menu',
+	'integrate_load_permissions' => 'SplitForum_Permissions',
 );
 
 // Adding or removing them?

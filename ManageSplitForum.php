@@ -138,7 +138,7 @@ Function EditSubForum($sub)
 		array('select', 'subforum_modify_language', $languages),
 		array('select', 'subforum_modify_primary_membergroup', $primary),
 	);
-	if (!empty($forumid) || ($_REQUEST['sa'] != 'newsub' && $sub == 0))
+	if (empty($forumid) || ($_REQUEST['sa'] != 'newsub' && $sub == 0))
 	{
 		$config_vars = array_merge($config_vars, array(
 			array('title', 'subforum_modify_dontchange'),
@@ -545,6 +545,9 @@ function SubForumSettings($return_config = false)
 		'',
 		array('check', 'subforum_settings_register_at_primary'),
 		array('check', 'subforum_settings_show_who_in_subforum'),
+		'',
+		array('check', 'subforum_settings_permission_access'),
+		array('check', 'subforum_settings_permission_access_log'),
 	);
 	if ($return_config)
 		return $config_vars;

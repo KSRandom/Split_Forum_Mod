@@ -68,4 +68,23 @@ function SplitForum_Admin_Menu(&$areas)
 	}
 }
 
+/**********************************************************************************
+* Split Forum permissions hook
+**********************************************************************************/
+function SplitForum_Permissions(&$permissionGroups, &$permissionList, &$leftPermissionGroups, &$hiddenPermissions, &$relabelPermissions)
+{
+	global $txt, $subforum_tree, $forumid, $modSettings;
+	
+	// Add the subforum names to the permissions list:
+	if (!empty($forumid))
+		$subforum_tree = array($forumid => $subforum_tree[$forumid]);
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		$permissionList['membergroup']['deny_subforum' . $id ] = array(false, 'access_subforums', 'access_subforums');
+		if (empty($modSettings['subforum_settings_permission_access']))
+			$hiddenPermissions[] = 'deny_subforum' . $id;
+		$txt['permissionname_deny_subforum' . $id] = $txt['subforum_deny'] . ' "' . $subforum['boardname'] . '"';
+	}
+}
+
 ?>

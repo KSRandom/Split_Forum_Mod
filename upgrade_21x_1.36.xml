@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.36</version>
+
+<file name="$boarddir/index.php">
+	<operation>
+		<search position="after"><![CDATA[// Check if the user should be disallowed access.]]></search>
+		<add><![CDATA[// Make sure that the user has access to this subforum:
+	SplitForum_DenyAccess();
+	
+	]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageRegistration.php">
+	<operation>
+		<search position="replace"><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';]]></search>
+		<add><![CDATA[]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);]]></search>
+		<add><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Register.php">
+	<operation>
+		<search position="replace"><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';]]></search>
+		<add><![CDATA[]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);]]></search>
+		<add><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';]]></add>
+	</operation>
+</file>
+</modification>

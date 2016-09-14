@@ -89,7 +89,7 @@ function get_subforum_max()
 	return $max;
 }
 
-function add_subforum(&$row, $exists = true)
+function add_subforum(&$row)
 {
 	global $subforum_tree, $forumid, $sourcedir, $txt;
 
@@ -97,8 +97,11 @@ function add_subforum(&$row, $exists = true)
 
 	// Define the contents of the array element:
 	$new_forumid = (isset($row['forumid']) ? (int) $row['forumid'] : $forumid);
-	$subforum_tree[$new_forumid] = array(
-		'forumid' => (int) (isset($row['forumid']) ? $row['forumid'] : $forumid),
+	$tree = array();
+	foreach ($subforum_tree as $subforum)
+		$tree[$subforum['forumid']] = $subforum;
+	$tree[$new_forumid] = array(
+		'forumid' => $new_forumid,
 		'cookiename' => (isset($row['cookiename']) ? $row['cookiename'] : ''),
 		'boardurl' => (isset($row['boardurl']) ? $row['boardurl'] : ''),
 		'boardname' => (isset($row['boardname']) ? $row['boardname'] : ''),
@@ -114,10 +117,7 @@ function add_subforum(&$row, $exists = true)
 		'ez_shoutbox' => (isset($row['ez_shoutbox']) ? (int) $row['ez_shoutbox'] : 0),
 		'enable_pretty' => (isset($row['enable_pretty']) ? $row['enable_pretty'] : ''),
 	);
-	$tree = array();
-	foreach ($subforum_tree as $subforum)
-		$tree[$subforum['forumid']] = $subforum;
-	asort($subforum_tree);
+	asort($tree);
 	$subforum_tree = $tree;
 
 	// Set the variable "subforum_tree" in the forum's Settings.php:

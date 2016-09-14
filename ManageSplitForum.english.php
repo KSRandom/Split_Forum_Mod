@@ -87,4 +87,10 @@ $txt['subforum_no_mod_update'] = 'Your install of Split Forum Mod is up to date!
 
 $txt['subforum_no_categories'] = 'No Categories Defined';
 
+$txt['subforum_deny'] = 'Deny access to';
+$txt['permissiongroup_access_subforums'] = 'Subforum Access';
+$txt['subforum_settings_permission_access'] = 'Restrict subforum access using permissions?';
+$txt['subforum_settings_permission_access_log'] = 'Log users who access restricted subforums?';
+$txt['subforum_access_denied'] = 'Access to this subforum has been denied.';
+
 ?>

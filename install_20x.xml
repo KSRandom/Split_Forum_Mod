@@ -2,11 +2,20 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.35</version>
+<version>1.36</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source File Edits														-->
 <!---------------------------------------------------------------------------->
+<file name="$boarddir/index.php">
+	<operation>
+		<search position="after"><![CDATA[// Check if the user should be disallowed access.]]></search>
+		<add><![CDATA[// Make sure that the user has access to this subforum:
+	SplitForum_DenyAccess();
+	
+	]]></add>
+	</operation>
+</file>
 <file name="$boarddir/SSI.php">
 	<operation>
 		<search position="before"><![CDATA[function ssi_queryPosts($query_where = '', $query_where_params = array(), $query_limit = 10, $query_order = 'm.id_msg DESC', $output_method = 'echo', $limit_body = false, $override_permissions = false)
@@ -985,10 +994,20 @@ function EditBoard()
         <search position="before"><![CDATA[global $txt, $board, $topic, $user_info, $context, $language, $scripturl, $settings, $smcFunc, $modSettings]]></search>
         <add><![CDATA[, $forumid]]></add>
     </operation>
+	<operation>
+		<search position="before"><![CDATA[SELECT b.id_board, b.name, b.child_level, c.name AS cat_name, c.id_cat]]></search>
+		<add><![CDATA[, c.forumid]]></add>
+	</operation>
     <operation>
         <search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
-        <add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid}))]]></add>
+        <add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})]]></add>
     </operation>
+	<operation>
+		<search position="before"><![CDATA[WHERE {query_see_board}
+			AND b.redirect = {string:blank_redirect}]]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
     <operation>
         <search position="before"><![CDATA['blank_redirect' => '',
 			'current_board' => $board,]]></search>
@@ -1656,6 +1675,13 @@ function EditBoard()
 		<add><![CDATA[
 				'forumid' => $row['forumid'],]]></add>
 	</operation>
+	<operation>
+		<search position="replace"><![CDATA[getBoardTree();
+
+	// Set the board order for each category.]]></search>
+		<add><![CDATA[getBoardTree(-1);
+
+	// Set the board order for each category.]]></add>
 </file>
 <file name="$sourcedir/Subs-Calendar.php">
 	<operation>
