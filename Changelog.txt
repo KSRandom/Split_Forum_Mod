@@ -1,3 +1,6 @@
+v1.25 - July 4th, 2015
+o Fixed code that made the assumption all subforums would start with [b][nobbc]http://[/nobbc][/b].
+
 v1.24 - June 25th, 2015
 o Updated for SMF 2.1 Beta 1
 o Modified ManageSplitForums.template.php to use 2.1-styled appearance under SMF 2.1.

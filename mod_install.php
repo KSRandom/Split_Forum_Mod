@@ -24,7 +24,6 @@ if (empty($subforum_tree))
 			'subtheme' => 0,
 		),
 	);
-	updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));
 }
 
 // Rearrange the subforum tree array so that the forumid is also the array index:
@@ -35,6 +34,7 @@ foreach ($subforum_tree as $subforum)
 	$tree[$subforum['forumid']] = $subforum;
 }
 $subforum_tree = $tree;
+updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));
 
 // Capture mod version number during the run of this script:
 $contents = file( dirname(__FILE__) . '/package-info.xml' );

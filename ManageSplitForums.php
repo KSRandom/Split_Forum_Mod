@@ -1,14 +1,15 @@
 <?php
 /**********************************************************************************
 * ManageSplitForums.php - PHP implementation of the Split Forum Mod
-*********************************************************************************
-* This program is distributed in the hope that it is and will be useful, but
-* WITHOUT ANY WARRANTIES; without even any implied warranty of MERCHANTABILITY
-* or FITNESS FOR A PARTICULAR PURPOSE .
-*********************************************************************************
-* This work is licensed under a Creative Commons Attribution 3.0 Unported License
+***********************************************************************************
+* This mod is licensed under the 2-clause BSD License, which can be found here:
+*	http://opensource.org/licenses/BSD-2-Clause
+***********************************************************************************
+* This program is distributed in the hope that it is and will be useful, but      *
+* WITHOUT ANY WARRANTIES; without even any implied warranty of MERCHANTABILITY    *
+* or FITNESS FOR A PARTICULAR PURPOSE.                                            *
 **********************************************************************************/
-if (!defined('SMF'))
+if (!defined('SMF')) 
 	die('Hacking attempt...');
 
 function ManageSplitForums()
@@ -205,14 +206,19 @@ function SaveSubForum($sub)
 	isAllowedTo('admin_forum');
 
 	// Filter all the information passed to this function, putting all the information into the array:
-	$arr['boardurl'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_boardurl']) ?  $_POST['subforum_modify_boardurl']  : '') );
+	$arr['boardurl'] = (isset($_POST['subforum_modify_boardurl']) ?  $_POST['subforum_modify_boardurl']  : '');
+	if (strpos($arr['boardurl'], 'http://') !== 0 && strpos($arr['boardurl'], 'https://') !== 0)
+		$arr['boardurl'] = 'http://' . $arr['boardurl'];
 	$arr['boardname'] = (isset($_POST['subforum_modify_boardname']) ?  $_POST['subforum_modify_boardname']  : '');
 	$arr['subtheme'] = (int) (isset($_POST['subforum_modify_subtheme']) ? $_POST['subforum_modify_subtheme'] : 0);
 	$arr['language'] = (isset($_POST['subforum_modify_language']) ?  $_POST['subforum_modify_language']  : '');
-	$arr['favicon'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_favicon']) ?  $_POST['subforum_modify_favicon']  : '') );
+	$arr['favicon'] = (isset($_POST['subforum_modify_favicon']) ?  $_POST['subforum_modify_favicon']  : '');
+	if (strpos($arr['favicon'], 'http://') !== 0 && strpos($arr['favicon'], 'https://') !== 0)
+		$arr['favicon'] = 'http://' . $arr['favicon'];
 	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary']) ? $_POST['subforum_modify_primary'] : '');
 	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : $forumid);
-	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''))) : $boarddir);
+	$arr['forumdir'] = ($sub == 0 ?  $boarddir : (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''));
+	$arr['forumdir'] = str_replace('http://', '', str_replace('https://', '', $arr['forumdir']));
 	$arr['sp_portal'] = (isset($_POST['subforum_modify_sp_portal']) ? (int) $_POST['subforum_modify_sp_portal'] : 0);
 	$arr['sp_standalone'] = (isset($_POST['subforum_modify_sp_standalone']) ? $_POST['subforum_modify_sp_standalone'] : '');
 	$arr['enable_pretty'] = (isset($_POST['subforum_modify_prettyURL_enable']) ? $_POST['subforum_modify_prettyURL_enable'] : 0);
