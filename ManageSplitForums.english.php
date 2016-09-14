@@ -12,6 +12,9 @@
 if (!defined('SMF')) 
 	die('Hacking attempt...');
 
+$txt['favicon'] = 'Website Icon URL';
+$txt['sp-subforums'] = 'Subforum';
+
 $txt['forumid_title'] = 'Forum Parent';
 $txt['forumid_desc'] = 'The sub-forum this category is usable on';
 
@@ -33,7 +36,7 @@ $txt['subforum_modify_boardurl_small'] = 'Full address must include "http://"';
 $txt['subforum_modify_favicon'] = 'Path to Site icon for SubForum:';
 $txt['subforum_modify_subtheme'] = 'Default SubForum theme:';
 $txt['subforum_modify_language'] = 'Default SubForum language:';
-$txt['subforum_modify_primary'] = 'Primary Membergroup for New Users:';
+$txt['subforum_modify_primary_membergroup'] = 'Primary Membergroup for New Users:';
 $txt['subforum_modify_dontchange'] = 'DON\'T change these settings unless you know what you are doing!!';
 $txt['subforum_modify_forumid'] = 'SubForum ID number:';
 $txt['subforum_modify_forumdir'] = 'Path to SubForum folder:';

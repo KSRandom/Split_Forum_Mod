@@ -35,6 +35,25 @@ function get_installed_themes()
 	return $themes;
 }
 
+function get_categories()
+{
+	global $smcFunc, $txt;
+
+	isAllowedTo('admin_forum');
+	$cats = array(
+	);
+	$request = $smcFunc['db_query']('', '
+		SELECT id_cat, name
+		FROM {db_prefix}categories
+		ORDER BY cat_order',
+		array()
+	);
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$cats[$row['id_cat']] = $row['name'];
+	$smcFunc['db_free_result']($request);
+	return $cats;
+}
+
 function get_membergroups()
 {
 	global $smcFunc, $txt;

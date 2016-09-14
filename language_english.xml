@@ -2,32 +2,13 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.25</version>
+<version>1.27</version>
 
-<file name="$languagedir/Admin.english.php" error="skip">
-	<operation>
-		<search position="after"><![CDATA[?>]]></search>
-		<add><![CDATA[// Begin SubForum Mod
-$txt['favicon'] = 'Website Icon URL';
-// End SubForum Mod
-
-]]></add>
-	</operation>
-</file>
 <file name="$languagedir/Errors.english.php" error="skip">
 	<operation>
 		<search position="before"><![CDATA[$txt['no_board'] = 'The board you specified doesn\'t exist';]]></search>
 		<add><![CDATA[
 $txt['wrong_forum'] = 'The board you specified is located on a different forum';]]></add>
-	</operation>
-</file>
-<file name="$languagedir/SPortalAdmin.english.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[$txt['sp-blocksNoBody'] = 'No Body';]]></search>
-		<add><![CDATA[
-// BEGIN: Split Forum Mod
-$txt['sp-subforums'] = 'Subforum';
-// BEGIN: Split Forum Mod]]></add>
 	</operation>
 </file>
 </modification>

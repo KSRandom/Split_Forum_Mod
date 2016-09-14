@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.26</version>
+<version>1.27</version>
 
 <file name="$sourcedir/ManageMembergroups.php">
 	<operation>
@@ -12,79 +12,97 @@
 		<add><![CDATA[, $forumid]]></search>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[SELECT id_board, name, child_level
-		FROM {db_prefix}boards
+		<search position="replace"><![CDATA[SELECT b.id_cat, c.name AS cat_name, b.id_board, b.name, b.child_level
+		FROM {db_prefix}boards AS b
+			LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 		ORDER BY board_order',
 		array(
 		)
 	);
-	$context['boards'] = array();
-	while ($row = $smcFunc['db_fetch_assoc']($result))
-		$context['boards'][] = array(
-			'id' => $row['id_board'],
-			'name' => $row['name'],
-			'child_level' => $row['child_level'],
-			'selected' => false
-		);]]></search>
-		<add><![CDATA[SELECT b.id_board, b.name, b.child_level, c.forumid, b.id_cat, c.name AS cat_name
+	$context['num_boards'] = $smcFunc['db_num_rows']($request);
+
+	$context['categories'] = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+	{
+		// This category hasn't been set up yet..
+		if (!isset($context['categories'][$row['id_cat']]))
+			$context['categories'][$row['id_cat']] = array(
+				'id' => $row['id_cat'],
+				'name' => $row['cat_name'],
+				'boards' => array()
+			);
+
+		// Set this board up, and let the template know when it's a child.  (indent them..)
+		$context['categories'][$row['id_cat']]['boards'][$row['id_board']] = array(]]></search>
+		<add><![CDATA[SELECT b.id_cat, c.name AS cat_name, b.id_board, b.name, b.child_level, c.forumid
 		FROM {db_prefix}boards AS b
-			LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)' . (empty($forumid) ? '' : '
-		WHERE c.forumid = {int:forumid}') . '
+			LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 		ORDER BY c.forumid, b.board_order',
 		array(
-			'forumid' => (int) $forumid,
 		)
 	);
-	$context['boards'] = array();
-	while ($row = $smcFunc['db_fetch_assoc']($result))
+	$context['num_boards'] = $smcFunc['db_num_rows']($request);
+
+	$context['categories'] = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
 	{
-		$context['boards'][$row['forumid']][$row['id_cat']]['cat_name'] = $row['cat_name'];
-		$context['boards'][$row['forumid']][$row['id_cat']]['boards'][] = array(
-			'id' => $row['id_board'],
-			'name' => $row['name'],
-			'child_level' => $row['child_level'],
-			'selected' => false
-		);
-	}]]></add>
+		// This category hasn't been set up yet..
+		if (!isset($context['categories'][$row['id_cat']]))
+			$context['categories'][$row['forumid']][$row['id_cat']] = array(
+				'id' => $row['id_cat'],
+				'name' => $row['cat_name'],
+				'boards' => array()
+			);
+
+		// Set this board up, and let the template know when it's a child.  (indent them..)
+		$context['categories'][$row['forumid']][$row['id_cat']]['boards'][$row['id_board']] = array(]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[function EditMembergroup()
 {
-	global $context, $txt, $sourcedir, $modSettings, $smcFunc]]></search>
+	global $context, $txt, $sourcedir, $modSettings, $smcFunc, $settings]]></search>
 		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[SELECT id_board, member_groups
-				FROM {db_prefix}boards
-				WHERE FIND_IN_SET({string:current_group}, member_groups) != 0' . (empty($_POST['boardaccess']) ? '' : '
-					AND id_board NOT IN ({array_int:board_access_list})'),
-				array(]]></search>
-		<add><![CDATA[SELECT b.id_board, b.member_groups
-				FROM {db_prefix}boards AS b' . (empty($forumid) ? '' : '
-					LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)') . '
-				WHERE FIND_IN_SET({string:current_group}, b.member_groups) != 0' . (empty($_POST['boardaccess']) ? '' : '
-					AND b.id_board NOT IN ({array_int:board_access_list})') . (empty($forumid) ? '' : '
-					AND c.forumid = {int:forumid}'),
-				array(
-					'forumid' => (int) $forumid,]]></add>
+		<search position="replace"><![CDATA[SELECT id_board, {raw:column}
+					FROM {db_prefix}boards
+					WHERE FIND_IN_SET({string:current_group}, {raw:column}) != 0' . (empty($changed_boards[$board_action]) ? '' : '
+						AND id_board NOT IN ({array_int:board_access_list})'),
+					array(]]></search>
+		<add><![CDATA[SELECT b.id_board, b.{raw:column}
+					FROM {db_prefix}boards AS b' . (empty($forumid) ? '' : '
+						LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)') . '
+					WHERE FIND_IN_SET({string:current_group}, b.{raw:column}) != 0' . (empty($changed_boards[$board_action]) ? '' : '
+						AND b.id_board NOT IN ({array_int:board_access_list})') . (empty($forumid) ? '' : '
+						AND c.forumid = {int:forumid}'),
+					array(
+						'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[SELECT id_board, name, child_level, FIND_IN_SET({string:current_group}, member_groups) != 0 AS can_access
-			FROM {db_prefix}boards
+		<search position="replace"><![CDATA[SELECT b.id_cat, c.name as cat_name, b.id_board, b.name, b.child_level,
+			FIND_IN_SET({string:current_group}, b.member_groups) != 0 AS can_access, FIND_IN_SET({string:current_group}, b.deny_member_groups) != 0 AS cannot_access
+			FROM {db_prefix}boards AS b
+				LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 			ORDER BY board_order',
 			array(
 				'current_group' => (int) $_REQUEST['group'],
 			)
 		);
-		while ($row = $smcFunc['db_fetch_assoc']($result))
-			$context['boards'][] = array(
-				'id' => $row['id_board'],
-				'name' => $row['name'],
-				'child_level' => $row['child_level'],
-				'selected' => !(empty($row['can_access']) || $row['can_access'] == 'f'),
-			);]]></search>
-		<add><![CDATA[SELECT b.id_board, b.name, b.child_level, c.forumid, c.name AS cat_name, c.id_cat,
-				FIND_IN_SET({string:current_group}, b.member_groups) != 0 AS can_access
+		$context['categories'] = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+		{
+			// This category hasn't been set up yet..
+			if (!isset($context['categories'][$row['id_cat']]))
+				$context['categories'][$row['id_cat']] = array(
+					'id' => $row['id_cat'],
+					'name' => $row['cat_name'],
+					'boards' => array()
+				);
+
+			// Set this board up, and let the template know when it's a child.  (indent them..)
+			$context['categories'][$row['id_cat']]['boards'][$row['id_board']] = array(]]></search>
+		<add><![CDATA[SELECT b.id_cat, c.name as cat_name, b.id_board, b.name, b.child_level, c.forumid,
+			FIND_IN_SET({string:current_group}, b.member_groups) != 0 AS can_access, FIND_IN_SET({string:current_group}, b.deny_member_groups) != 0 AS cannot_access
 			FROM {db_prefix}boards AS b
 				LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)' . (empty($forumid) ? '' : '
 			WHERE c.forumid = {int:forumid}') . '
@@ -94,19 +112,26 @@
 				'current_group' => (int) $_REQUEST['group'],
 			)
 		);
-		while ($row = $smcFunc['db_fetch_assoc']($result))
+		$context['categories'] = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
 		{
-			$context['boards'][$row['forumid']][$row['id_cat']]['cat_name'] = $row['cat_name'];
-			$context['boards'][$row['forumid']][$row['id_cat']]['boards'][] = array(
-				'id' => $row['id_board'],
-				'name' => $row['name'],
-				'child_level' => $row['child_level'],
-				'selected' => !(empty($row['can_access']) || $row['can_access'] == 'f'),
-			);
-		}]]></add>
+			// This category hasn't been set up yet..
+			if (!isset($context['categories'][$row['forumid']][$row['id_cat']]))
+				$context['categories'][$row['forumid']][$row['id_cat']] = array(
+					'id' => $row['id_cat'],
+					'name' => $row['cat_name'],
+					'boards' => array()
+				);
+
+			// Set this board up, and let the template know when it's a child.  (indent them..)
+			$context['categories'][$row['forumid']][$row['id_cat']]['boards'][$row['id_board']] = array(]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManagePermissions.php">
+	<operation>
+		<search position="before"><![CDATA[global $context, $txt, $smcFunc, $sourcedir, $cat_tree, $boardList, $boards]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
 	<operation>
 		<search position="replace"><![CDATA[getBoardTree();]]></search>
 		<add><![CDATA[getBoardTree( ($forumid == 0 ? -1 : $forumid) );]]></add>
@@ -123,7 +148,9 @@
 </file>
 <file name="$themedir/ManageMembergroups.template.php">
 	<operation>
-		<search position="before"><![CDATA[global $context, $settings, $options, $scripturl, $txt, $modSettings]]></search>
+		<search position="before"><![CDATA[function template_new_group()
+{
+	global $context, $scripturl, $txt, $modSettings]]></search>
 		<add><![CDATA[, $subforum_tree]]></add>
 	</operation>
 	<operation>
@@ -237,7 +264,7 @@
 	<operation>
 		<search position="before"><![CDATA[function template_edit_group()
 {
-	global $context, $settings, $options, $scripturl, $txt]]></search>
+	global $context, $scripturl, $txt, $modSettings]]></search>
 		<add><![CDATA[, $subforum_tree]]></add>
 	</operation>
 	<operation>
@@ -371,33 +398,33 @@
 </file>
 <file name="$themedir/ManagePermissions.template.php">
 	<operation>
+		<search position="before"><![CDATA[function template_by_board()
+{
+	global $context, $scripturl, $txt]]></search>
+		<add><![CDATA[, $subforum_tree, $forumid]]></add>
+	</operation>
+	<operation>
 		<search position="replace"><![CDATA[foreach ($context['categories'] as $category)
 	{
 		echo '
-		<div class="cat_bar">
-			<h3 class="catbg"><strong>', $category['name'], '</strong></h3>
-		</div>';
+			<div class="sub_bar">
+				<h3 class="subbg">', $category['name'], '</h3>
+			</div>';
 
 		if (!empty($category['boards']))
 			echo '
-		<div class="windowbg">
-			<span class="topslice"><span></span></span>
-			<div class="content">
 				<ul class="perm_boards flow_hidden">';
-
-		$alternate = false;
 
 		foreach ($category['boards'] as $board)
 		{
-			$alternate = !$alternate;
 
 			echo '
-
-					<li class="flow_hidden' ,' windowbg', $alternate ? '' : '2','">
+					<li class="flow_hidden">
 						<span class="perm_board floatleft">
 							<a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], ';rid=permissions;', $context['session_var'], '=', $context['session_id'], '">', str_repeat('-', $board['child_level']), ' ', $board['name'], '</a>
 						</span>
 						<span class="perm_boardprofile floatleft">';
+
 			if ($context['edit_all'])
 			{
 				echo '
@@ -405,14 +432,14 @@
 
 				foreach ($context['profiles'] as $id => $profile)
 					echo '
-								<option value="', $id, '" ', $id == $board['profile'] ? 'selected="selected"' : '', '>', $profile['name'], '</option>';
+								<option value="', $id, '"', $id == $board['profile'] ? ' selected' : '', '>', $profile['name'], '</option>';
 
 				echo '
 							</select>';
 			}
 			else
 				echo '
-							<a href="', $scripturl, '?action=admin;area=permissions;sa=index;pid=', $board['profile'], ';', $context['session_var'], '=', $context['session_id'], '"> [', $board['profile_name'], ']</a>';
+							<a href="', $scripturl, '?action=admin;area=permissions;sa=index;pid=', $board['profile'], ';', $context['session_var'], '=', $context['session_id'], '">', $board['profile_name'], '</a>';
 
 			echo '
 						</span>
@@ -421,13 +448,9 @@
 
 		if (!empty($category['boards']))
 			echo '
-				</ul>
-			</div>
-			<span class="botslice"><span></span></span>
-		</div>';
+				</ul>';
 	}]]></search>
-	<add><![CDATA[
-	// Display the subforums as a tab at the top of the screen:
+	<add><![CDATA[// Display the subforums as a tab at the top of the screen:
 	$flagged = array( 0 => false );
 	if (count($subforum_tree) > 1)
 	{
@@ -466,30 +489,23 @@
 		foreach ($subforum as $category)
 		{
 			echo '
-			<div class="cat_bar">
-				<h3 class="catbg"><strong>', $category['name'], '</strong></h3>
+			<div class="sub_bar">
+				<h3 class="subbg">', $category['name'], '</h3>
 			</div>';
 
 			if (!empty($category['boards']))
 				echo '
-			<div class="windowbg">
-				<span class="topslice"><span></span></span>
-				<div class="content">
 					<ul class="perm_boards flow_hidden">';
-
-			$alternate = false;
 
 			foreach ($category['boards'] as $board)
 			{
-				$alternate = !$alternate;
-
 				echo '
-
-						<li class="flow_hidden' ,' windowbg', $alternate ? '' : '2','">
+						<li class="flow_hidden">
 							<span class="perm_board floatleft">
 								<a href="', $scripturl, '?action=admin;area=manageboards;sa=board;boardid=', $board['id'], ';rid=permissions;', $context['session_var'], '=', $context['session_id'], '">', str_repeat('-', $board['child_level']), ' ', $board['name'], '</a>
 							</span>
 							<span class="perm_boardprofile floatleft">';
+
 				if ($context['edit_all'])
 				{
 					echo '
@@ -497,14 +513,14 @@
 
 					foreach ($context['profiles'] as $id => $profile)
 						echo '
-									<option value="', $id, '" ', $id == $board['profile'] ? 'selected="selected"' : '', '>', $profile['name'], '</option>';
+									<option value="', $id, '"', $id == $board['profile'] ? ' selected' : '', '>', $profile['name'], '</option>';
 
 					echo '
 								</select>';
 				}
 				else
 					echo '
-								<a href="', $scripturl, '?action=admin;area=permissions;sa=index;pid=', $board['profile'], ';', $context['session_var'], '=', $context['session_id'], '"> [', $board['profile_name'], ']</a>';
+								<a href="', $scripturl, '?action=admin;area=permissions;sa=index;pid=', $board['profile'], ';', $context['session_var'], '=', $context['session_id'], '">', $board['profile_name'], '</a>';
 
 				echo '
 							</span>

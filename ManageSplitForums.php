@@ -87,6 +87,9 @@ Function EditSubForum($sub)
 	}
 	$smcFunc['db_free_result']($request);
 
+	// Get the names of all the categories held in the database:
+	$context['sfm_categories'] = get_categories();
+
 	// Get the names of all installed themes available on this install:
 	$installed_themes = get_installed_themes();
 
@@ -129,7 +132,7 @@ Function EditSubForum($sub)
 			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
 		array('text', 'subforum_modify_forumdir', 'size' => 40,
 			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
-		array('select', 'subforum_modify_primary', $primary),
+		array('select', 'subforum_modify_primary_membergroup', $primary),
 	);
 	if ($sub != 0 || $_REQUEST['sa'] == 'newsub')
 		$config_vars[] = array('check', 'subforum_modify_news');
@@ -215,7 +218,7 @@ function SaveSubForum($sub)
 	$arr['favicon'] = (isset($_POST['subforum_modify_favicon']) ?  $_POST['subforum_modify_favicon']  : '');
 	if (strpos($arr['favicon'], 'http://') !== 0 && strpos($arr['favicon'], 'https://') !== 0)
 		$arr['favicon'] = 'http://' . $arr['favicon'];
-	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary']) ? $_POST['subforum_modify_primary'] : '');
+	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary_membergroup']) ? $_POST['subforum_modify_primary_membergroup'] : '');
 	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : $forumid);
 	$arr['forumdir'] = ($sub == 0 ?  $boarddir : (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''));
 	$arr['forumdir'] = str_replace('http://', '', str_replace('https://', '', $arr['forumdir']));

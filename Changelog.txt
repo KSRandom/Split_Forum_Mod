@@ -1,3 +1,6 @@
+v1.27 - November 20th, 2015
+o Fixed issue where primary membergroup field on settings page wasn't set correctly in UI.
+
 v1.26 - November 14th, 2015
 o SMF 2.0.x: Modified Add Membergroup in order to group boards by subforum, then category.
 o SMF 2.0.x: Modified Edit Membergroup in order to group boards by subforum, then category.

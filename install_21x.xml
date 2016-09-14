@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.26</version>
+<version>1.27</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source File Edits														-->
@@ -1785,7 +1785,7 @@ function EditBoard()
 	<operation>
 		<search position="replace"><![CDATA['id_post_group' => 4,]]></search>
 		<add><![CDATA['id_group' => !empty($modSettings['primary_membergroup']) ? $modSettings['primary_membergroup'] : '0',
-	'id_post_group' => 4,]]></add>
+		'id_post_group' => 4,]]></add>
 	</operation>
 </file>	
 <file name="$sourcedir/Subs-MessageIndex.php">
