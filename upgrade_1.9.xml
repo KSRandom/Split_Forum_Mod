@@ -1,0 +1,132 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.9</version>
+
+<!-------------------------------------------------------------------------->
+<!-- Fix for some undefined errors in EditBoard (ManageBoards.php)        -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[$context['children'] = $boards[$_REQUEST['boardid']]['tree']['children'];
+		foreach ($context['board_order'] as $board)
+			if ($board['is_child'] == false && $board['selected'] == false)
+				$context['can_move_children'] = true;]]></search>
+		<add><![CDATA[if (isset($boards[$_REQUEST['boardid']]['tree']['children']))
+			$context['children'] = $boards[$_REQUEST['boardid']]['tree']['children'];
+		else
+			$context['children'] = array();
+		foreach ($context['board_order'] as $cat => $list)
+			foreach ($list as $board)
+				if ($board['is_child'] == false && $board['selected'] == false)
+					$context['can_move_children'] = true;]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Fix for the Manage Boards UI so that board order can be changed      -->
+<!-------------------------------------------------------------------------->
+<file name="$themedir/ManageBoards.template.php">
+	<operation>
+		<search position="replace"><![CDATA[<dt id="cat_txt', $cat, '"', ($cat <> $_REQUEST['cat'] ? ' style="display: none;"' : '') . '>
+							<strong>', $txt['order'], ':</strong>
+						</dt>
+						<dd id="cat_opt', $cat, '"', ($cat <> $_REQUEST['cat'] ? ' style="display: none;"' : '') . '>';]]></search>
+		<add><![CDATA[<dt id="cat_txt', $cat, '"', ($cat != $context['board']['category'] ? ' style="display: none;"' : '') . '>
+							<strong>', $txt['order'], ':</strong>
+						</dt>
+						<dd id="cat_opt', $cat, '"', ($cat != $context['board']['category'] ? ' style="display: none;"' : '') . '>';]]></add>
+	</operation>
+	
+<!-------------------------------------------------------------------------->
+<!-- Fix for Manage Categories UI so that category order can be changed   -->
+<!-------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[// If this isn't the only category, let the user choose where this category should be positioned down the board index.
+	if (count($context['category_order']) > 1)
+	{
+		echo '
+						<dt><strong>', $txt['order'], ':</strong></dt>
+						<dd>';
+		foreach ($subforum_tree as $id => $subforum)
+		{
+			echo '
+							<select name="cat_order' . $subforum['forumid'] . '" id="cat_order' . $subforum['forumid'] . '"' . ($subforum['forumid'] <> $_REQUEST['sub'] ? 'style="display: none;"' : '') . '>';
+
+			// Print every existing category into a select box.
+			foreach ($context['category_order'][$subforum['forumid']] as $order)
+				echo '
+									<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
+			echo '
+							</select>';
+		}
+		echo '
+						</dd>';
+	}]]></search>
+		<add><![CDATA[// If this isn't the only category, let the user choose where this category should be positioned down the board index.
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		if (isset($context['category_order'][$subforum['forumid']]) && count($context['category_order'][$subforum['forumid']]) > 1)
+		{
+			echo '
+						<dt id="cat_txt' . $subforum['forumid'] . '">
+							<strong>', $txt['order'], ':</strong>
+						</dt>
+						<dd id="cat_ord' . $subforum['forumid'] . '">
+							<select name="cat_order' . $subforum['forumid'] . '" id="cat_order' . $subforum['forumid'] . '"' . ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : '') . '>';
+
+			// Print every existing category into a select box.
+			foreach ($context['category_order'][$subforum['forumid']] as $order)
+				echo '
+									<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
+			echo '
+							</select>';
+		}
+		echo '
+						</dd>';
+	}]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("cat_order' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			';
+	echo '
+		}]]></search>
+		<add><![CDATA[function SubForumsCategories(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("cat_txt' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("cat_ord' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			';
+	echo '
+		}]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<select name="forum_id" onchange="expandTabs(this.options[this.selectedIndex].value); return false;">';]]></search>
+		<add><![CDATA[<select name="forum_id" onchange="SubForumsCategories(this.options[this.selectedIndex].value); return false;">';]]></add>
+	</operation>
+	
+<!-------------------------------------------------------------------------->
+<!-- Fix for undefined variables in Confirm Delete Category UI            -->
+<!-------------------------------------------------------------------------->
+	<operation>
+		<search position="before"><![CDATA[<form action="', $scripturl, '?action=admin;area=manageboards;sa=cat2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">
+			<input type="hidden" name="cat" value="', $context['category']['id'], '" />]]></search>
+		<add><![CDATA[
+			<input type="hidden" name="forumid" value="', $context['category']['forumid'], '" />]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach ($context['category_order'] as $cat)]]></search>
+		<add><![CDATA[foreach ($context['category_order'][$_POST['forumid']] as $cat)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<label for="delete_action1"><input type="radio" id="delete_action1" name="delete_action" value="1" class="input_radio"', count($context['category_order']) == 1 ? ' disabled="disabled"' : '', ' />', $txt['mboards_delete_option2'], '</label>:]]></search>
+		<add><![CDATA[<label for="delete_action1"><input type="radio" id="delete_action1" name="delete_action" value="1" class="input_radio"', count($context['category_order'][$_POST['forumid']]) == 1 ? ' disabled="disabled"' : '', ' />', $txt['mboards_delete_option2'], '</label>:]]></add>
+	</operation>
+</file>
+</modification>

@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.8[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.9[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -54,10 +54,20 @@ This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x 
 [url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  Earlier versions of SimplePortal have not been tested for compatibility with this mod.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.2 thru v1.7[/b] to [b]v1.8[/b].
+Upgrade is possible from [b]v1.2 thru v1.8[/b] to [b]v1.9[/b].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.9 - September 5th, 2014[/u][/b]
+o Added creation of [b].htaccess[/b] to redirect subdirectory requests to primary forum.
+o Fixed some undefined errors found in [b]ManageBoards.php[/b].
+o Fixed some undefined errors found in [b]ManageSplitForums.php[/b].
+o Fixed bugs in Manage Category UI so that category order can be changed again.
+o Fixed bugs in Delete Category UI so that categories to move to are selectable again.
+o Fixed bugs in Manage Board UI so that board order can be changed again if creating new board.
+o Fixed bug within rewritten SimplePortal block copying code because fields were omitted.
+o Minor compatibility fix within [b]upgrade_v1.4.xml[/b] for Pretty URL.  Functionality not changed.
+
 [b][u]v1.8 - August 24th, 2014[/u][/b]
 o Fixed some undefined errors found in [b]ManageSplitForums.php[/b].
 o Fixed issue with Manage Boards UI installed where copying blocks was selected by default.

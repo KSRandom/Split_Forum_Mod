@@ -411,8 +411,8 @@ function copy_sp_blocks($from, $forum)
 	// Retrieve & modify all blocks for specified forum:
 	$request = $smcFunc['db_query']('', '
 		SELECT 
-			b.id_block, b.label, b.type, b.col, b.row, b.permission_set, b.display,
-			b.display_custom, b.style, b.forum, p.variable, p.value
+			b.id_block, b.label, b.type, b.col, b.row, b.permission_set, b.groups_allowed, b.groups_denied, 
+			b.state, b.force_view, b.display, b.display_custom, b.style, b.forum, b.style, p.variable, p.value
 		FROM {db_prefix}sp_blocks AS b
 			LEFT JOIN {db_prefix}sp_parameters AS p ON (p.id_block = b.id_block)
 		WHERE b.forum = {int:from}
@@ -452,6 +452,10 @@ function copy_sp_blocks($from, $forum)
 			'col' => 'int',
 			'row' => 'int',
 			'permission_set' => 'int',
+			'groups_allowed' => 'text',
+			'groups_denied' => 'text',
+			'state' => 'int',
+			'force_view' => 'int',
 			'display' => 'text',
 			'display_custom' => 'text',
 			'style' => 'text',
@@ -517,4 +521,15 @@ function delete_sp_blocks($forum)
 	}
 }
 
+function relativePath($from, $to, $ps = DIRECTORY_SEPARATOR)
+{
+	$arFrom = explode($ps, rtrim($from, $ps));
+	$arTo = explode($ps, rtrim($to, $ps));
+	while(count($arFrom) && count($arTo) && ($arFrom[0] == $arTo[0]))
+	{
+		array_shift($arFrom);
+		array_shift($arTo);
+	}
+	return str_pad("", count($arFrom) * 3, '..' . $ps) . implode($ps, $arTo);
+}
 ?>

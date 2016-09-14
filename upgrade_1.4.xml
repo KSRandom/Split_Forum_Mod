@@ -175,13 +175,13 @@ function EditBoard()
 <!-------------------------------------------------------------------------->
 <file name="$sourcedir/Subs-Boards.php">
 	<operation>
-		<search position="replace"><![CDATA[global $sourcedir, $cat_tree, $boards, $boardList, $modSettings, $smcFunc;
-
-	// Get some basic information about all boards and categories.
+		<search position="before"><![CDATA[global $sourcedir, $cat_tree, $boards, $boardList, $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Get some basic information about all boards and categories.
 	getBoardTree();]]></search>
-		<add><![CDATA[global $sourcedir, $cat_tree, $boards, $boardList, $modSettings, $smcFunc, $forumid;
-
-	// Get some basic information about all boards and categories.
+		<add><![CDATA[// Get some basic information about all boards and categories.
 	getBoardTree( ($forumid == 0 ? -1 : $forumid) );]]></add>
 	</operation>
 	<operation>

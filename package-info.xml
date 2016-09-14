@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.8</version>
+	<version>1.9</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -17,6 +17,7 @@
 		<modification>upgrade_1.6.xml</modification>
 		<modification>upgrade_1.7.xml</modification>
 		<modification>upgrade_1.8.xml</modification>
+		<modification>upgrade_1.9.xml</modification>
 		<modification>language_english.xml</modification>
 		<modification>language_english-utf8.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
@@ -30,6 +31,7 @@
 	</install>
 	<uninstall for="2.0 - 2.0.99">
 		<database>db_uninstall.php</database>
+		<modification reverse="true">upgrade_1.9.xml</modification>
 		<modification reverse="true">upgrade_1.8.xml</modification>
 		<modification reverse="true">upgrade_1.7.xml</modification>
 		<modification reverse="true">upgrade_1.6.xml</modification>
@@ -60,6 +62,7 @@
 		<modification>upgrade_1.6.xml</modification>
 		<modification>upgrade_1.7.xml</modification>
 		<modification>upgrade_1.8.xml</modification>
+		<modification>upgrade_1.9.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english-utf8.php" destination="$boarddir/Themes/default/languages" />
@@ -75,6 +78,7 @@
 		<modification>upgrade_1.6.xml</modification>
 		<modification>upgrade_1.7.xml</modification>
 		<modification>upgrade_1.8.xml</modification>
+		<modification>upgrade_1.9.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
@@ -88,6 +92,7 @@
 		<modification>upgrade_1.6.xml</modification>
 		<modification>upgrade_1.7.xml</modification>
 		<modification>upgrade_1.8.xml</modification>
+		<modification>upgrade_1.9.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
@@ -100,6 +105,7 @@
 		<modification>upgrade_1.6.xml</modification>
 		<modification>upgrade_1.7.xml</modification>
 		<modification>upgrade_1.8.xml</modification>
+		<modification>upgrade_1.9.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
@@ -109,6 +115,7 @@
 		<database>db_upgrade_1.7_only.php</database>
 		<modification>upgrade_1.7.xml</modification>
 		<modification>upgrade_1.8.xml</modification>
+		<modification>upgrade_1.9.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
@@ -116,6 +123,12 @@
 	</upgrade>
 	<upgrade from="1.7">
 		<modification>upgrade_1.8.xml</modification>
+		<modification>upgrade_1.9.xml</modification>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+	</upgrade>
+	<upgrade from="1.8">
+		<modification>upgrade_1.9.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>

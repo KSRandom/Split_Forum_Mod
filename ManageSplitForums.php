@@ -135,7 +135,7 @@ Function EditSubForum($sub)
 		$modSettings['subforum_modify_' . $var] = $val;
 
 	// Populate everything needed for Simple Portal support:
-	if ($context['sp_blocks_enabled'])
+	if (isset($context['sp_blocks_enabled']) && $context['sp_blocks_enabled'])
 	{
 		$options = array(-1 => $txt['subforum_modify_sp_blocks_nothing']);
 		foreach ($subforum_tree as $subforum)
@@ -188,7 +188,7 @@ function SaveSubForum($sub)
 	$arr['favicon'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_favicon']) ?  $_POST['subforum_modify_favicon']  : '') );
 	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary']) ? $_POST['subforum_modify_primary'] : '');
 	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : 0);
-	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : '')))  : $boarddir);
+	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('/', '\\', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : '')))) : $boarddir);
 	$arr['sp_portal'] = (isset($_POST['subforum_modify_sp_portal']) ? (int) $_POST['subforum_modify_sp_portal'] : 0);
 	$arr['sp_standalone'] = (isset($_POST['subforum_modify_sp_standalone']) ? $_POST['subforum_modify_sp_standalone'] : '');
 
@@ -236,15 +236,24 @@ function SaveSubForum($sub)
 		copy_sp_blocks($_POST['subforum_modify_sp_blocks'], $arr['forumid']);
 	}
 
-	// Create the folder and "index.php" in the new forum folder if necessary:
-	@mkdir($arr['forumdir']);
- 	if (!file_exists($arr['forumdir'] . '/index.php'))
- 	{
+	// Do this for all subforums, but NOT the primary forum!
+	if ($arr['forumid'] <> 0)
+	{
+		@mkdir($arr['forumdir']);
 		if (is_dir($arr['forumdir']))
 		{
+			// Create the new forum folder and write "index.php" for the subforum:
 			if ($handle = fopen($arr['forumdir'] . '/index.php', 'w'))
 			{
 				fwrite($handle, "<" . "?php" . "\n" . "require_once('" . $boarddir . "/index.php');" . "\n" . "?" . ">");
+				fclose($handle);
+			}
+
+			// Write out the new ".htaccess" file for the subforum:
+			$path = relativePath($arr['forumdir'], $boarddir);
+			if ($handle = fopen($arr['forumdir'] . '/.htaccess', 'w'))
+			{
+				fwrite($handle, "Options +FollowSymlinks\nRewriteEngine on\nRewriteRule (.*)/(.*) " . $path . "/$1/$2");
 				fclose($handle);
 			}
 		}
