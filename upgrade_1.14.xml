@@ -1,0 +1,451 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.14</version>
+
+<!---------------------------------------------------------------------------->
+<!-- Removal of all changes made to Admin.php, changes now in hook function	-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/Admin.php">
+	<operation>
+		<search position="replace"><![CDATA[loadTemplate('Admin', array('admin', 'splitforum'));]]></search>
+		<add><![CDATA[loadTemplate('Admin', 'admin');]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Subforum means no package manager and server settings access
+	if ($forumid <> 0) 
+	{
+		unset($admin_areas['forum']['areas']['packages']);
+		unset($admin_areas['layout']['areas']['subforums']['subsections']['newsub']);
+		unset($admin_areas['layout']['areas']['subforums']['subsections']['settings']);
+		unset($admin_areas['config']['areas']['serversettings']);
+	}
+	
+	// Any files to include for administration?]]></search>
+		<add><![CDATA[// Any files to include for administration?]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir, $forumid]]></search>
+		<add><![CDATA[global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$context['req_forumid'] = (int) (empty($_REQUEST['sub']) ? $forumid : $_REQUEST['sub']);
+	
+	// Load the language and templates....
+	loadLanguage('ManageSplitForums');]]></search>
+		<add><![CDATA[// Load the language and templates....]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['areas' => array(
+				'subforums' => array(
+					'label' => ($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list']),
+					'file' => 'ManageSplitForums.php',
+					'function' => 'ManageSplitForums',
+					'icon' => 'server.gif',
+					'subsections' => array(
+						'main' => array($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list'], 'admin_forum'),
+						'newsub' => array($txt['subforums_list_add'], 'admin_forum'),
+						'settings' => array($txt['settings'], 'admin_forum'),
+					),
+				),]]></search>
+		<add><![CDATA['areas' => array(]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA['add' => array($txt['sp-adminBlockAddName'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=add;sub=' . $context['req_forumid']),
+						'header' => array($txt['sp-positionHeader'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=header;sub=' . $context['req_forumid']),
+						'left' => array($txt['sp-positionLeft'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=left;sub=' . $context['req_forumid']),
+						'top' => array($txt['sp-positionTop'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=top;sub=' . $context['req_forumid']),
+						'bottom' => array($txt['sp-positionBottom'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=bottom;sub=' . $context['req_forumid']),
+						'right' => array($txt['sp-positionRight'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=right;sub=' . $context['req_forumid']),
+						'footer' => array($txt['sp-positionFooter'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=footer;sub=' . $context['req_forumid']),]]></search>
+		<add><![CDATA['add' => array($txt['sp-adminBlockAddName']),
+						'header' => array($txt['sp-positionHeader']),
+						'left' => array($txt['sp-positionLeft']),
+						'top' => array($txt['sp-positionTop']),
+						'bottom' => array($txt['sp-positionBottom']),
+						'right' => array($txt['sp-positionRight']),
+						'footer' => array($txt['sp-positionFooter']),]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Seperation of News per SubForum (Load.php)								-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/Subs.php">
+	<operation>
+		<search position="replace"><![CDATA[global $user_settings, $smcFunc;]]></search>
+		<add><![CDATA[global $user_settings, $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$context['news_lines'] = explode("\n", str_replace("\r", '', trim(addslashes($modSettings['news']))));]]></search>
+		<add><![CDATA[$tmp = (empty($forumid) ? '' : $forumid);
+	$context['news_lines'] = explode("\n", str_replace("\r", '', trim(addslashes($modSettings['news' . $tmp]))));]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageNews.php">
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $modSettings, $context, $sourcedir, $user_info;]]></search>
+		<add><![CDATA[global $txt, $modSettings, $context, $sourcedir, $user_info, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[require_once($sourcedir . '/Subs-Post.php');]]></search>
+		<add><![CDATA[require_once($sourcedir . '/Subs-Post.php');
+		$tmp = (empty($forumid) ? '' : $forumid);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$temp_news = explode("\n", $modSettings['news']);]]></search>
+		<add><![CDATA[$temp_news = explode("\n", $modSettings['news' . $tmp]);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[updateSettings(array('news' => implode("\n", $temp_news)));]]></search>
+		<add><![CDATA[updateSettings(array('news' . $tmp => implode("\n", $temp_news)));]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[updateSettings(array('news' => implode("\n", $_POST['news'])));]]></search>
+		<add><![CDATA[updateSettings(array('news' . $tmp => implode("\n", $_POST['news'])));]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach (explode("\n", $modSettings['news']) as $id => $line)]]></search>
+		<add><![CDATA[foreach (explode("\n", $modSettings['news' . $tmp]) as $id => $line)]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Removal of "subforums" action from the forum (index.php)				-->
+<!---------------------------------------------------------------------------->
+<file name="$boarddir/index.php">
+	<operation>
+		<search position="replace"><![CDATA['suggest' => array('Subs-Editor.php', 'AutoSuggestHandler'),
+		'subforums' => array('ManageSplitForums.php', 'ManageSplitForums'),]]></search>
+		<add><![CDATA['suggest' => array('Subs-Editor.php', 'AutoSuggestHandler'),]]></add>
+	</operation>
+
+<!---------------------------------------------------------------------------->
+<!-- Action for Global unread replies (index.php & Recent.php)				-->
+<!---------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA['unread' => array('Recent.php', 'UnreadTopics'),]]></search>
+		<add><![CDATA['unread' => array('Recent.php', 'UnreadTopics'),
+		'unreadglobal' => array('Recent.php', 'UnreadTopics'),]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Recent.php">
+	<operation>
+		<search position="replace"><![CDATA[AND b.id_board NOT IN ({array_int:boards})
+				AND c.forumid = {int:forumid}]]></search>
+		<add><![CDATA[AND b.id_board NOT IN ({array_int:boards})' . ($_REQUEST['action'] == 'unreadglobal' ? '' : '
+				AND c.forumid = {int:forumid}') . ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND b.id_board IN ({array_int:board_list})
+				AND c.forumid = {int:forumid}',]]></search>
+		<add><![CDATA[AND b.id_board IN ({array_int:board_list})' . ($_REQUEST['action'] == 'unreadglobal' ? '' : '
+				AND c.forumid = {int:forumid}'),]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND b.id_cat IN ({array_int:id_cat})
+				AND c.forumid = {int:forumid}',]]></search>
+		<add><![CDATA[AND b.id_cat IN ({array_int:id_cat})' . ($_REQUEST['action'] == 'unreadglobal' ? '' : '
+				AND c.forumid = {int:forumid}'),]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND b.id_board != {int:recycle_board}' : '').
+				' AND c.forumid = {int:forumid}',]]></search>
+		<add><![CDATA[AND b.id_board != {int:recycle_board}' : '') . ($_REQUEST['action'] == 'unreadglobal' ? '' : '
+				AND c.forumid = {int:forumid}'),]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$txt['unread_topics_visit_none'] = strtr($txt['unread_topics_visit_none'], array('?action=unread;all' => '?action=unread;all' . sprintf($context['querystring_board_limits'], 0) . $context['querystring_sort_limits']));]]></search>
+		<add><![CDATA[$txt['unread_topics_visit_none'] = strtr($txt['unread_topics_visit_none'], array('?action=unread;all' => '?action=' . ($_REQUEST['action'] == 'unreadglobal' ? 'unreadglobal' : 'unread') . ';all' . sprintf($context['querystring_board_limits'], 0) . $context['querystring_sort_limits']));]]></add>
+	</operation>
+
+<!---------------------------------------------------------------------------->
+<!-- Indentation fixes (Recent.php)											-->
+<!---------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[AND m.approved = {int:is_approved}
+			AND c.forumid = {int:forumid}]]></search>
+		<add><![CDATA[AND m.approved = {int:is_approved}
+					AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['limit' => 10,
+			'forumid' => $forumid,]]></search>
+		<add><![CDATA['limit' => 10,
+					'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Seperation of Calendar's per SubForum									-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/Display.php">
+	<operation>
+		<search position="replace"><![CDATA[global $scripturl, $txt, $modSettings, $context, $settings;]]></search>
+		<add><![CDATA[global $scripturl, $txt, $modSettings, $context, $settings, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[FROM {db_prefix}calendar AS cal
+				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = cal.id_member)
+			WHERE cal.id_topic = {int:current_topic}
+			ORDER BY start_date',
+			array(
+				'current_topic' => $topic,]]></search>
+		<add><![CDATA[FROM {db_prefix}calendar AS cal
+				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = cal.id_member)
+			WHERE cal.id_topic = {int:current_topic}
+				AND cal.forumid = {int:forumid}
+			ORDER BY start_date',
+			array(
+				'current_topic' => $topic,
+				'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Post.php">
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $scripturl, $topic, $modSettings, $board;]]></search>
+		<add><![CDATA[global $txt, $scripturl, $topic, $modSettings, $board, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Get the current event information.
+			$request = $smcFunc['db_query']('', '
+				SELECT
+					id_member, title, MONTH(start_date) AS month, DAYOFMONTH(start_date) AS day,
+					YEAR(start_date) AS year, (TO_DAYS(end_date) - TO_DAYS(start_date)) AS span
+				FROM {db_prefix}calendar
+				WHERE id_event = {int:id_event}
+				LIMIT 1',
+				array(
+					'id_event' => $context['event']['id'],]]></search>
+		<add><![CDATA[// Get the current event information.
+			$request = $smcFunc['db_query']('', '
+				SELECT
+					id_member, title, MONTH(start_date) AS month, DAYOFMONTH(start_date) AS day,
+					YEAR(start_date) AS year, (TO_DAYS(end_date) - TO_DAYS(start_date)) AS span
+				FROM {db_prefix}calendar
+				WHERE id_event = {int:id_event}
+					AND forumid = {int:forumid}
+				LIMIT 1',
+				array(
+					'id_event' => $context['event']['id'],
+					'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $user_info, $board_info, $options, $smcFunc;]]></search>
+		<add><![CDATA[global $user_info, $board_info, $options, $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Get the event's poster.
+			$request = $smcFunc['db_query']('', '
+				SELECT id_member
+				FROM {db_prefix}calendar
+				WHERE id_event = {int:id_event}',
+				array(
+					'id_event' => $_REQUEST['eventid'],]]></search>
+		<add><![CDATA[// Get the event's poster.
+			$request = $smcFunc['db_query']('', '
+				SELECT id_member
+				FROM {db_prefix}calendar
+				WHERE id_event = {int:id_event}
+					AND forumid = {int:forumid}',
+				array(
+					'id_event' => $_REQUEST['eventid'],
+					'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Delete it?
+		if (isset($_REQUEST['deleteevent']))
+			$smcFunc['db_query']('', '
+				DELETE FROM {db_prefix}calendar
+				WHERE id_event = {int:id_event}',
+				array(
+					'id_event' => $_REQUEST['eventid'],]]></search>
+		<add><![CDATA[// Delete it?
+		if (isset($_REQUEST['deleteevent']))
+			$smcFunc['db_query']('', '
+				DELETE FROM {db_prefix}calendar
+				WHERE id_event = {int:id_event}
+					AND forumid = {int:forumid}',
+				array(
+					'id_event' => $_REQUEST['eventid'],
+					'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[UPDATE {db_prefix}calendar
+				SET end_date = {date:end_date},
+					start_date = {date:start_date},
+					title = {string:title}
+				WHERE id_event = {int:id_event}',
+				array(]]></search>
+		<add><![CDATA[UPDATE {db_prefix}calendar
+				SET end_date = {date:end_date},
+					start_date = {date:start_date},
+					title = {string:title}
+				WHERE id_event = {int:id_event}
+					AND forumid = {int:forumid}',
+				array(
+					'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/RemoveTopic.php">
+	<operation>
+		<search position="replace"><![CDATA[global $sourcedir, $modSettings, $smcFunc;]]></search>
+		<add><![CDATA[global $sourcedir, $modSettings, $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[DELETE FROM {db_prefix}calendar
+		WHERE id_topic IN ({array_int:topics})',
+		array(
+			'topics' => $topics,]]></search>
+		<add><![CDATA[DELETE FROM {db_prefix}calendar
+		WHERE id_topic IN ({array_int:topics})
+			AND forumid = {int:forumid}',
+		array(
+			'topics' => $topics,
+			'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/SplitTopics.php">
+	<operation>
+		<search position="replace"><![CDATA[global $smcFunc, $language, $modSettings;]]></search>
+		<add><![CDATA[global $smcFunc, $language, $modSettings, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[UPDATE {db_prefix}calendar
+		SET
+			id_topic = {int:id_topic},
+			id_board = {int:target_board}
+		WHERE id_topic IN ({array_int:deleted_topics})',
+		array(]]></search>
+		<add><![CDATA[UPDATE {db_prefix}calendar
+		SET
+			id_topic = {int:id_topic},
+			id_board = {int:target_board}
+		WHERE id_topic IN ({array_int:deleted_topics})
+			AND forumid = {int:forumid}',
+		array(
+			'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Boards.php">
+	<operation>
+		<search position="replace"><![CDATA[global $sourcedir, $boards, $smcFunc;]]></search>
+		<add><![CDATA[global $sourcedir, $boards, $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[DELETE FROM {db_prefix}calendar
+		WHERE id_board IN ({array_int:boards_to_remove})',
+		array(]]></search>
+		<add><![CDATA[DELETE FROM {db_prefix}calendar
+		WHERE id_board IN ({array_int:boards_to_remove})
+			AND forumid = {int:forumid}',
+		array(
+			'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Calendar.php">
+	<operation>
+		<search position="replace"><![CDATA[global $scripturl, $modSettings, $user_info, $smcFunc, $context;]]></search>
+		<add><![CDATA[global $scripturl, $modSettings, $user_info, $smcFunc, $context, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND (cal.id_board = {int:no_board_link} OR {query_wanna_see_board})' : ''),
+		array(]]></search>
+		<add><![CDATA[AND (cal.id_board = {int:no_board_link} OR {query_wanna_see_board})' : '') .'
+			AND cal.forumid = {int:forumid}',
+		array(
+			'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $smcFunc;
+
+	// A simple database query, how hard can that be?
+	$request = $smcFunc['db_query']('', '
+		SELECT id_member
+		FROM {db_prefix}calendar
+		WHERE id_event = {int:id_event}
+		LIMIT 1',
+		array(]]></search>
+		<add><![CDATA[global $smcFunc, $forumid;
+
+	// A simple database query, how hard can that be?
+	$request = $smcFunc['db_query']('', '
+		SELECT id_member
+		FROM {db_prefix}calendar
+		WHERE id_event = {int:id_event}
+			AND forumid = {int:forumid}
+		LIMIT 1',
+		array(
+			'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $modSettings, $smcFunc;]]></search>
+		<add><![CDATA[global $modSettings, $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['start_date' => 'date', 'end_date' => 'date',
+		),
+		array(
+			$eventOptions['board'], $eventOptions['topic'], $eventOptions['title'], $eventOptions['member'],
+			$eventOptions['start_date'], $eventOptions['end_date'],]]></search>
+		<add><![CDATA['start_date' => 'date', 'end_date' => 'date', 'forumid' => 'int',
+		),
+		array(
+			$eventOptions['board'], $eventOptions['topic'], $eventOptions['title'], $eventOptions['member'],
+			$eventOptions['start_date'], $eventOptions['end_date'], $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function modifyEvent($event_id, &$eventOptions)
+{
+	global $smcFunc;]]></search>
+		<add><![CDATA[function modifyEvent($event_id, &$eventOptions)
+{
+	global $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[id_topic = {int:id_topic}
+		WHERE id_event = {int:id_event}',
+		array(]]></search>
+		<add><![CDATA[id_topic = {int:id_topic}
+		WHERE id_event = {int:id_event}
+			AND forumid = {int:forumid}',
+		array(
+			'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $smcFunc;
+
+	$smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}calendar
+		WHERE id_event = {int:id_event}',
+		array(]]></search>
+		<add><![CDATA[global $smcFunc, $forumid;
+
+	$smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}calendar
+		WHERE id_event = {int:id_event}
+			AND forumid = {int:forumid}',
+		array(
+			'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function getEventProperties($event_id)
+{
+	global $smcFunc;]]></search>
+		<add><![CDATA[function getEventProperties($event_id)
+{
+	global $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = c.id_topic)
+		WHERE c.id_event = {int:id_event}',
+		array(]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = c.id_topic)
+		WHERE c.id_event = {int:id_event}
+			AND c.forumid = {int:forumid}',
+		array(
+			'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+</modification>

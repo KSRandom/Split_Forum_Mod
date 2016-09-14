@@ -13,7 +13,7 @@ elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then t
 db_extend('packages');
 require_once($sourcedir.'/Subs-Admin.php');
 
-// Insert forumid column into categories table to associate each category with a particular forum:
+// Insert forumid column into categories and calendar table to associate with a particular forum:
 $smcFunc['db_add_column'](
 	'{db_prefix}categories', 
 	array(
@@ -24,9 +24,19 @@ $smcFunc['db_add_column'](
 		'default' => 0
 	)
 );
+$smcFunc['db_add_column'](
+	'{db_prefix}calendar', 
+	array(
+		'name' => 'forumid', 
+		'size' => 4, 
+		'type' => 'int', 
+		'null' => false, 
+		'default' => 0
+	)
+);
 
 // If we have one or no subforums defined as an array, check the table (if it exists):
-if (count($subforum_tree) < 2)
+if (empty($subforum_tree))
 {
 	// Define the subforum_tree variable's default content:
 	$subforum_tree = array(
@@ -42,33 +52,7 @@ if (count($subforum_tree) < 2)
 			'subtheme' => 0,
 		),
 	);
-
-	// If the subforum table exists, get all the information from it:
-	$tblchk = $smcFunc['db_query']('', 'SHOW TABLES LIKE "' . $db_prefix . 'subforums"', array());
-	while ($row = $smcFunc['db_fetch_row']($tblchk))
-	{
-		// Gather information about all the subforums and put them in the $subforum_tree array:
-		$request = $smcFunc['db_query']('', '
-			SELECT *
-			FROM {db_prefix}subforums
-			ORDER BY forumid ASC',
-			array()
-		);
-		$subforum_tree = array();
-		while ($row = $smcFunc['db_fetch_assoc']($request))
-			$subforum_tree[$row['forumid']] = $row;
-		$smcFunc['db_free_result']($request);
-		
-		// Drop the subforum table from the database:
-		$smcFunc['db_query']('', '
-			DROP TABLE {db_prefix}subforums'
-		);
-	}
-	$smcFunc['db_free_result']($tblchk);
-
-	// Insert the current subforum information settings into the Settings.php file:
-	if (empty($subforum_tree))
-		updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));
+	updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));
 }
 
 // Rearrange the subforum tree array so that the forumid is also the array index:

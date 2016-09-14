@@ -44,6 +44,7 @@ $txt['subforum_modify_sp_blocks_nothing'] = '[ Do Nothing ]';
 $txt['subforum_modify_sp_blocks_default'] = '[ Use Default Blocks ]';
 $txt['subforum_modify_sp_blocks_remove'] = '[ Remove Blocks ]';
 $txt['subforum_modify_confirm'] = 'Are you sure you want to delete this SubForum?';
+$txt['subforum_modify_news'] = 'Copy News from Primary Forum?';
 
 $txt['subforum_server_url'] = 'Root webserver URL for new subforums';
 $txt['subforum_server_root'] = 'Root server path for new subforums';

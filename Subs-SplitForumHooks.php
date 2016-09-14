@@ -10,7 +10,7 @@ if (!defined('SMF'))
 	die('Hacking attempt...');
 
 /**********************************************************************************
-* Lazy Admin Menu hook
+* Split Forum top menu hook
 **********************************************************************************/
 function SplitForum_Menu_Buttons(&$areas)
 {

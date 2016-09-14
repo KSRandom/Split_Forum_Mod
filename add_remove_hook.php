@@ -11,6 +11,8 @@ if (SMF == 'SSI')
 $hook_functions = array(
 	'integrate_pre_include' => '$sourcedir/Subs-SplitForumHooks.php',
 	'integrate_menu_buttons' => 'SplitForum_Menu_Buttons',
+	'integrate_admin_include' => '$sourcedir/Subs-SplitForumAdminHooks.php',
+	'integrate_admin_areas' => 'SplitForum_Admin_Menu',
 );
 
 // Adding or removing them?

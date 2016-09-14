@@ -21,7 +21,7 @@ function ManageSplitForums()
 	require_once($sourcedir . '/Subs-Boards.php');
 	require_once($sourcedir . '/Subs-ManageSplitForums.php');
 	loadLanguage('Profile');
-	loadLanguage('ManageBoards+ManageSplitForums');
+	loadLanguage('ManageBoards');
 	loadTemplate('ManageSplitForums');
 
 	// Create the tabs for the template .
@@ -132,8 +132,11 @@ Function EditSubForum($sub)
 		array('text', 'subforum_modify_cookiename', 'size' => 40),
 		array('select', 'subforum_modify_primary', $primary),
 	);
+	if ($sub != 0 || $_REQUEST['sa'] == 'newsub')
+		$config_vars[] = array('check', 'subforum_modify_news');
 	foreach ($subforum_tree[$sub] as $var => $val)
 		$modSettings['subforum_modify_' . $var] = $val;
+	$modSettings['subforum_modify_news'] = ($_REQUEST['sa'] == 'newsub');
 
 	// Populate everything needed for Simple Portal support:
 	if (isset($context['sp_blocks_enabled']) && $context['sp_blocks_enabled'])
@@ -185,7 +188,8 @@ Function EditSubForum($sub)
 
 function SaveSubForum($sub)
 {
-	global $context, $sourcedir, $txt, $scripturl, $modSettings, $settings, $forumid, $subforum_tree, $smcFunc, $boarddir;
+	global $context, $sourcedir, $txt, $scripturl, $modSettings, $settings, $forumid;
+	global $modSettings, $subforum_tree, $smcFunc, $boarddir;
 
 	// Load the variables from the form:
 	checkSession();
@@ -285,7 +289,6 @@ function SaveSubForum($sub)
 			$path = relativePath($arr['forumdir'], $boarddir);
 			if (substr($path, -1) == '\\')
 				$path = substr($path, 0, strlen($path) - 1) . '/';
-			echo $path; exit;
 			if ($handle = fopen($arr['forumdir'] . '/.htaccess', 'w'))
 			{
 				fwrite($handle, "Options +FollowSymlinks\nRewriteEngine on\nRewriteRule (.*)/(.*) " . $path . "$1/$2");
@@ -293,6 +296,10 @@ function SaveSubForum($sub)
 				@chmod($arr['forumdir'] . '/.htaccess', 0755);
 			}
 		}
+		
+		// If requested, copy the news settings to the subforum:
+		if (!empty($_POST['subforum_modify_news']))
+			updateSettings(array('news' . $sub => $modSettings['news']));
 	}
 
 	// Let's call hook function(s) to handle subdomain addition:

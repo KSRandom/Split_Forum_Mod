@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.13[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.14[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -43,8 +43,6 @@ All recent posts, xml-based feeds, and other forum-related functionality works f
 o [b]integrate_subforum_subdomain[/b] - Hook for creating/deleting subdomains and/or domains
 
 [color=blue][b][size=12pt][u]To-Do List[/u][/size][/b][/color]
-o Each subforum has it's own news section.
-o An action permitting viewing of all recent posts/topics across all subforums....
 o Copy a category/board from one subforum to another
 o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
@@ -54,15 +52,23 @@ o Language settings restricted to members registered on a subforum
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x is not and will not be supported.
 
-[url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  Earlier versions of SimplePortal have not been tested for compatibility with this mod.
+[url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  Other versions of SimplePortal have not been tested for compatibility with this mod.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.2 and up[/b] to this version.
+Upgrade is possible from [b]v1.3[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.14 - October 15th, 2014[/u][/b]
+o Fixed database installer by removing the "gathering information from subforum table" code...
+o Converted admin menu changes into hook and removed changes from [b]Admin.php[/b]...
+o Modified news admin and loader code in order to create seperate news per subforum.
+o Added "unreadglobal" action to see unread topics from all subforums.
+o Removed "subforums" action because of multiple issues, including security issues.
+o Modified calendar system to allow seperate events per subforum.
+
 [b][u]v1.13 - October 12th, 2014[/u][/b]
-o Fixed database installer for older versions of this mod.
+o Fixed database installer by integrating multiple install scripts into one.
 o Fixed SimplePortal block copying function to correctly duplicate blocks.
 o Added ability to remove all defined blocks for a particular subforum.
 o Added ability to change the SubForums top menu title.  (Defaults now to "Sister Sites")
