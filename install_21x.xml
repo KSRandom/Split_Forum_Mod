@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.25</version>
+<version>1.26</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source File Edits														-->
@@ -2035,6 +2035,24 @@ function EditBoard()
 <!---------------------------------------------------------------------------->
 <!-- Template Edits															-->
 <!---------------------------------------------------------------------------->
+<file name="$themedir/index.template.php">
+	<operation>
+		<search position="before"><![CDATA[function template_html_above()
+{
+	global $context, $settings, $scripturl, $txt, $modSettings]]></search>
+		<add><![CDATA[, $favicon]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[
+</head>]]></search>
+		<add><![CDATA[';
+	if (!empty($favicon))
+		echo '<link rel="shortcut icon" href="'.$favicon.'" type="image/x-icon" />
+<link rel="icon" href="'.$favicon.'" type="image/x-icon" />';
+echo '
+]]></add>
+	</operation>
+</file>
 <file name="$themedir/ManageBoards.template.php">
 	<operation>
 		<search position="replace"><![CDATA[global $context, $settings, $scripturl, $txt, $modSettings;
@@ -2257,7 +2275,7 @@ function template_modify_category()
 		<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', $board['is_redirect'] ? ' redirect_board' : '', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;">
+		<search position="replace"><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $board['is_redirect'] ? ' redirect_board' : '', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;">
 						<span class="floatleft"><a', $board['move'] ? ' class="red"' : '', ' href="', $scripturl, '?board=', $board['id'], '.0">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? $recycle_board : '', $board['is_redirect'] ? $redirect_board : '', '</span>]]></search>
 		<add><![CDATA[<li', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? ' id="recycle_board"' : ' ', ' class="windowbg', $alternate ? '' : '2', $board['is_redirect'] ? ' redirect_board' : '', '" style="padding-' . ($context['right_to_left'] ? 'right' : 'left') . ': ', 5 + 30 * $board['child_level'], 'px;">
 						<span class="floatleft"><a', $board['move'] ? ' class="red"' : '', ' href="', $subforum_tree[$category['forumid']]['boardurl'], '?board=', $board['id'], '.0">', $board['name'], '</a>', !empty($modSettings['recycle_board']) && !empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] == $board['id'] ? $recycle_board : '', $board['is_redirect'] ? $redirect_board : '', '</span>]]></add>
@@ -2667,24 +2685,6 @@ function template_modify_category()
 	<operation>
 		<search position="replace"><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sa=add" method="post" accept-charset="', $context['character_set'], '">]]></search>
 		<add><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=add" method="post" accept-charset="', $context['character_set'], '">]]></add>
-	</operation>
-</file>
-<file name="$themedir/index.template.php">
-	<operation>
-		<search position="before"><![CDATA[function template_html_above()
-{
-	global $context, $settings, $scripturl, $txt, $modSettings]]></search>
-		<add><![CDATA[, $favicon;]]></add>
-	</operation>
-	<operation>
-		<search position="after"><![CDATA[
-</head>]]></search>
-		<add><![CDATA[';
-	if (!empty($favicon))
-		echo '<link rel="shortcut icon" href="'.$favicon.'" type="image/x-icon" />
-<link rel="icon" href="'.$favicon.'" type="image/x-icon" />';
-echo '
-]]></add>
 	</operation>
 </file>
 </modification>

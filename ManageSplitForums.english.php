@@ -71,4 +71,6 @@ $txt['no_pack_in_subforum'] = 'You cannot access the Packages page through a sub
 $txt['subforum_mod_update'] = 'Split Forum Mod version %s is available for download!';
 $txt['subforum_no_mod_update'] = 'Your install of Split Forum Mod is up to date!';
 
+$txt['subforum_no_categories'] = 'No Categories Defined';
+
 ?>

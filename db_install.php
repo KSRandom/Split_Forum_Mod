@@ -13,7 +13,7 @@ elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then t
 db_extend('packages');
 
 //==============================================================================
-// Insert column into categories and calendar table to associate with a subforum:
+// Insert column into the necessary tables to associate with a subforum:
 //==============================================================================
 $smcFunc['db_add_column'](
 	'{db_prefix}categories', 
@@ -35,9 +35,19 @@ $smcFunc['db_add_column'](
 		'default' => 0
 	)
 );
+$smcFunc['db_add_column'](
+	'{db_prefix}log_online', 
+	array(
+		'name' => 'forumid', 
+		'size' => 4, 
+		'type' => 'int', 
+		'null' => false, 
+		'default' => 0
+	)
+);
 
 //==============================================================================
-// Figure out where the attachment path(s) are:
+// If Simple Portal is installed, add support for subforums within the DB:
 //==============================================================================
 $tblchk = $smcFunc['db_query']('', 'show tables like "' . $db_prefix . 'sp_blocks"', array());
 while ($row = $smcFunc['db_fetch_row']($tblchk))

@@ -46,15 +46,15 @@ function get_membergroups()
 	$request = $smcFunc['db_query']('', '
 		SELECT group_name, id_group, min_posts
 		FROM {db_prefix}membergroups
-		WHERE id_group > {int:moderator_group} AND min_posts = -1
+		WHERE id_group > {int:moderator_group} 
+			AND min_posts = -1
 		ORDER BY id_group',
 		array(
 			'moderator_group' => 3,
 		)
 	);
 	while ($row = $smcFunc['db_fetch_assoc']($request))
-		if ($row['min_posts'] != -1)
-			$primary[$row['id_group']] = $row['group_name'];
+		$primary[$row['id_group']] = $row['group_name'];
 	$smcFunc['db_free_result']($request);
 	return $primary;
 }

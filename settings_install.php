@@ -85,8 +85,9 @@ foreach ($subforum_tree as $subforum)
 }
 
 if (SMF == 'SSI')
-   echo 'Congratulations! You have successfully installed this mod!';
+	echo 'Congratulations! You have successfully installed the settings for this mod!';
 
+/******************************************************************************/
 function relativePath($from, $to, $ps = DIRECTORY_SEPARATOR)
 {
 	$arFrom = explode($ps, rtrim($from, $ps));

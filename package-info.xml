@@ -5,12 +5,12 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.25</version>
+	<version>1.26</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
 		<code>add_remove_hooks.php</code>
-		<code>mod_install.php</code>
+		<code>settings_install.php</code>
 		<database>db_install.php</database>
 		<modification>install_20x.xml</modification>
 		<modification>language_english.xml</modification>
@@ -22,11 +22,11 @@
 		<require-file name="ManageSplitForums.template.php" destination="$boarddir/Themes/default" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="empty.png" destination="$imagesdir" />
-		<redirect timeout="5000" url="?action=admin;area=maintain;sa=routine;activity=cleancache" />
+		<redirect timeout="5000" url="?action=admin;area=subforums" />
 	</install>
 	<uninstall for="2.0 - 2.0.99">
 		<code>add_remove_hooks.php</code>
-		<code>mod_uninstall.php</code>
+		<code>settings_uninstall.php</code>
 		<modification reverse="true">install_20x.xml</modification>
 		<modification reverse="true">language_english.xml</modification>
 		<remove-file name="$sourcedir/ManageSplitForums.php" />
@@ -42,7 +42,7 @@
 	<install for="2.1 Beta 1 - 2.1.99">
 		<readme parsebbc="true">readme.txt</readme>
 		<code>add_remove_hooks.php</code>
-		<code>mod_install.php</code>
+		<code>settings_install.php</code>
 		<database>db_install.php</database>
 		<modification>install_21x.xml</modification>
 		<modification>language_english.xml</modification>
@@ -54,11 +54,11 @@
 		<require-file name="ManageSplitForums.template.php" destination="$boarddir/Themes/default" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="empty.png" destination="$imagesdir" />
-		<redirect timeout="5000" url="?action=admin;area=maintain;sa=routine;activity=cleancache" />
+		<redirect timeout="5000" url="?action=admin;area=subforums" />
 	</install>
-	<uninstall for="2.1 Beta 1 - 2.1.99">
+	<uninstall for="2.1 Beta 2 - 2.1.99">
 		<code>add_remove_hooks.php</code>
-		<code>mod_uninstall.php</code>
+		<code>settings_uninstall.php</code>
 		<modification reverse="true">install_21x.xml</modification>
 		<modification reverse="true">language_english.xml</modification>
 		<remove-file name="$sourcedir/ManageSplitForums.php" />
@@ -71,7 +71,7 @@
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
 
-	<upgrade from="1.24">
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
+	<upgrade for="2.0 - 2.0.99" from="1.25">
+		<modification>upgrade_20x_1.26.xml</modification>
 	</upgrade>
 </package-info>

@@ -1,4 +1,11 @@
-v1.25 - July 4th, 2015
+v1.26 - November 14th, 2015
+o SMF 2.0.x: Modified Add Membergroup in order to group boards by subforum, then category.
+o SMF 2.0.x: Modified Edit Membergroup in order to group boards by subforum, then category.
+o SMF 2.0.x: Modified Board Permissions UI in order to group boards by subforum, then category.
+o Fixed issue with primary membergroup per subforum setting not showing any membergroups.
+o Removed "db_uninstall.php" and renamed other files to reduce confusion.
+
+v1.25 - July 6th, 2015
 o Fixed code that made the assumption all subforums would start with [b][nobbc]http://[/nobbc][/b].
 
 v1.24 - June 25th, 2015

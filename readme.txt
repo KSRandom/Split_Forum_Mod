@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.25[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.26[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -42,7 +42,6 @@ All recent posts, xml-based feeds, and other forum-related functionality works f
 o [b]integrate_subforum_subdomain[/b] - Hook for creating/deleting subdomains and/or domains
 
 [color=blue][b][size=12pt][u]To-Do List[/u][/size][/b][/color]
-o Make final compatibility changes for use with [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards[/url] mod...
 o Copy a category/board from one subforum to another
 o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
