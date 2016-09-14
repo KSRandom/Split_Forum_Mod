@@ -4,12 +4,22 @@
 <id>Dougiefresh:Split_Forum</id>
 <version>1.27</version>
 
+<file name="$sourcedir/Logging.php">
+	<operation>
+		<search position="before"><![CDATA[global $user_info, $user_settings, $context, $modSettings, $settings, $topic, $board, $smcFunc, $sourcedir]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$serialized = $_GET + array('USER_AGENT' => $_SERVER['HTTP_USER_AGENT']);]]></search>
+		<add><![CDATA[$serialized = $_GET + array('USER_AGENT' => $_SERVER['HTTP_USER_AGENT'], 'forumid' => $forumid);]]></add>
+	</operation>
+</file>
 <file name="$sourcedir/ManageMembergroups.php">
 	<operation>
 		<search position="before"><![CDATA[function AddMembergroup()
 {
 	global $context, $txt, $sourcedir, $modSettings, $smcFunc]]></search>
-		<add><![CDATA[, $forumid]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[SELECT b.id_cat, c.name AS cat_name, b.id_board, b.name, b.child_level
@@ -56,6 +66,33 @@
 
 		// Set this board up, and let the template know when it's a child.  (indent them..)
 		$context['categories'][$row['forumid']][$row['id_cat']]['boards'][$row['id_board']] = array(]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach ($context['categories'] as $category)
+	{
+		$temp_boards[] = array(
+			'name' => $category['name'],
+			'child_ids' => array_keys($category['boards'])
+		);
+		$temp_boards = array_merge($temp_boards, array_values($category['boards']));
+
+		// Include a list of boards per category for easy toggling.
+		$context['categories'][$category['id']]['child_ids'] = array_keys($category['boards']);
+	}]]></search>
+		<add><![CDATA[foreach ($context['categories'] as $id => $subforum)
+	{
+		foreach ($subforum as $category)
+		{
+			$temp_boards[] = array(
+				'name' => $category['name'],
+				'child_ids' => array_keys($category['boards'])
+			);
+			$temp_boards = array_merge($temp_boards, array_values($category['boards']));
+
+			// Include a list of boards per category for easy toggling.
+			$context['categories'][$id][$category['id']]['child_ids'] = array_keys($category['boards']);
+		}
+	}]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[function EditMembergroup()
@@ -126,8 +163,51 @@
 			// Set this board up, and let the template know when it's a child.  (indent them..)
 			$context['categories'][$row['forumid']][$row['id_cat']]['boards'][$row['id_board']] = array(]]></add>
 	</operation>
+	<operation>
+		<search position="before"><![CDATA[function AddMembergroup()
+{
+	global $context, $txt, $sourcedir, $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Now, let's sort the list of categories into the boards for templates that like that.
+		$temp_boards = array();
+		foreach ($context['categories'] as $category)
+		{
+			$temp_boards[] = array(
+				'name' => $category['name'],
+				'child_ids' => array_keys($category['boards'])
+			);
+			$temp_boards = array_merge($temp_boards, array_values($category['boards']));
+
+			// Include a list of boards per category for easy toggling.
+			$context['categories'][$category['id']]['child_ids'] = array_keys($category['boards']);
+		}]]></search>
+		<add><![CDATA[// Now, let's sort the list of categories into the boards for templates that like that.
+		$temp_boards = array();
+		foreach ($context['categories'] as $id => $subforum)
+		{
+			foreach ($subforum as $category)
+			{
+				$temp_boards[] = array(
+					'name' => $category['name'],
+					'child_ids' => array_keys($category['boards'])
+				);
+				$temp_boards = array_merge($temp_boards, array_values($category['boards']));
+
+				// Include a list of boards per category for easy toggling.
+				$context['categories'][$id][$category['id']]['child_ids'] = array_keys($category['boards']);
+			}
+		]]></add>
+	</operation>
 </file>
 <file name="$sourcedir/ManagePermissions.php">
+	<operation>
+		<search position="before"><![CDATA[function PermissionByBoard()
+{
+	global $context, $txt, $smcFunc, $sourcedir, $cat_tree, $boardList, $boards]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
 	<operation>
 		<search position="before"><![CDATA[global $context, $txt, $smcFunc, $sourcedir, $cat_tree, $boardList, $boards]]></search>
 		<add><![CDATA[, $forumid]]></add>
@@ -146,6 +226,30 @@
 		<add><![CDATA[$context['categories'][$id][$catid]['boards'][$boardid] = array(]]></add>
 	</operation>
 </file>
+<file name="$sourcedir/Who.php">
+	<operation>
+		<search position="before"><![CDATA[global $context, $scripturl, $txt, $modSettings, $memberContext, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$conditions = array();]]></search>
+		<add><![CDATA[
+	if (!empty($modSettings['subforum_settings_show_who_in_subforum']))
+		$conditions[] = 'INSTR(lo.url, {string:in_url_string}) > 0';]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[WHERE ' . implode(' AND ', $conditions) : ''),
+		array(]]></search>
+		<add><![CDATA[
+			'in_url_string' => 's:7:"forumid";i:' . ((int) $forumid) . ';',]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[LIMIT {int:offset}, {int:limit}',
+		array(]]></search>
+		<add><![CDATA[
+			'in_url_string' => 's:7:"forumid";i:' . ((int) $forumid) . ';',]]></add>
+	</operation>
+</file>
 <file name="$themedir/ManageMembergroups.template.php">
 	<operation>
 		<search position="before"><![CDATA[function template_new_group()
@@ -155,44 +259,39 @@
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[echo '
-						<dt>
-							<strong>', $txt['membergroups_new_board'], ':</strong>', $context['post_group'] ? '<br />
-							<span class="smalltext" style="font-weight: normal">' . $txt['membergroups_new_board_post_groups'] . '</span>' : '', '
-						</dt>
-						<dd>
-							<fieldset id="visible_boards">
-								<legend>', $txt['membergroups_new_board_desc'], '</legend>';
-	foreach ($context['boards'] as $board)
-		echo '
-								<div style="margin-left: ', $board['child_level'], 'em;"><input type="checkbox" name="boardaccess[]" id="boardaccess_', $board['id'], '" value="', $board['id'], '" ', $board['selected'] ? ' checked="checked" disabled="disabled"' : '', ' class="input_check" /> <label for="boardaccess_', $board['id'], '">', $board['name'], '</label></div>';
+					<dt>
+						<strong>', $txt['membergroups_new_board'], ':</strong>', $context['post_group'] ? '<br>
+						<span class="smalltext" style="font-weight: normal">' . $txt['membergroups_new_board_post_groups'] . '</span>' : '', '
+					</dt>
+					<dd>';
+
+	template_add_edit_group_boards_list(false);
 
 	echo '
-								<br />
-								<input type="checkbox" id="checkall_check" class="input_check" onclick="invertAll(this, this.form, \'boardaccess\');" /> <label for="checkall_check"><em>', $txt['check_all'], '</em></label>
-							</fieldset>
-						</dd>
-					</dl>]]></search>
+					</dd>
+				</dl>]]></search>
 		<add><![CDATA[// Display the subforums as a tab at the top of the screen:
-	if (!empty($context['boards']))
+	if (!empty($context['categories']))
 	{
-		$flagged = array( 0 => false );
+		echo '
+				</dl>';
+		$flagged = array();
 		if (count($subforum_tree) > 1)
 		{
 			echo '
-					<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-						function expandTabs(forum)
-						{
-							';
+				<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+					function expandTabs(forum)
+					{
+						';
 			foreach ($subforum_tree as $subforum => $info)
 				echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
-							document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
-							';
+						document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+						';
 			echo '
-						}
-					// ]]]]><![CDATA[></script>
-					</dl>
-					<fieldset id="visible_boards">
-						<legend>', $txt['membergroups_new_board_desc'], '</legend>
+					}
+				// ]]]]><![CDATA[></script>
+				<fieldset id="visible_boards">
+					<legend>', $txt['membergroups_new_board_desc'], '</legend>
 					<div id="tabContainer">
 						<div class="tabs">
 							<ul>';
@@ -200,7 +299,6 @@
 			{
 				echo '
 								<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
-				$flagged[$id] = false;
 			}
 			echo '
 							</ul>
@@ -208,28 +306,22 @@
 					</div>
 					<hr class="hrcolor" />';
 		}
-		foreach ($context['boards'] as $id => $categories)
+		$context_categories = $context['categories'];
+		foreach ($context_categories as $id => $categories)
 		{
 			echo '
 					<div id="subforum' . $id . '"' . (!empty($id) ? ' style="display: none;"' : '') . '>
 						<dl class="settings">
 							<dt>
-								<strong>', $txt['membergroups_new_board'], ':</strong>', $context['post_group'] ? '<br />
+								<strong>', $txt['membergroups_new_board'], ':</strong>', $context['post_group'] ? '<br>
 								<span class="smalltext" style="font-weight: normal">' . $txt['membergroups_new_board_post_groups'] . '</span>' : '', '
 							</dt>
-							<dd>' . (count($subforum_tree) == 1 ? '
-								<fieldset id="visible_boards" style="width: 95%;">
-									<legend>' . $txt['membergroups_new_board_desc'] . '</legend>' : '');
-			foreach ($categories as $category)
-			{
-				echo '
-									<strong>' . $category['cat_name'] . '</strong>';
-				foreach ($category['boards'] as $board)
-					echo '
-									<div style="margin-left: ', $board['child_level'], 'em;"><input type="checkbox" name="boardaccess[]" id="boardaccess_', $board['id'], '" value="', $board['id'], '" ', $board['selected'] ? ' checked="checked" disabled="disabled"' : '', ' class="input_check" /> <label for="boardaccess_', $board['id'], '">', $board['name'], '</label></div>';
-			}
+							<dd>';
+
+			$context['categories'] = $categories;
+			template_add_edit_group_boards_list(false);
+
 			echo '
-								' . (count($subforum_tree) == 1 ? '</fieldset>' : '') . '
 							</dd>
 						</dl>
 					</div>';
@@ -237,7 +329,7 @@
 		}
 		foreach ($subforum_tree as $id => $section)
 		{
-			if ($flagged[$id] === false)
+			if (empty($flagged[$id]))
 				echo '
 					<div id="subforum' . $id . '"' . (!empty($id) ? ' style="display: none;"' : '') . '>
 						<dl class="settings">
@@ -252,11 +344,6 @@
 					</div>';
 		}
 		echo '
-					<dl class="settings">
-						<dd>
-							<input type="checkbox" id="checkall_check" class="input_check" onclick="invertAll(this, this.form, \'boardaccess\');" /> <label for="checkall_check"><em>', $txt['check_all'], '</em></label>
-						</dd>
-					</dl>
 					' . (count($subforum_tree) > 1 ? '</fieldset>' : '');
 	}
 	echo ']]></add>
@@ -268,54 +355,45 @@
 		<add><![CDATA[, $subforum_tree]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[if (!empty($context['boards']))
+		<search position="replace"><![CDATA[if (!empty($context['categories']))
 	{
 		echo '
-						<dt>
-							<strong>', $txt['membergroups_new_board'], ':</strong>', $context['group']['is_post_group'] ? '<br />
-							<span class="smalltext">' . $txt['membergroups_new_board_post_groups'] . '</span>' : '', '
-						</dt>
-						<dd>
-							<fieldset id="visible_boards" style="width: 95%;">
-								<legend><a href="javascript:void(0);" onclick="document.getElementById(\'visible_boards\').style.display = \'none\';document.getElementById(\'visible_boards_link\').style.display = \'block\'; return false;">', $txt['membergroups_new_board_desc'], '</a></legend>';
-		foreach ($context['boards'] as $board)
-			echo '
-								<div style="margin-left: ', $board['child_level'], 'em;"><input type="checkbox" name="boardaccess[]" id="boardaccess_', $board['id'], '" value="', $board['id'], '" ', $board['selected'] ? ' checked="checked"' : '', ' class="input_check" /> <label for="boardaccess_', $board['id'], '">', $board['name'], '</label></div>';
+					<dt>
+						<strong>', $txt['membergroups_new_board'], ':</strong>', $context['group']['is_post_group'] ? '<br>
+						<span class="smalltext">' . $txt['membergroups_new_board_post_groups'] . '</span>' : '', '
+					</dt>
+					<dd>';
+		if (!empty($context['can_manage_boards']))
+			echo $txt['membergroups_can_manage_access'];
+		else
+			template_add_edit_group_boards_list();
 
 		echo '
-								<br />
-								<input type="checkbox" id="checkall_check" class="input_check" onclick="invertAll(this, this.form, \'boardaccess\');" /> <label for="checkall_check"><em>', $txt['check_all'], '</em></label>
-							</fieldset>
-							<a href="javascript:void(0);" onclick="document.getElementById(\'visible_boards\').style.display = \'block\'; document.getElementById(\'visible_boards_link\').style.display = \'none\'; return false;" id="visible_boards_link" style="display: none;">[ ', $txt['membergroups_select_visible_boards'], ' ]</a>
-							<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-								document.getElementById("visible_boards_link").style.display = "";
-								document.getElementById("visible_boards").style.display = "none";
-							// ]]]]><![CDATA[></script>
-						</dd>';
+					</dd>';
 	}
 	echo '
-					</dl>]]></search>
+				</dl>]]></search>
 		<add><![CDATA[// Display the subforums as a tab at the top of the screen:
-	if (!empty($context['boards']))
+	if (!empty($context['categories']))
 	{
 		$flagged = array( 0 => false );
 		if (count($subforum_tree) > 1)
 		{
 			echo '
-					</dl>
-					<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-						function expandTabs(forum)
-						{
-							';
+				</dl>
+				<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+					function expandTabs(forum)
+					{
+						';
 			foreach ($subforum_tree as $subforum => $info)
 				echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
-							document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
-							';
+						document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+						';
 			echo '
-						}
-					// ]]]]><![CDATA[></script>
-					<fieldset id="visible_boards">
-						<legend>', $txt['membergroups_new_board_desc'], '</legend>
+					}
+				// ]]]]><![CDATA[></script>
+				<fieldset id="visible_boards">
+					<legend>', $txt['membergroups_new_board_desc'], '</legend>
 					<div id="tabContainer">
 						<div class="tabs">
 							<ul>';
@@ -331,27 +409,26 @@
 					</div>
 					<hr class="hrcolor" />';
 		}
-		foreach ($context['boards'] as $id => $categories)
+		$context_categories = $context['categories'];
+		foreach ($context_categories as $id => $categories)
 		{
 			echo '
 					<div id="subforum' . $id . '"' . (!empty($id) ? ' style="display: none;"' : '') . '>
 						<dl class="settings">
 							<dt>
-								<strong>', $txt['membergroups_new_board'], ':</strong>
+								<strong>', $txt['membergroups_new_board'], ':</strong>', $context['group']['is_post_group'] ? '<br>
+								<span class="smalltext">' . $txt['membergroups_new_board_post_groups'] . '</span>' : '', '
 							</dt>
-							<dd>' . (count($subforum_tree) == 1 ? '
-								<fieldset id="visible_boards" style="width: 95%;">
-									<legend>' . $txt['membergroups_new_board_desc'] . '</legend>' : '');
-			foreach ($categories as $category)
+							<dd>';
+			if (!empty($context['can_manage_boards']))
+				echo $txt['membergroups_can_manage_access'];
+			else
 			{
-				echo '
-									<strong>' . $category['cat_name'] . '</strong>';
-				foreach ($category['boards'] as $board)
-					echo '
-									<div style="margin-left: ', $board['child_level'], 'em;"><input type="checkbox" name="boardaccess[]" id="boardaccess_', $board['id'], '" value="', $board['id'], '" ', $board['selected'] ? ' checked="checked" disabled="disabled"' : '', ' class="input_check" /> <label for="boardaccess_', $board['id'], '">', $board['name'], '</label></div>';
+				$context['categories'] = $categories;
+				template_add_edit_group_boards_list();
 			}
+
 			echo '
-								' . (count($subforum_tree) == 1 ? '</fieldset>' : '') . '
 							</dd>
 						</dl>
 					</div>';
@@ -374,23 +451,7 @@
 					</div>';
 		}
 		echo '
-					<dl class="settings">
-						<dd>
-							<input type="checkbox" id="checkall_check" class="input_check" onclick="invertAll(this, this.form, \'boardaccess\');" /> <label for="checkall_check"><em>', $txt['check_all'], '</em></label>
-						</dd>
-					</dl>
-					' . (count($subforum_tree) > 1 ? '</fieldset>' : '') . '
-					<dl class="settings" id="visible_boards_link" style="display: none;">
-						<dt>
-							<strong>', $txt['membergroups_new_board'], ':</strong>
-						</dt>
-						<dd>
-							<a href="javascript:void(0);" onclick="document.getElementById(\'visible_boards\').style.display = \'block\'; document.getElementById(\'visible_boards_link\').style.display = \'none\'; return false;">[ ', $txt['membergroups_select_visible_boards'], ' ]</a>
-							<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-								document.getElementById("visible_boards_link").style.display = "";
-								document.getElementById("visible_boards").style.display = "none";
-							// ]]]]><![CDATA[></script>
-						</dd>';
+					' . (count($subforum_tree) > 1 ? '</fieldset>' : '');
 	}
 	echo '
 					</dl>]]></add>

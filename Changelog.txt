@@ -1,3 +1,10 @@
+v1.28 - December 2nd, 2015
+o SMF 2.1: Modified Add Membergroup in order to group boards by subforum, then category.
+o SMF 2.1: Modified Edit Membergroup in order to group boards by subforum, then category.
+o SMF 2.1: Modified Board Permissions UI in order to group boards by subforum, then category.
+o Fixed undefined variable errors in the Add & Edit Membergroup UIs, and Manage Permissions UI.
+o Added code to restrict the display of users online in Who's Online to those in subforum.
+
 v1.27 - November 20th, 2015
 o Fixed issue where primary membergroup field on settings page wasn't set correctly in UI.
 

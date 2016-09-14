@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.27</version>
+	<version>1.28</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -71,16 +71,14 @@
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
 
-	<upgrade for="2.0 - 2.0.99" from="1.26">
-		<modification>upgrade_20x_1.27.xml</modification>
+	<upgrade for="2.0 - 2.0.99" from="1.27">
+		<modification>upgrade_20x_1.28.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
 	</upgrade>
-	<upgrade for="2.1 Beta 2 - 2.1.99" from="1.26">
-		<modification>upgrade_21x_1.27.xml</modification>
+	<upgrade for="2.1 Beta 2 - 2.1.99" from="1.27">
+		<modification>upgrade_21x_1.28.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
 	</upgrade>
 </package-info>

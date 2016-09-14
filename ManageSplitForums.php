@@ -460,6 +460,7 @@ function SubForumSettings($return_config = false)
 		array('check', 'subforum_settings_topmenu_admin_only'),
 		'',
 		array('check', 'subforum_settings_register_at_primary'),
+		array('check', 'subforum_settings_show_who_in_subforum'),
 	);
 	if ($return_config)
 		return $config_vars;

@@ -59,6 +59,7 @@ $txt['subforum_settings_topmenu'] = 'Show Sister Sites in top menu';
 $txt['subforum_settings_topmenu_admin_only'] = 'Show Sister Sites in top menu to admin only';
 $txt['subforum_sister_sites'] = 'Sister Sites';
 $txt['subforum_settings_register_at_primary'] = 'Redirect registration to Primary Forum:';
+$txt['subforum_settings_show_who_in_subforum'] = 'Who\'s Online restricted to subforum?';
 
 $txt['subforum_delete_title'] = 'Delete SubForum';
 $txt['subforum_delete_line'] = 'Deleting this subforum will also delete the below categories and boards, including all topics, posts and attachments within each board:';

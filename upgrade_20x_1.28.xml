@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.28</version>
+
+<file name="$sourcedir/ManageMembergroups.php">
+	<operation>
+		<search position="before"><![CDATA[function AddMembergroup()
+{
+	global $context, $txt, $sourcedir, $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManagePermissions.php">
+	<operation>
+		<search position="before"><![CDATA[function PermissionByBoard()
+{
+	global $context, $modSettings, $txt, $smcFunc, $sourcedir, $cat_tree, $boardList, $boards]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Who.php">
+	<operation>
+		<search position="before"><![CDATA[global $context, $scripturl, $user_info, $txt, $modSettings, $memberContext, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></search>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$conditions = array();]]></search>
+		<add><![CDATA[
+	if (!empty($modSettings['subforum_settings_show_who_in_subforum']))
+		$conditions[] = 'INSTR(lo.url, {string:in_url_string}) > 0';]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[WHERE ' . implode(' AND ', $conditions) : ''),
+		array(]]></search>
+		<add><![CDATA[
+			'in_url_string' => 's:7:"forumid";i:' . ((int) $forumid) . ';',]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[LIMIT {int:offset}, {int:limit}',
+		array(]]></search>
+		<add><![CDATA[
+			'in_url_string' => 's:7:"forumid";i:' . ((int) $forumid) . ';',]]></add>
+	</operation>
+</file>
+<file name="$themedir/ManagePermissions.template.php">
+	<operation>
+		<search position="before"><![CDATA[function template_by_board()
+{
+	global $context, $settings, $options, $scripturl, $txt, $modSettings]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs.php">
+	<operation>
+		<search position="before"><![CDATA[global $user_info, $user_settings, $context, $modSettings, $settings, $topic, $board, $smcFunc, $sourcedir]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$serialized = $_GET + array('USER_AGENT' => $_SERVER['HTTP_USER_AGENT']);]]></search>
+		<add><![CDATA[$serialized = $_GET + array('USER_AGENT' => $_SERVER['HTTP_USER_AGENT'], 'forumid' => $forumid);]]></add>
+	</operation>
+</file>
+</modification>
