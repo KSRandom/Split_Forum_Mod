@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.11[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.12[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -58,6 +58,9 @@ Upgrade is possible from [b]v1.2 and up[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.12 - October 8th, 2014[/u][/b]
+o Mod rearranged due to some servers having difficulty processing this mod correctly...
+
 [b][u]v1.11 - October 3rd, 2014[/u][/b]
 o Removed some forgotten debugging code left in [b]ManageSplitForum.php[/b].
 o Added new SubForums top menu item, which is visible with more than 1 subforum.
