@@ -79,7 +79,7 @@ function SplitForum_PreLoad()
 		$language = !empty($row['language']) ? $row['language'] : $language;
 		$favicon = !empty($row['favicon']) ? $row['favicon'] : $favicon;
 		$modSettings['primary_membergroup'] = !empty($row['primary_membergroup']) ? $row['primary_membergroup'] : 0;
-		$modSettings['news' . $forumid] = !empty($modSettings['news' . $forumid]) ? $modSettings['news' . $forumid] : $modSettings['news']);
+		$modSettings['news' . $forumid] = !empty($modSettings['news' . $forumid]) ? $modSettings['news' . $forumid] : $modSettings['news'];
 
 		// Overwrite settings related to Pretty URLs:
 		if (isset($modSettings['pretty_root_url']))
@@ -91,7 +91,7 @@ function SplitForum_PreLoad()
 		if (isset($row['sp_portal']))
 			$modSettings['sp_portal_mode'] = !empty($row['sp_portal']) ? $row['sp_portal'] : $modSettings['sp_portal_mode'];
 		if (isset($row['sp_standalone']))
-			$modSettings['sp_standalone_url'] = !empty($row['sp_standalone']) ? $row['sp_standalone'] : ;$modSettings['sp_standalone_url'];
+			$modSettings['sp_standalone_url'] = !empty($row['sp_standalone']) ? $row['sp_standalone'] : $modSettings['sp_standalone_url'];
 	}
 
 	// Each subforum is effectively an alias, so let's add all of the them to $modSettings:

@@ -5,9 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.34</version>
-
-	<install for="2.0 - 2.0.99">
+	<version>1.35</version><install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
 		<code>add_remove_hooks.php</code>
 		<code>settings_install.php</code>
@@ -92,6 +90,14 @@
 	</upgrade>
 	<upgrade for="2.1 Beta 2 - 2.1.99" from="1.33">
 		<modification reverse="true">upgrade_21x_1.34.xml</modification>
+		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
+	</upgrade>
+	<upgrade for="2.0 - 2.0.99" from="1.34">
+		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
+	</upgrade>
+	<upgrade for="2.1 Beta 2 - 2.1.99" from="1.34">
 		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
 	</upgrade>

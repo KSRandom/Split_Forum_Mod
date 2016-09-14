@@ -145,7 +145,7 @@ Function EditSubForum($sub)
 			array('text', 'subforum_modify_forumid', 'size' => 40),
 			array('text', 'subforum_modify_forumdir', 'size' => 40),
 			array('check', 'subforum_modify_news')
-		);
+		));
 	}
 
 	// Define the options for copying/deleting/defaulting the blocks:

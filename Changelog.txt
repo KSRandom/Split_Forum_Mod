@@ -1,3 +1,6 @@
+v1.35 - June 18th, 2016
+o Fixed several syntax errors found by [url=http://www.simplemachines.org/community/index.php?action=profile;u=151394]Tair[/url].
+
 v1.34 - June 12th, 2016
 o SMF 2.0: Fixed issue in MoveTopic.php where destination boards weren't limited to that subforum.
 o Added error checking to make sure removal of subforum tree elements doesn't generate errors.
