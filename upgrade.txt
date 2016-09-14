@@ -5,6 +5,19 @@
 [hr]
 
 [color=blue][b][size=12pt][u]What's Changed?[/u][/size][/b][/color]
+[quote]
+[b][u]v1.5 - Internal[/u][/b]
+o Updated [b]package-info.xml[/b] so that it redirects to clears the SMF file cache
+
+[b][u]v1.4 - July 26th, 2014[/u][/b]
+o While changing the subforum a category is assigned to, the category order list now changes.
+o Added the ability to move boards between subforums
+o Fixed multiple Manage Boards UI bugs, resulting from subforum ID not being passed
+o Fixed an undeclared array element error found in [b]Load.php[/b]
+o Modified tab system so that it works better with revised move boards ability
+o Modified [b]db_install.php[/b] so that it doesn't overwrite previous subforum settings when installing
+o Removed code from [b]uninstall.php[/b] that automatically removes subforum files...
+
 [b][u]v1.3 - July 4th, 2014[/u][/b]
 o Changed name of new subforums to "SubForum # [n]" (where [n] is the new subforum ID)
 o Total rewrite of [b]edit_db.php[/b], now renamed to [b]db_install.php[/b]....
@@ -20,6 +33,10 @@ o Fixed REALLY bad problem in version 1.1 resulting in errors in admin screen!
 o Added English UTF8 language strings
 o Changed the method that subforum boards and categories are listed to a tabbed system
 o [b]edit_db.php[/b] modification to attempt to eliminate some weird error...
+
+[b][u]v1.0 - May 17th, 2013[/u][/b]
+o Initial Release
+[/quote]
 
 [hr]
 [url=http://creativecommons.org/licenses/by/3.0][img]http://i.creativecommons.org/l/by/3.0/80x15.png[/img][/url]

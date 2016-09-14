@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.4[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.5[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -52,16 +52,24 @@ o Language settings restricted to members registered on a subforum
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x is not and will not be supported.
 
+[url=http://custom.simplemachines.org/mods/index.php?mod=1104]Simple Portal[/url] should be installed before this mod if you want subforum support for blocks within Simple Portal.
+
 This mod shares the [b]realtabs.css[/b] from [url=http://custom.simplemachines.org/mods/index.php?mod=3796]Real Tabs for Admin & Moderator Menus[/url], so you need to backup any customized [b]realtabs.css[/b] before installing the mod.
 
 [color=blue][b][size=12pt][u]Known Issues[/u][/size][/b][/color]
 If you installed [b]Version 1.1[/b] and are having errors at the admin screen, go to [url=http://www.simplemachines.org/community/index.php?topic=523055.msg3712535#msg3712535]this post[/url] and follow the instructions given.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.2 and v1.3[/b] to [b]v1.4[/b].
+Upgrade is possible from [b]v1.2 thru v1.4[/b] to [b]v1.5[/b].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.5 - Auguest 3rd, 2014[/u][/b]
+o Fixed the subforum URL detection code that resulted in board doesn't exist errors....
+o Fixed Manage Boards UI so that boards aren't hidden when entering Manage Boards UI...
+o Updated [b]package-info.xml[/b] so that it redirects to clears the SMF file cache
+o Modified Simple Portal code to support subforums selection for blocks.
+
 [b][u]v1.4 - July 26th, 2014[/u][/b]
 o While changing the subforum a category is assigned to, the category order list now changes.
 o Added the ability to move boards between subforums

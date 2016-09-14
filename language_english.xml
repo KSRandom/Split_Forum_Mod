@@ -21,4 +21,13 @@ $txt['favicon'] = 'Website Icon URL';
 $txt['wrong_forum'] = 'The board you specified is located on a different forum';]]></add>
 	</operation>
 </file>
+<file name="$languagedir/SPortalAdmin.english.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[$txt['sp-blocksNoBody'] = 'No Body';]]></search>
+		<add><![CDATA[
+// BEGIN: Split Forum Mod
+$txt['sp-subforums'] = 'Display on Subforums';
+// BEGIN: Split Forum Mod]]></add>
+	</operation>
+</file>
 </modification>
