@@ -54,10 +54,13 @@ function get_membergroups()
 	return $primary;
 }
 	
-function get_subforum_count()
+function get_subforum_max()
 {
 	global $subforum_tree, $forumid;
-	return ($forumid == 0 ? count($subforum_tree) : 1);
+	$max = 0;
+	foreach ($subforum_tree as $subforum)
+		$max = ($subforum['forumid'] > $max ? $subforum['forumid'] : $max);
+	return $max;
 }
 
 function add_subforum(&$row)
@@ -79,6 +82,10 @@ function add_subforum(&$row)
 		'primary_membergroup' => (isset($row['primary_membergroup']) ? (int) $row['primary_membergroup'] : 0),
 	);
 	asort($subforum_tree);
+	$tree = array();
+	foreach ($subforum_tree as $subforum)
+		$tree[$subforum['forumid']] = $subforum;
+	$subforum_tree = $tree;
 	
 	// Set the variable "subforum_tree" in the forum's Settings.php:
 	require_once($sourcedir.'/Subs-Admin.php');
@@ -110,6 +117,272 @@ function move_attached_boards($from, $dest)
 			'newid' => (int) $dest,
 			'forumid' => (int) $from,
 		)
+	);
+}
+
+function insert_sp_blocks($forum = -1)
+{
+	global $smcFunc, $forumid;
+
+	$forum = (int) ($forum <> -1 ? $forum : $forumid);
+	
+	$welcome_text = '<h2 style="text-align: center;">Welcome to SimplePortal!</h2>
+<p>SimplePortal is one of several portal mods for Simple Machines Forum (SMF). Although always developing, SimplePortal is produced with the user in mind first. User feedback is the number one method of growth for SimplePortal, and our users are always finding ways for SimplePortal to grow. SimplePortal stays competative with other portal software by adding numerous user-requested features such as articles, block types and the ability to completely customize the portal page.</p>
+<p>All this and SimplePortal has remained Simple! SimplePortal is built for simplicity and ease of use; ensuring the average forum administrator can install SimplePortal, configure a few settings, and show off the brand new portal to the users in minutes. Confusing menus, undesired pre-loaded blocks and settings that cannot be found are all avoided as much as possible. Because when it comes down to it, SimplePortal is YOUR portal, and should reflect your taste as much as possible.</p>
+<p><strong>Ultimate Simplicity</strong>
+<br />
+The simplest portal you can ever think of... You only need a few clicks to install it through Package Manager. A few more to create your own blocks and articles. Your portal is ready to go within a couple of minutes, and simple to customise to reflect YOU.</p>
+<p><strong>Install Friendly</strong>
+<br />
+With the ingenius design of install and update packages, SimplePortal is incredibly install and update friendly. You will never need any manual changes even on a heavily modified forum.</p>
+<p><strong>Incredible Theme Support</strong>
+<br />
+The simple but powerful structure of SimplePortal brings you wide-range theme support too. You can use SimplePortal with all SMF themes by just adding a button for it.</p>
+<p><strong>Professional Support</strong>
+<br />
+SimplePortal offers high quality professional support with its own well known support team.</p>';
+
+	$default_blocks = array(
+		'user_info' => array(
+			'label' => 'User Info',
+			'type' => 'sp_userInfo',
+			'col' => 1,
+			'row' => 1,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'whos_online' => array(
+			'label' => 'Who&#039;s Online',
+			'type' => 'sp_whosOnline',
+			'col' => 1,
+			'row' => 2,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'board_stats' => array(
+			'label' => 'Board Stats',
+			'type' => 'sp_boardStats',
+			'col' => 1,
+			'row' => 3,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'theme_select' => array(
+			'label' => 'Theme Select',
+			'type' => 'sp_theme_select',
+			'col' => 1,
+			'row' => 4,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'search' => array(
+			'label' => 'Search',
+			'type' => 'sp_quickSearch',
+			'col' => 1,
+			'row' => 5,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'news' => array(
+			'label' => 'News',
+			'type' => 'sp_news',
+			'col' => 2,
+			'row' => 1,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => 'title_default_class~|title_custom_class~|title_custom_style~|body_default_class~windowbg|body_custom_class~|body_custom_style~|no_title~1|no_body~',
+			'forums' => $forum,
+		),
+		'welcome' => array(
+			'label' => 'Welcome',
+			'type' => 'sp_html',
+			'col' => 2,
+			'row' => 2,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => 'title_default_class~|title_custom_class~|title_custom_style~|body_default_class~windowbg|body_custom_class~|body_custom_style~|no_title~1|no_body~',
+			'forums' => $forum,
+		),
+		'board_news' => array(
+			'label' => 'Board News',
+			'type' => 'sp_boardNews',
+			'col' => 2,
+			'row' => 3,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'recent_topics' => array(
+			'label' => 'Recent Topics',
+			'type' => 'sp_recent',
+			'col' => 3,
+			'row' => 1,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'top_poster' => array(
+			'label' => 'Top Poster',
+			'type' => 'sp_topPoster',
+			'col' => 4,
+			'row' => 1,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'recent_posts' => array(
+			'label' => 'Recent Posts',
+			'type' => 'sp_recent',
+			'col' => 4,
+			'row' => 2,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'staff' => array(
+			'label' => 'Forum Staff',
+			'type' => 'sp_staff',
+			'col' => 4,
+			'row' => 3,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'calendar' => array(
+			'label' => 'Calendar',
+			'type' => 'sp_calendar',
+			'col' => 4,
+			'row' => 4,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+		'top_boards' => array(
+			'label' => 'Top Boards',
+			'type' => 'sp_topBoards',
+			'col' => 4,
+			'row' => 5,
+			'permission_set' => '3',
+			'display' => '',
+			'display_custom' => '',
+			'style' => '',
+			'forums' => $forum,
+		),
+	);
+
+	$smcFunc['db_insert']('ignore',
+		'{db_prefix}sp_blocks',
+		array(
+			'label' => 'text',
+			'type' => 'text',
+			'col' => 'int',
+			'row' => 'int',
+			'permission_set' => 'int',
+			'display' => 'text',
+			'display_custom' => 'text',
+			'style' => 'text',
+			'forums' => 'text',
+		),
+		$default_blocks,
+		array('id_block')
+	);
+
+	$request = $smcFunc['db_query']('', '
+		SELECT MIN(id_block) AS id, type
+		FROM {db_prefix}sp_blocks
+		WHERE type IN ({array_string:types}) AND forums = {int:forum}
+		GROUP BY type
+		LIMIT 4',
+		array(
+			'types' => array('sp_html', 'sp_boardNews', 'sp_calendar', 'sp_recent'),
+			'forum' => $forum,
+		)
+	);
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$block_ids[$row['type']] = $row['id'];
+	$smcFunc['db_free_result']($request);
+
+	$default_parameters = array(
+		array(
+			'id_block' => $block_ids['sp_html'],
+			'variable' => 'content',
+			'value' => htmlspecialchars($welcome_text),
+		),
+		array(
+			'id_block' => $block_ids['sp_boardNews'],
+			'variable' => 'avatar',
+			'value' => 1,
+		),
+		array(
+			'id_block' => $block_ids['sp_boardNews'],
+			'variable' => 'per_page',
+			'value' => 3,
+		),
+		array(
+			'id_block' => $block_ids['sp_calendar'],
+			'variable' => 'events',
+			'value' => 1,
+		),
+		array(
+			'id_block' => $block_ids['sp_calendar'],
+			'variable' => 'birthdays',
+			'value' => 1,
+		),
+		array(
+			'id_block' => $block_ids['sp_calendar'],
+			'variable' => 'holidays',
+			'value' => 1,
+		),
+		array(
+			'id_block' => $block_ids['sp_recent'],
+			'variable' => 'type',
+			'value' => 1,
+		),
+		array(
+			'id_block' => $block_ids['sp_recent'],
+			'variable' => 'display',
+			'value' => 1,
+		),
+	);
+
+	$smcFunc['db_insert']('replace',
+		'{db_prefix}sp_parameters',
+		array(
+			'id_block' => 'int',
+			'variable' => 'text',
+			'value' => 'text',
+		),
+		$default_parameters,
+		array()
 	);
 }
 

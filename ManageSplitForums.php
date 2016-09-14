@@ -98,10 +98,10 @@ Function EditSubForum($sub)
 	if ($_REQUEST['sa'] == 'newsub')
 	{
 		// Figure out what the largest forum ID in the database is:
-		$sub = get_subforum_count();
+		$sub = get_subforum_max();
 
 		// Populate a new entry for the template:
-		$subforum_tree[$sub]['forumid'] = $sub;
+		$subforum_tree[$sub]['forumid'] = $sub + 1;
 		$subforum_tree[$sub]['boardname'] = $txt['subforums_list_prefix'] . ' # ' . $sub;
 		$subforum_tree[$sub]['boardurl'] = $modSettings['subforum_server_url'] . '/forum' . $sub;
 		$subforum_tree[$sub]['forumdir'] = $modSettings['subforum_server_root'] . '/forum' . $sub;

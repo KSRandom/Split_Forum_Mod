@@ -1,0 +1,1055 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.6</version>
+
+<!-------------------------------------------------------------------------->
+<!-- Better Modify Board UI (ManageBoards.php)                            -->
+<!-------------------------------------------------------------------------->
+<!-- ManageBoardsMain function -->
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[loadTemplate('ManageBoards');
+	$context['req_forumid'] = (isset($_REQUEST['sub']) ? ((int) $_REQUEST['sub']) : $forumid);]]></search>
+		<add><![CDATA[loadTemplate('ManageBoards');]]></add>
+	</operation>
+
+<!-- EditBoard function -->	
+	<operation>
+		<search position="before"><![CDATA[global $txt, $context, $cat_tree, $boards, $boardList, $sourcedir, $smcFunc, $modSettings, $forumid]]></search>
+		<add><![CDATA[, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach ($cat_tree as $catID => $tree)
+		$context['categories'][] = array(
+			'id' => $catID == $curBoard['category'] ? 0 : $catID,]]></search>
+		<add><![CDATA[foreach ($subforum_tree as $subforum)
+		$context['categories'][$subforum['forumid']] = array();
+	foreach ($cat_tree as $catID => $tree)
+		$context['categories'][$tree['node']['forumid']][] = array(
+			'id' => $catID,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach ($boardList[$curBoard['category']] as $boardid)
+	{
+		if ($boardid == $_REQUEST['boardid'])
+		{
+			$context['board_order'][] = array(
+				'id' => $boardid,
+				'name' => str_repeat('-', $boards[$boardid]['level']) . ' (' . $txt['mboards_current_position'] . ')',
+				'children' => $boards[$boardid]['tree']['children'],
+				'no_children' => empty($boards[$boardid]['tree']['children']),
+				'is_child' => false,
+				'selected' => true
+			);
+		}
+		else
+		{
+			$context['board_order'][] = array(
+				'id' => $boardid,
+				'name' => str_repeat('-', $boards[$boardid]['level']) . ' ' . $boards[$boardid]['name'],
+				'is_child' => empty($_REQUEST['boardid']) ? false : isChildOf($boardid, $_REQUEST['boardid']),
+				'selected' => false
+			);
+		}
+	}]]></search>
+		<add><![CDATA[$selected_cat = -1;
+	foreach ($boardList as $cat => $list)
+	{
+		$context['board_order'][$cat] = array();
+		foreach ($list as $boardid)
+		{
+			if ($boardid == $_REQUEST['boardid'])
+			{
+				$context['board_order'][$cat][] = array(
+					'id' => $boardid,
+					'name' => str_repeat('-', $boards[$boardid]['level']) . ' (' . $txt['mboards_current_position'] . ')',
+					'children' => $boards[$boardid]['tree']['children'],
+					'no_children' => empty($boards[$boardid]['tree']['children']),
+					'is_child' => false,
+					'selected' => true
+				);
+				$selected_cat = $cat;
+			}
+			else
+			{
+				$context['board_order'][$cat][] = array(
+					'id' => $boardid,
+					'name' => str_repeat('-', $boards[$boardid]['level']) . ' ' . $boards[$boardid]['name'],
+					'is_child' => empty($_REQUEST['boardid']) ? false : isChildOf($boardid, $_REQUEST['boardid']),
+					'selected' => false
+				);
+			}
+		}
+	}
+	foreach ($context['board_order'] as $cat => $boards)
+	{
+		if ($selected_cat != $cat && !empty($context['board_order'][$cat][0]['selected']))
+			$context['board_order'][$cat][0]['selected'] = true;
+	}]]></add>
+	</operation>
+	
+<!-- EditBoard2 function -->	
+	<operation>
+		<search position="before"><![CDATA[global $txt, $sourcedir, $modSettings, $smcFunc, $context]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search positon="replace"><![CDATA[$boardOptions = array();
+
+		// Move this board to a new category?
+		if (!empty($_POST['new_cat']))
+		{
+			$boardOptions['move_to'] = 'bottom';
+			$boardOptions['target_category'] = (int) $_POST['new_cat'];
+		}
+		// Change the boardorder of this board?
+		elseif (!empty($_POST['placement']) && !empty($_POST['board_order']))
+		{
+			if (!in_array($_POST['placement'], array('before', 'after', 'child')))
+				fatal_lang_error('mangled_post', false);
+
+			$boardOptions['move_to'] = $_POST['placement'];
+			$boardOptions['target_board'] = (int) $_POST['board_order'];]]></search>
+		<add><![CDATA[$boardOptions = array();
+		$sub = (!empty($_POST['new_forum']) ? $_POST['new_forum'] : $forumid);
+		
+		// Move this board to a new category?
+		$cat = (!empty($_GET['cat']) ? $_GET['cat'] : '');
+		if (!empty($_POST['new_cat' . $sub]))
+		{
+			$boardOptions['move_to'] = 'bottom';
+			$boardOptions['target_category'] = $cat = (int) $_POST['new_cat' . $sub];
+		}			
+			
+		// Change the boardorder of this board?
+		if (!empty($_POST['placement' . $cat]) && !empty($_POST['board_order' . $cat]))
+		{
+			if (!in_array($_POST['placement' . $cat], array('before', 'after', 'child')))
+				fatal_lang_error('mangled_post', false);
+
+			$boardOptions['move_to'] = $_POST['placement' . $cat];
+			$boardOptions['target_board'] = (int) $_POST['board_order' . $cat];]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Better Modify Board UI (ManageBoards.template.php)                   -->
+<!-------------------------------------------------------------------------->
+<file name="$themedir/ManageBoards.template.php">
+	<operation>
+		<search position="replace"><![CDATA[function template_modify_board()
+{
+	global $context, $settings, $options, $scripturl, $txt, $modSettings;
+
+	// The main table header.
+	echo ']]></search>
+		<add><![CDATA[function template_modify_board()
+{
+	global $context, $settings, $options, $scripturl, $txt, $modSettings, $forumid, $subforum_tree;
+
+	// The main table header.
+	echo '
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function hideCategories(forum)
+		{';
+	foreach ($subforum_tree as $subforum)
+		echo '
+			document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");';
+	echo '
+			hideBoards(document.getElementById("new_cat" + forum).options[document.getElementById("new_cat" + forum).selectedIndex].value);
+		}
+		function hideBoards(cat)
+		{';
+	foreach ($context['board_order'] as $cat => $boards)
+		foreach ($boards as $board)
+			echo '
+			document.getElementById("cat_txt', $cat, '").style.display = (cat == ' . $cat . ' ? "" : "none");
+			document.getElementById("cat_opt', $cat, '").style.display = (cat == ' . $cat . ' ? "" : "none");';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2' . (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : '') .'" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[<form action="', $scripturl, '?action=admin;area=manageboards;sa=board2', (!empty($_REQUEST['sub']) ? ';sub=' . $_REQUEST['sub'] : ''), (!empty($_REQUEST['cat']) ? ';cat=' . $_REQUEST['cat'] : ''), '" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Option for choosing the category the board lives in.]]></search>
+		<add><![CDATA[// Option for choosing the subforum the board lives in.
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+						<dt>
+							<strong>', $txt['forumid_title'], ':</strong>
+
+						</dt>
+						<dd>
+							<select name="new_forum" onchange="hideCategories(this.options[this.selectedIndex].value);">';
+		foreach ($subforum_tree as $subforum)
+			echo '
+								<option value="', $subforum['forumid'], '" ', $subforum['forumid'] == $_REQUEST['sub'] ? ' selected="selected"' : '', '>', $subforum['boardname'], '</option>';
+		echo '
+							</select>
+						</dd>';
+	}
+	else
+		echo '
+						<input type="hidden" name="new_forum" value="', $_REQUEST['sub'], '" />';
+	
+	]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<dd>
+							<select name="new_cat" onchange="if (this.form.order) {this.form.order.disabled = this.options[this.selectedIndex].value != 0; this.form.board_order.disabled = this.options[this.selectedIndex].value != 0 || this.form.order.options[this.form.order.selectedIndex].value == \'\';}">';
+		foreach ($context['categories'] as $category)
+			echo '
+								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
+		echo '
+							</select>
+						</dd>';]]></search>
+		<add><![CDATA[<dd>';
+	foreach ($subforum_tree as $subforum)
+	{
+		echo '
+							<select name="new_cat', $subforum['forumid'], '" id="new_cat', $subforum['forumid'], '" onchange="hideBoards(this.options[this.selectedIndex].value);"', ($subforum['forumid'] <> $_REQUEST['sub'] ? ' style="display: none;"' : ''), '>';
+		foreach ($context['categories'][$subforum['forumid']] as $category)
+			echo '
+								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
+		echo '
+							</select>';
+	}
+	echo '
+						</dd>';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// If this isn't the only board in this category let the user choose where the board is to live.
+	if ((isset($context['board']['is_new']) && count($context['board_order']) > 0) || count($context['board_order']) > 1)
+	{
+		echo '
+						<dt>
+							<strong>', $txt['order'], ':</strong>
+						</dt>
+						<dd>';
+
+	// The first select box gives the user the option to position it before, after or as a child of another board.
+	echo '
+							<select id="order" name="placement" onchange="this.form.board_order.disabled = this.options[this.selectedIndex].value == \'\';">
+								', !isset($context['board']['is_new']) ? '<option value="">(' . $txt['mboards_unchanged'] . ')</option>' : '', '
+								<option value="after">' . $txt['mboards_order_after'] . '...</option>
+								<option value="child">' . $txt['mboards_order_child_of'] . '...</option>
+								<option value="before">' . $txt['mboards_order_before'] . '...</option>
+							</select>';
+
+	// The second select box lists all the boards in the category.
+	echo '
+							<select id="board_order" name="board_order" ', isset($context['board']['is_new']) ? '' : 'disabled="disabled"', '>
+								', !isset($context['board']['is_new']) ? '<option value="">(' . $txt['mboards_unchanged'] . ')</option>' : '';
+	foreach ($context['board_order'] as $order)
+		echo '
+								<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
+	echo '
+							</select>
+						</dd>';
+	}]]></search>
+	<add><![CDATA[// If this isn't the only board in this category let the user choose where the board is to live.
+	foreach ($context['board_order'] as $cat => $board_order)
+	{
+		if ((isset($context['board']['is_new']) && count($board_order) > 0) || count($board_order) > 1)
+		{
+			echo '
+						<dt id="cat_txt', $cat, '"', ($cat <> $_REQUEST['cat'] ? ' style="display: none;"' : '') . '>
+							<strong>', $txt['order'], ':</strong>
+						</dt>
+						<dd id="cat_opt', $cat, '"', ($cat <> $_REQUEST['cat'] ? ' style="display: none;"' : '') . '>';
+
+			// The first select box gives the user the option to position it before, after or as a child of another board.
+			echo '
+							<select id="order" name="placement', $cat, '">
+								', !isset($context['board']['is_new']) ? '<option value="">(' . $txt['mboards_unchanged'] . ')</option>' : '', '
+								<option value="after">' . $txt['mboards_order_after'] . '...</option>
+								<option value="child">' . $txt['mboards_order_child_of'] . '...</option>
+								<option value="before">' . $txt['mboards_order_before'] . '...</option>
+							</select>';
+
+			// The second select box lists all the boards in the category.
+			echo '
+							<select id="board_order', $cat, '" name="board_order', $cat, '" ', isset($context['board']['is_new']) ? '' : 'disabled="disabled"', '>
+								', !isset($context['board']['is_new']) ? '<option value="">(' . $txt['mboards_unchanged'] . ')</option>' : '';
+			foreach ($board_order as $order)
+				echo '
+								<option', $order['selected'] ? ' selected="selected"' : '', ' value="', $order['id'], '">', $order['name'], '</option>';
+			echo '
+							</select>
+						</dd>';
+		}
+	}]]></add>
+	</operation>
+	
+<!-------------------------------------------------------------------------->
+<!-- Version 1.5 Modify Category UI browser-compatibility fixes           -->
+<!-------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[<select name="forum_id">';
+		// Print every existing category into a select box.
+		foreach ($subforum_tree as $row)
+			echo '
+								<option', $context['category']['forumid'] == $row['forumid'] ? ' selected="selected"' : '', ' value="', $row['forumid'], '" onclick="expandTabs(' . $row['forumid'] . '); return false;">', $row['boardname'], '</option>';]]></search>
+		<add><![CDATA[<select name="forum_id" onchange="expandTabs(this.options[this.selectedIndex].value); return false;">';
+		// Print every existing category into a select box.
+		foreach ($subforum_tree as $row)
+			echo '
+								<option', $context['category']['forumid'] == $row['forumid'] ? ' selected="selected"' : '', ' value="', $row['forumid'], '">', $row['boardname'], '</option>';]]></add>
+	</operation>
+</file>	
+
+<!-------------------------------------------------------------------------->
+<!-- Block restriction for Subforums (Admin.php)                          -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/Admin.php">
+	<operation>
+		<search position="after"><![CDATA[// Load the language and templates....]]></search>
+		<add><![CDATA[$context['req_forumid'] = (int) (empty($_REQUEST['sub']) ? $forumid : $_REQUEST['sub']);
+	
+	]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA['add' => array($txt['sp-adminBlockAddName']),
+						'header' => array($txt['sp-positionHeader']),
+						'left' => array($txt['sp-positionLeft']),
+						'top' => array($txt['sp-positionTop']),
+						'bottom' => array($txt['sp-positionBottom']),
+						'right' => array($txt['sp-positionRight']),
+						'footer' => array($txt['sp-positionFooter']),]]></search>
+		<add><![CDATA['add' => array($txt['sp-adminBlockAddName'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=add;sub=' . $context['req_forumid']),
+						'header' => array($txt['sp-positionHeader'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=header;sub=' . $context['req_forumid']),
+						'left' => array($txt['sp-positionLeft'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=left;sub=' . $context['req_forumid']),
+						'top' => array($txt['sp-positionTop'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=top;sub=' . $context['req_forumid']),
+						'bottom' => array($txt['sp-positionBottom'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=bottom;sub=' . $context['req_forumid']),
+						'right' => array($txt['sp-positionRight'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=right;sub=' . $context['req_forumid']),
+						'footer' => array($txt['sp-positionFooter'], 'url' => $scripturl . '?action=admin;area=portalblocks;sa=footer;sub=' . $context['req_forumid']),]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Block restriction for Subforums (Subs-Portal.php)                    -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/PortalAdminBlocks.php" error="skip">
+<!-- sportal_admin_blocks_main function -->
+	<operation>
+		<search position="replace"><![CDATA[global $context, $txt, $scripturl, $sourcedir;]]></search>
+		<add><![CDATA[global $context, $txt, $scripturl, $sourcedir, $forumid;
+
+	$context['req_forumid'] = (int) (empty($_REQUEST['sub']) ? $forumid : $_REQUEST['sub']);]]></add>
+	</operation>
+
+<!-- sportal_admin_block_list function -->
+	<operation>
+		<search position="replace"><![CDATA['state_icon' => empty($block['state']) ? '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('deactive', $txt['sp-blocksActivate']) . '</a>' : '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('active', $txt['sp-blocksDeactivate']) . '</a>',
+				'edit' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=edit;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('modify') . '</a>',
+				'move' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=select;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('move', $txt['sp-adminColumnMove']) . '</a>',
+				'delete' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=delete;block_id=' . $block['id'] . ';col=' . $block['column'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '" onclick="return confirm(\''.$txt['sp-deleteblock'].'\');">' . sp_embed_image('delete') . '</a>',]]></search>
+		<add><![CDATA['state_icon' => empty($block['state']) ? '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('deactive', $txt['sp-blocksActivate']) . '</a>' : '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('active', $txt['sp-blocksDeactivate']) . '</a>',
+				'edit' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=edit;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('modify') . '</a>',
+				'move' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=select;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('move', $txt['sp-adminColumnMove']) . '</a>',
+				'delete' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=delete;block_id=' . $block['id'] . ';col=' . $block['column'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '" onclick="return confirm(\''.$txt['sp-deleteblock'].'\');">' . sp_embed_image('delete') . '</a>',]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$context['blocks'][$side['name']][$block_id]['move_insert'] = '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=move;block_id=' . $context['block_move'] . ';col=' . $block['column'] . ';row=' . $block['row'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('arrow', $txt['sp-blocks_move_here']) . '</a>';]]></search>
+		<add><![CDATA[$context['blocks'][$side['name']][$block_id]['move_insert'] = '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=move;block_id=' . $context['block_move'] . ';col=' . $block['column'] . ';row=' . $block['row'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('arrow', $txt['sp-blocks_move_here']) . '</a>';]]></add>
+	</operation>
+
+<!-- sportal_admin_block_edit function -->
+	<operation>
+		<search position="replace"><![CDATA[);
+		}
+
+		redirectexit('action=admin;area=portalblocks');]]></search>
+		<add><![CDATA[);
+		}
+
+		redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[global $txt, $context, $modSettings, $smcFunc, $sourcedir, $boarddir, $boards, $forumid]]></search>
+		<add><![CDATA[, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[	// ]]]]><![CDATA[></script>]]></search>
+		<add><![CDATA[		function sp_hideBoards(forum)
+		{';
+	foreach ($subforum_tree as $subforum)
+		$context['html_headers'] .= '
+			document.getElementById("sfm_boards' . $subforum['forumid'] . '").style.display = forum == ' . $subforum['forumid'] . ' ? "" : "none";';
+	$context['html_headers'] .= '
+		}
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['forums' => !empty($_POST['forums']) ? implode(',', array_unique($_POST['forums'])) : $forumid,]]></search>
+		<add><![CDATA['forum' => !empty($_POST['forum']) ? $_POST['forum'] : $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA["forums = {string:forums}",]]></search>
+		<add><![CDATA["forum = {int:forum}",]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['forums' => 'string',]]></search>
+		<add><![CDATA['forum' => 'int',]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[SELECT id_board, name
+			FROM {db_prefix}boards
+			ORDER BY name DESC'
+		);
+		$context['display_boards'] = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+			$context['display_boards']['b' . $row['id_board']] = $row['name'];]]></search>
+		<add><![CDATA[SELECT b.id_board, b.name, c.forumid
+			FROM {db_prefix}boards AS b
+				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			' . ($forumid == 0 ? '' : 'WHERE c.forumid = {int:forumid}') . '
+			ORDER BY name DESC',
+			array(
+				'forumid' => (int) $forumid,
+			)
+		);
+		$context['display_boards'] = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+			$context['display_boards'.$row['forumid']]['b' . $row['id_board']] = $row['name'];]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['list_blocks' => !empty($_POST['block_column']) ? getBlockInfo($_POST['block_column']) : array(),]]></search>
+		<add><![CDATA[
+			'forum' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[if (!empty($_POST['display_boards']))
+				foreach ($_POST['display_boards'] as $board)]]></search>
+		<add><![CDATA[$forum = !empty($_POST['forums']) ? $_POST['forums'] : $forumid;
+			if (!empty($_POST['display_boards' . $forum]))
+				foreach ($_POST['display_boards' . $forum] as $board)]]></add>
+	</operation>
+	
+<!-- sportal_admin_block_move function -->
+	<operation>
+		<search position="replace"><![CDATA[fixColumnRows($side);
+	}
+
+	redirectexit('action=admin;area=portalblocks');]]></search>
+		<add><![CDATA[fixColumnRows($side);
+	}
+
+	redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+	
+<!-- sportal_admin_block_delete function -->
+	<operation>
+		<search position="replace"><![CDATA[function sportal_admin_block_delete()
+{
+	global $smcFunc;]]></search>
+		<add><![CDATA[function sportal_admin_block_delete()
+{
+	global $smcFunc, $context;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[fixColumnRows($_REQUEST['col']);
+
+	// Return back to the block list.
+	redirectexit('action=admin;area=portalblocks');]]></search>
+		<add><![CDATA[fixColumnRows($_REQUEST['col']);
+
+	// Return back to the block list.
+	redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Block restriction for Subforums (Subs-Portal.php)                    -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/Subs-Portal.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null, $all_subforum = null)
+{
+	global $smcFunc, $context, $settings, $options, $txt, $forumid;
+
+	$query = array();
+	$parameters = array();
+	if (empty($all_subforum))
+	{
+		$query[] = 'FIND_IN_SET({int:forumid}, spb.forums)';
+		$parameters['forumid'] = (int) $forumid;
+	}]]></search>
+		<add><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null)
+{
+	global $smcFunc, $context, $settings, $options, $txt, $forumid;
+
+	$query = array('spb.forum = {int:forumid}');
+	$parameters = array(
+		'forumid' => (int) ($forumid == 0 ? (!empty($context['req_forumid']) ? $context['req_forumid'] : $forumid) : $forumid)
+	);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['forums' => explode(',', $row['forums']),]]></search>
+		<add><![CDATA['forum' => $row['forum'],]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[spb.display_custom, spb.style, spp.variable, spp.value, spb.forums]]></search>
+		<add><![CDATA[spb.display_custom, spb.style, spp.variable, spp.value, spb.forum]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Block restriction for Subforums (PortalAdminBlocks.template.php)     -->
+<!-------------------------------------------------------------------------->
+<file name="$themedir/PortalAdminBlocks.template.php" error="skip">
+<!-- Reversal of operation performed in v1.5 -->
+	<operation>
+		<search position="replace"><![CDATA[if (count($subforum_tree) > 1)
+	{
+		echo '
+			<br />
+			<div class="cat_bar">
+				<h3 class="catbg">', $txt['sp-subforums'], '</h3>
+			</div>
+			<div class="windowbg2">
+				<span class="topslice"><span></span></span>
+				<div class="sp_content_padding">
+					<dl class="sp_form">';
+
+		foreach ($subforum_tree as $id => $forum)
+		{
+			$forums = array();
+			foreach ($context['SPortal']['block']['list_blocks'][$_REQUEST['block_id']]['forums'] as $subforum)
+				$forums[$subforum] = 1;
+			echo '
+						<dd><input type="checkbox" name="forums[', $id, ']" value="', $id, '" id="forums', $id, '"', isset($forums[$id]) ? ' checked="checked"' : '', ' class="input_check" /><a href="', $forum['boardurl'], '">', $forum['boardname'], '</a></dd>';
+		}
+
+		echo '
+					</dl>
+					<div class="sp_button_container">
+						<input type="submit" name="add_block" value="', !$context['SPortal']['is_new'] ? $txt['sp-blocksEdit'] : $txt['sp-blocksAdd'], '" class="button_submit" />
+					</div>
+				</div>
+				<span class="botslice"><span></span></span>
+			</div>';
+	}
+	
+	echo '
+		</form>
+	</div>
+	<script language="JavaScript" type="text/javascript"><!-- // --><![CDATA[]]></search>
+		<add><![CDATA[echo '
+		</form>
+	</div>
+	<script language="JavaScript" type="text/javascript"><!-- // --><![CDATA[]]></add>
+	</operation>
+
+<!-- New operations performed in v1.6 -->
+<!-- template_block_list function -->
+	<operation>
+		<search position="replace"><![CDATA[global $context, $settings, $options, $scripturl, $txt;]]></search>
+		<add><![CDATA[global $context, $settings, $options, $scripturl, $txt, $subforum_tree;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<div id="sp_manage_blocks">';]]></search>
+		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>
+	<div id="sp_manage_blocks">';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=portalblocks">', $txt['sp-blocks_cancel_moving'], '</a>]', '</p>]]></search>
+		<add><![CDATA[<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , '">', $txt['sp-blocks_cancel_moving'], '</a>]', '</p>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<a class="sp_float_right" href="', $scripturl, '?action=admin;area=portalblocks;sa=add;col=', $side['id'], '">', sp_embed_image('add', sprintf($txt['sp-blocksCreate'], $side['label'])), '</a>
+				<a href="', $scripturl, '?action=helpadmin;help=', $side['help'], '" onclick="return reqWin(this.href);" class="help"><img src="', $settings['images_url'], '/helptopics.gif" alt="', $txt['help'], '" class="icon" /></a>
+				<a href="', $scripturl, '?action=admin;area=portalblocks;sa=', $id, '">', $side['label'], ' ', $txt['sp-blocksBlocks'], '</a>]]></search>
+		<add><![CDATA[<a class="sp_float_right" href="', $scripturl, '?action=admin;area=portalblocks;sa=add;sub=' . $context['req_forumid'] , ';col=', $side['id'], '">', sp_embed_image('add', sprintf($txt['sp-blocksCreate'], $side['label'])), '</a>
+				<a href="', $scripturl, '?action=helpadmin;help=', $side['help'], '" onclick="return reqWin(this.href);" class="help"><img src="', $settings['images_url'], '/helptopics.gif" alt="', $txt['help'], '" class="icon" /></a>
+				<a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=', $id, '">', $side['label'], ' ', $txt['sp-blocksBlocks'], '</a>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td class="sp_center"><a href="', $scripturl, '?action=admin;area=portalblocks;sa=move;block_id=', $context['block_move'], ';col=', $side['id'], ';', $context['session_var'], '=', $context['session_id'], '">', sp_embed_image('arrow', $txt['sp-blocks_move_here']), '</a></td>]]></search>
+		<add><![CDATA[<td class="sp_center"><a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=move;block_id=', $context['block_move'], ';col=', $side['id'], ';', $context['session_var'], '=', $context['session_id'], '">', sp_embed_image('arrow', $txt['sp-blocks_move_here']), '</a></td>]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[foreach($context['sides'] as $id => $side)]]></search>
+		<add><![CDATA[// Display the subforums as a tab at the top of the screen:
+	$flagged = array( 0 => false );
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+		{
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), '><a href="', $scripturl, '?action=admin;area=portalblocks;sub=', $id, (empty($_REQUEST['sa']) ? '' : ';sa=' . $_REQUEST['sa']), '">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+			$flagged[$id] = false;
+		}
+		echo '
+				</ul>
+			</div>
+		</div><hr/>';
+	}
+
+	]]></add>
+	</operation>
+
+<!-- template_block_edit function -->
+	<operation>
+		<search position="replace"><![CDATA[<form name="sp_edit_block_form" id="sp_edit_block_form" action="', $scripturl, '?action=admin;area=portalblocks;sa=edit" method="post" accept-charset="', $context['character_set'], '" onsubmit="submitonce(this);">]]></search>
+		<add><![CDATA[<form name="sp_edit_block_form" id="sp_edit_block_form" action="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=edit" method="post" accept-charset="', $context['character_set'], '" onsubmit="submitonce(this);">]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[', $txt['sp-blocksShowBlock'], ']]></search>
+		<add><![CDATA[';
+		if (count($subforum_tree) > 1)
+		{
+			echo $txt['sp-subforums'], ':
+					<select name="forum" id="forum" onchange="sp_hideBoards(this.options[this.selectedIndex].value);">';
+			foreach ($subforum_tree as $subforum)
+				echo '
+						<option value="', $subforum['forumid'], '"', ($context['req_forumid'] == $subforum['forumid']  ? ' selected="selected"' : ''), '>', $subforum['boardname'], '</option>';
+			echo '
+					</select><br/>';
+		}
+		else
+			echo '
+					<input type="hidden" name="forum" value="', $forumid, '" />';
+		echo '
+					]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$display_types = array('actions', 'boards', 'pages');
+		foreach ($display_types as $type)
+		{
+			if (empty($context['display_' . $type]))
+				continue;]]></search>
+		<add><![CDATA[$display_types = array('actions');
+		foreach ($subforum_tree as $subforum)
+			$display_types[] = 'boards' . $subforum['forumid'];
+		$display_types[] = 'pages';
+		foreach ($display_types as $type)
+		{
+			if (empty($context['display_' . $type]))
+				continue;
+			if ($need_div = empty($txt['sp-blocksSelect' . ucfirst($type)]))
+			{
+				$txt['sp-blocksSelect' . ucfirst($type)] = $txt['sp-blocksSelectBoards'];
+				echo '
+						<div id="sfm_', $type, '" name="sfm_', $type, '"', $context['SPortal']['block']['forum'] <> str_replace('boards', '', $type) ? ' style="display: none;"' : '', '>';
+			}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<li><input type="checkbox" onclick="invertAll(this, this.form, \'display_', $type, '[]\');" class="input_check" /> <em>', $txt['check_all'], '</em></li>
+						</ul>
+						<br />';]]></search>
+		<add><![CDATA[
+			if ($need_div)
+				echo '
+						</div>';]]></add>
+	</operation>
+	
+<!-- template_block_select_type function -->
+	<operation>
+		<search position="replace"><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sa=add" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=add" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- Block restriction for Subforums (Subs-PortalAdmin.php)               -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/Subs-PortalAdmin.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[function sportal_admin_state_change()
+{]]></search>
+		<add><![CDATA[function sportal_admin_state_change()
+{
+	global $context;
+
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[redirectexit('action=admin;area=portalblocks;sa=' . $list);
+	}
+	elseif($_REQUEST['type'] == 'category')
+		redirectexit('action=admin;area=portalarticles;sa=categories');
+	elseif($_REQUEST['type'] == 'article')
+		redirectexit('action=admin;area=portalarticles;sa=articles');
+	else
+		redirectexit('action=admin;area=portalconfig');]]></search>
+		<add><![CDATA[redirectexit('action=admin;area=portalblocks;sa=' . $list . ';sub=' . $context['req_forumid']);
+	}
+	elseif($_REQUEST['type'] == 'category')
+		redirectexit('action=admin;area=portalarticles;sa=categories;sub=' . $context['req_forumid']);
+	elseif($_REQUEST['type'] == 'article')
+		redirectexit('action=admin;area=portalarticles;sa=articles;sub=' . $context['req_forumid']);
+	else
+		redirectexit('action=admin;area=portalconfig;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+
+<!-------------------------------------------------------------------------->
+<!-- Reversal of operation performed in v1.5 (Subs-PortalAdmin.php)       -->
+<!-------------------------------------------------------------------------->
+	<operation error="ignore">
+		<search position="replace"><![CDATA[function fixColumnRows($column_id = null)
+{
+	global $smcFunc;
+
+	$blockList = getBlockInfo($column_id, null, null, null, null, true););]]></search>
+		<add><![CDATA[function fixColumnRows($column_id = null)
+{
+	global $smcFunc, $forumid;
+
+	$blockList = getBlockInfo($column_id);]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- SSI functions modified to work with subforums (SSI.php)              -->
+<!-------------------------------------------------------------------------->
+<file name="$boarddir/SSI.php">
+	<!-- ssi_queryPosts function -->
+	<operation>
+		<search position="before"><![CDATA[function ssi_queryPosts($query_where = '', $query_where_params = array(), $query_limit = 10, $query_order = 'm.id_msg DESC', $output_method = 'echo', $limit_body = false, $override_permissions = false)
+{
+	global $context, $settings, $scripturl, $txt, $db_prefix, $user_info]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[WHERE 1=1 ' . ($override_permissions ? '' : ']]></search>
+		<add><![CDATA[WHERE c.forumid = {int:forumid} ' . ($override_permissions ? '' : ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['current_member' => $user_info['id'],
+			'is_approved' => 1,]]></search>
+		<add><![CDATA[
+			'forumid' => (int) $forumid,]]></add>
+	</operation>
+	
+	<!-- ssi_recentTopics function -->
+	<operation>
+		<search position="before"><![CDATA[function ssi_recentTopics($num_recent = 8, $exclude_boards = null, $include_boards = null, $output_method = 'echo')
+{
+	global $context, $settings, $scripturl, $txt, $db_prefix, $user_info]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}messages AS m ON (m.id_msg = t.id_last_msg)
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[WHERE t.id_last_msg >= {int:min_message_id}]]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['current_member' => $user_info['id'],
+			'include_boards' => empty($include_boards) ? '' : $include_boards,]]></search>
+		<add><![CDATA[
+			'forumid' => (int) $forumid,]]></add>
+	</operation>
+	
+	<!-- ssi_topBoards function -->
+	<operation>
+		<search position="before"><![CDATA[function ssi_topBoards($num_top = 10, $output_method = 'echo')
+{
+	global $context, $settings, $db_prefix, $txt, $scripturl, $user_info, $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[LEFT JOIN {db_prefix}log_boards AS lb ON (lb.id_board = b.id_board AND lb.id_member = {int:current_member})]]></search>
+		<add><![CDATA[INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[AND b.id_board != {int:recycle_board}' : '') . ']]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['current_member' => $user_info['id'],
+			'recycle_board' => (int) $modSettings['recycle_board'],]]></search>
+		<add><![CDATA[
+			'forumid' => (int) $forumid,]]></add>
+	</operation>
+	
+	<!-- ssi_topTopics function -->
+	<operation>
+		<search position="before"><![CDATA[global $db_prefix, $txt, $scripturl, $user_info, $modSettings, $smcFunc, $context]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[SELECT id_topic
+			FROM {db_prefix}topics
+			WHERE num_' . ($type != 'replies' ? 'views' : 'replies') . ' != 0' . ($modSettings['postmod_active'] ? '
+				AND approved = {int:is_approved}' : '') . '
+			ORDER BY num_' . ($type != 'replies' ? 'views' : 'replies') . ' DESC
+			LIMIT {int:limit}',
+			array(
+				'is_approved' => 1,
+				'limit' => $num_topics > 100 ? ($num_topics + ($num_topics / 2)) : 100,
+			)]]></search>
+		<add><![CDATA[SELECT t.id_topic
+			FROM {db_prefix}topics AS t
+				INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)
+				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			WHERE t.num_' . ($type != 'replies' ? 'views' : 'replies') . ' != 0' . ($modSettings['postmod_active'] ? '
+				AND t.approved = {int:is_approved}' : '') . '
+				AND c.forumid = {int:forumid}
+			ORDER BY num_' . ($type != 'replies' ? 'views' : 'replies') . ' DESC
+			LIMIT {int:limit}',
+			array(
+				'is_approved' => 1,
+				'limit' => $num_topics > 100 ? ($num_topics + ($num_topics / 2)) : 100,
+				'forumid' => (int) $forumid,
+			)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}messages AS m ON (m.id_msg = t.id_first_msg)
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[AND t.id_topic IN ({array_int:topic_list})' : '') . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+			AND b.id_board != {int:recycle_enable}' : '') . ']]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['recycle_enable' => $modSettings['recycle_board'],
+			'limit' => $num_topics,]]></search>
+		<add><![CDATA[
+			'forumid' => (int) $forumid,]]></add>
+	</operation>
+	
+	<!-- ssi_boardStats function -->
+	<operation>
+		<search position="before"><![CDATA[global $db_prefix, $txt, $scripturl, $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$totals = array(
+		'members' => $modSettings['totalMembers'],
+		'posts' => $modSettings['totalMessages'],
+		'topics' => $modSettings['totalTopics']
+	);
+
+	$result = $smcFunc['db_query']('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}boards',
+		array(
+		)
+	);
+	list ($totals['boards']) = $smcFunc['db_fetch_row']($result);
+	$smcFunc['db_free_result']($result);
+
+	$result = $smcFunc['db_query']('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}categories',
+		array(
+		)]]></search>
+		<add><![CDATA[$result = $smcFunc['db_query']('', '
+		SELECT COUNT(b.id_board) AS boards, SUM(b.num_topics) AS topics, SUM(b.num_posts) AS posts
+		FROM {db_prefix}boards AS b
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+		WHERE c.forumid = {int:forumid}',
+		array(
+			'forumid' => (int) $forumid,
+		)
+	);
+	$row = $smcFunc['db_fetch_assoc']($result);
+	$totals = array(
+		'members' => $modSettings['totalMembers'],
+		'boards' => $row['boards'],
+		'topics' => $row['topics'],
+		'posts' => $row['posts'],
+	);
+	$smcFunc['db_free_result']($result);
+
+	$result = $smcFunc['db_query']('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}categories AS c
+		WHERE c.forumid = {int:forumid}',
+		array(
+			'forumid' => (int) $forumid,
+		)]]></add>
+	</operation>
+	
+	<!-- ssi_recentPoll function -->
+	<operation>
+		<search position="before"><![CDATA[function ssi_recentPoll($topPollInstead = false, $output_method = 'echo')
+{
+	global $db_prefix, $txt, $settings, $boardurl, $user_info, $context, $smcFunc, $modSettings]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)' . ($topPollInstead ? ']]></search>
+		<add><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)' . ($topPollInstead ? ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[AND b.id_board IN ({array_int:boards_allowed_list})' : '') . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+			AND b.id_board != {int:recycle_enable}' : '') . ']]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['current_time' => time(),
+			'recycle_enable' => $modSettings['recycle_board'],]]></search>
+		<add><![CDATA[
+			'forumid' => (int) $forumid,]]></add>
+	</operation>
+	
+	<!-- ssi_showPoll function -->
+	<operation>
+		<search position="before"><![CDATA[function ssi_showPoll($topic = null, $output_method = 'echo')
+{
+	global $db_prefix, $txt, $settings, $boardurl, $user_info, $context, $smcFunc, $modSettings]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)
+		WHERE t.id_topic = {int:current_topic}]]></search>
+		<add><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+		WHERE t.id_topic = {int:current_topic}
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['boards_allowed_see' => $boardsAllowed,]]></search>
+		<add><![CDATA[
+			'forumid' => (int) $forumid,]]></add>
+	</operation>
+	
+	<!-- ssi_pollVote function -->
+	<operation>
+		<search position="before"><![CDATA[function ssi_pollVote()
+{
+	global $context, $db_prefix, $user_info, $sc, $smcFunc, $sourcedir, $modSettings]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}topics AS t ON (t.id_poll = {int:current_poll})
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[WHERE p.id_poll = {int:current_poll}]]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['current_poll' => $_POST['poll'],
+			'is_approved' => 1,]]></search>
+		<add><![CDATA[
+			'forumid' => (int) $forumid,]]></add>
+	</operation>
+	
+	<!-- ssi_boardNews function -->
+	<operation>
+		<search position="before"><![CDATA[global $scripturl, $db_prefix, $txt, $settings, $modSettings, $context]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[SELECT id_board
+		FROM {db_prefix}boards
+		WHERE ' . ($board === null ? '' : 'id_board = {int:current_board}
+			AND ') . 'FIND_IN_SET(-1, member_groups) != 0
+		LIMIT 1',
+		array(
+			'current_board' => $board,
+		)]]></search>
+		<add><![CDATA[SELECT b.id_board
+		FROM {db_prefix}boards AS b
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+		WHERE ' . ($board === null ? '' : 'id_board = {int:current_board}
+			AND ') . 'FIND_IN_SET(-1, member_groups) != 0
+			AND c.forumid = {int:forumid}
+		LIMIT 1',
+		array(
+			'current_board' => $board,
+			'forumid' => (int) $forumid,
+		)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[SELECT t.id_first_msg
+		FROM {db_prefix}topics as t
+		LEFT JOIN {db_prefix}boards as b ON (b.id_board = t.id_board)
+		WHERE t.id_board = {int:current_board}' . ($modSettings['postmod_active'] ? '
+			AND t.approved = {int:is_approved}' : '') . '
+			AND {query_see_board}
+		ORDER BY t.id_first_msg DESC
+		LIMIT ' . $start . ', ' . $limit,
+		array(
+			'current_board' => $board,
+			'is_approved' => 1,
+		)]]></search>
+		<add><![CDATA[SELECT t.id_first_msg
+		FROM {db_prefix}topics as t
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			LEFT JOIN {db_prefix}boards as b ON (b.id_board = t.id_board)
+		WHERE t.id_board = {int:current_board}' . ($modSettings['postmod_active'] ? '
+			AND t.approved = {int:is_approved}' : '') . '
+			AND {query_see_board}
+			AND c.forumid = {int:forumid}
+		ORDER BY t.id_first_msg DESC
+		LIMIT ' . $start . ', ' . $limit,
+		array(
+			'current_board' => $board,
+			'is_approved' => 1,
+			'forumid' => (int) $forumid,
+		)]]></add>
+	</operation>
+	
+	<!-- ssi_recentAttachments function -->
+	<operation>
+		<search position="before"><![CDATA[global $smcFunc, $context, $modSettings, $scripturl, $txt, $settings]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}topics AS t ON (t.id_topic = m.id_topic)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)
+			INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[AND att.approved = {int:is_approved}') . '
+		ORDER BY att.id_attach DESC
+		LIMIT {int:num_attachments}',
+		array(
+			'boards_can_see' => $attachments_boards,]]></search>
+		<add><![CDATA[AND att.approved = {int:is_approved}') . '
+			AND c.forumid = {int:forumid}
+		ORDER BY att.id_attach DESC
+		LIMIT {int:num_attachments}',
+		array(
+			'forumid' => (int) $forumid,
+			'boards_can_see' => $attachments_boards,]]></add>
+	</operation>
+</file>
+</modification>

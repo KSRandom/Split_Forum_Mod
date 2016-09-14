@@ -15,7 +15,7 @@
 <file name="$sourcedir/Admin.php">
 	<operation>
 		<search position="replace"><![CDATA[loadTemplate('Admin', 'admin');]]></search>
-		<add><![CDATA[loadTemplate('Admin', array('admin', 'realtabs'));]]></add>
+		<add><![CDATA[loadTemplate('Admin', array('admin', 'splitforum'));]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// Any files to include for administration?]]></search>
