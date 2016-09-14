@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.34</version>
+
+<file name="$sourcedir/ManageRegistration.php">
+	<operation>
+		<search position="replace"><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);]]></search>
+		<add><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';]]></search>
+	</operation>
+</file>
+<file name="$sourcedir/MoveTopic.php">
+    <operation>
+        <search position="before"><![CDATA[global $txt, $board, $topic, $user_info, $context, $language, $scripturl, $settings, $smcFunc, $modSettings]]></search>
+        <add><![CDATA[, $forumid]]></add>
+    </operation>
+    <operation>
+        <search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+        <add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid}))]]></add>
+    </operation>
+    <operation>
+        <search position="before"><![CDATA['blank_redirect' => '',
+			'current_board' => $board,]]></search>
+        <add><![CDATA[
+            'forumid' => (int) $forumid,]]></add>
+    </operation>
+</file>
+<file name="$sourcedir/Register.php">
+	<operation>
+		<search position="replace"><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);]]></search>
+		<add><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';]]></search>
+	</operation>
+</file>
+</modification>

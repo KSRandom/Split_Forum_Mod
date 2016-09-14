@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.33</version>
+<version>1.34</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source File Edits														-->
@@ -941,7 +941,7 @@ function EditBoard()
 	$context['agreement'] = file_exists($boarddir . '/agreement' . $context['current_agreement'] . '.txt') ? htmlspecialchars(file_get_contents($boarddir . '/agreement' . $context['current_agreement'] . '.txt')) : '';
 	$context['warning'] = is_writable($boarddir . '/agreement' . $context['current_agreement'] . '.txt') ? '' : $txt['agreement_not_writable'];]]></search>
 		<add><![CDATA[// Try to figure out if we have more agreements.
-	$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);
+	$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';
 	foreach ($context['languages'] as $lang)
 	{
 		if (file_exists($boarddir . '/' . $agree . $lang['filename'] . '.txt'))
@@ -979,6 +979,22 @@ function EditBoard()
 		<search position="replace"><![CDATA['boarddir', 'sourcedir', 'cachedir',]]></search>
 		<add><![CDATA['boarddir', 'sourcedir', 'cachedir', 'favicon',]]></add>
 	</operation>
+</file>
+<file name="$sourcedir/MoveTopic.php">
+    <operation>
+        <search position="before"><![CDATA[global $txt, $board, $topic, $user_info, $context, $language, $scripturl, $settings, $smcFunc, $modSettings]]></search>
+        <add><![CDATA[, $forumid]]></add>
+    </operation>
+    <operation>
+        <search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+        <add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid}))]]></add>
+    </operation>
+    <operation>
+        <search position="before"><![CDATA['blank_redirect' => '',
+			'current_board' => $board,]]></search>
+        <add><![CDATA[
+            'forumid' => (int) $forumid,]]></add>
+    </operation>
 </file>
 <file name="$sourcedir/News.php">
 	<operation>
@@ -1380,7 +1396,7 @@ function EditBoard()
 		elseif (file_exists($boarddir . '/agreement.txt'))
 			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/agreement.txt'), true, 'agreement');]]></search>
 		<add><![CDATA[// Have we got a localized one?
-		$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);
+		$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';
 		if (file_exists($boarddir . '/' . $agree . $user_info['language'] . '.txt'))
 			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/' . $agree . $user_info['language'] . '.txt'), true, 'agreement_' . $user_info['language']);
 		elseif (file_exists($boarddir . '/' . $agree . '.txt'))
@@ -2274,7 +2290,7 @@ function template_modify_category()
 	}]]></add>
 	</operation>
 
-	<operation error="skip">
+	<operation error="ignore">
 		<search position="replace"><![CDATA[<div id="alias_board"', ($context['board']['alias_board'] == 0 ? ' style="display: none;"' : ''), '>
 					<fieldset>
 						<legend>', $txt['mboards_alias_legend'], '</legend>]]></search>
@@ -2304,7 +2320,7 @@ function template_modify_category()
 					<fieldset>', (count($subforum_tree) == 1 ? '
 						<legend>' . $txt['mboards_alias_legend'] . '</legend>' : ''), ']]></add>
 	</operation>
-	<operation error="skip">
+	<operation error="ignore">
 		<search position="replace"><![CDATA[$last_cat = 0;
 	foreach ($boards as $id => $board)
 	{
@@ -2324,7 +2340,7 @@ function template_modify_category()
 		}
 		]]></add>
 	</operation>
-	<operation error="skip">
+	<operation error="ignore">
 		<search position="replace"><![CDATA[<input type="radio" name="alias_board" value="', $board['id'], '"', ($context['board']['alias_board'] == $board['id'] ? ' checked="checked"' : ''), '>', $board['name'], '<br />';
 	}
 	echo '

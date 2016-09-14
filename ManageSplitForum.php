@@ -136,20 +136,17 @@ Function EditSubForum($sub)
 		array('text', 'subforum_modify_favicon', 'size' => 40),
 		array('select', 'subforum_modify_subtheme', $installed_themes),
 		array('select', 'subforum_modify_language', $languages),
-		//'',
-		array('title', 'subforum_modify_dontchange'),
-		array('text', 'subforum_modify_forumid', 'size' => 40,
-			'javascript' => ((!empty($forumid) || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
-		array('text', 'subforum_modify_forumdir', 'size' => 40,
-			'javascript' => ((!empty($forumid) || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
 		array('select', 'subforum_modify_primary_membergroup', $primary),
 	);
-	if (!empty($sub) || $_REQUEST['sa'] == 'newsub')
-		$config_vars[] = array('check', 'subforum_modify_news');
-	foreach ($subforum_tree[$sub] as $var => $val)
-		$modSettings['subforum_modify_' . $var] = $val;
-	$modSettings['subforum_modify_news'] = ($_REQUEST['sa'] == 'newsub');
-	$subforum_tree[$sub]['sp_portal'] = (isset($subforum_tree[$sub]['sp_portal']) ? $subforum_tree[$sub]['sp_portal'] : 0);
+	if (!empty($forumid) || ($_REQUEST['sa'] != 'newsub' && $sub == 0))
+	{
+		$config_vars = array_merge($config_vars, array(
+			array('title', 'subforum_modify_dontchange'),
+			array('text', 'subforum_modify_forumid', 'size' => 40),
+			array('text', 'subforum_modify_forumdir', 'size' => 40),
+			array('check', 'subforum_modify_news')
+		);
+	}
 
 	// Define the options for copying/deleting/defaulting the blocks:
 	$options = array(-1 => $txt['subforum_modify_sp_blocks_nothing']);
@@ -224,6 +221,12 @@ Function EditSubForum($sub)
 		$modSettings['subforum_modify_prettyURL_enable'] = $modSettings['pretty_enable_filters'];
 	}
 
+	// Populate the settings so that the user can modify things:
+	foreach ($subforum_tree[$sub] as $var => $val)
+		$modSettings['subforum_modify_' . $var] = $val;
+	$modSettings['subforum_modify_news'] = ($_REQUEST['sa'] == 'newsub');
+	$subforum_tree[$sub]['sp_portal'] = (isset($subforum_tree[$sub]['sp_portal']) ? $subforum_tree[$sub]['sp_portal'] : 0);
+
 	// Needed for the settings template
 	require_once($sourcedir . '/ManageServer.php');
 	$context['sub_template'] = 'show_settings';
@@ -246,9 +249,13 @@ function SaveSubForum($sub)
 	isAllowedTo('admin_forum');
 
 	// Filter all the information passed to this function, putting all the information into the array:
+	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : $forumid);
 	$arr['boardurl'] = (isset($_POST['subforum_modify_boardurl']) ?  $_POST['subforum_modify_boardurl']  : '');
 	if (strpos($arr['boardurl'], 'http://') !== false && strpos($arr['boardurl'], 'https://') !== false)
 		$arr['boardurl'] = 'http://' . $arr['boardurl'];
+	$arr['forumdir'] = ($sub == 0 ?  $boarddir : (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''));
+	$arr['forumdir'] = str_replace('http://', '', str_replace('https://', '', $arr['forumdir']));
+
 	$arr['boardname'] = (isset($_POST['subforum_modify_boardname']) ?  $_POST['subforum_modify_boardname']  : '');
 	$arr['subtheme'] = (int) (isset($_POST['subforum_modify_subtheme']) ? $_POST['subforum_modify_subtheme'] : 0);
 	$arr['language'] = (isset($_POST['subforum_modify_language']) ?  $_POST['subforum_modify_language']  : '');
@@ -256,9 +263,6 @@ function SaveSubForum($sub)
 	if (strpos($arr['favicon'], 'http://') !== false && strpos($arr['favicon'], 'https://') !== false)
 		$arr['favicon'] = 'http://' . $arr['favicon'];
 	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary_membergroup']) ? $_POST['subforum_modify_primary_membergroup'] : '');
-	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : $forumid);
-	$arr['forumdir'] = ($sub == 0 ?  $boarddir : (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''));
-	$arr['forumdir'] = str_replace('http://', '', str_replace('https://', '', $arr['forumdir']));
 
 	// Pretty URL support:
 	if (file_exists($sourcedir . '/Subs-PrettyUrls.php'))
@@ -452,10 +456,6 @@ function DeleteSubForum($sub)
 		redirectexit('action=admin;area=subforums');
 	}
 
-	// Let's call hook function(s) to handle subdomain/domain removal:
-	$arr['action'] = 'delete';
-	call_integration_hook('integrate_subforum_subdomain', array(&$arr));
-
 	// Let user decide what to do with the contents:
 	$context['sub_template'] = 'subforums_delete';
 	$context['page_title'] = $txt['subforum_delete_title'];
@@ -499,7 +499,12 @@ function DeleteSubForum($sub)
 			foreach ($context['categories'] as $catid => $category)
 				deleteCategories(array($catid));
 		}
+
+		// Let's call hook function(s) to handle subdomain/domain removal:
 		delete_subforum($sub);
+		$arr = array('action' => 'delete', 'forumid' => $sub);
+		call_integration_hook('integrate_subforum_subdomain', array(&$arr));
+
 		redirectexit('action=admin;area=subforums');
 	}
 	if (isset($_POST['cancel']))

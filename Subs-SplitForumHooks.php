@@ -20,20 +20,12 @@ function SplitForum_PreLoad()
 	global $boardurl, $cookiename, $boarddir, $forumid, $mbname;
 	global $subtheme, $language, $favicon, $subforum_tree, $modSettings;
 
-	// Each subforum is effectively an alias, so let's add all of the them to $modSettings:
-	$urls = array();
-	if (!empty($modSettings['forum_alias_urls']))
-		$urls = explode(',', $modSettings['forum_alias_urls']);
-	foreach ($subforum_tree as $subforum)
-		$urls[] = $subforum['boardurl'];
-	$modSettings['forum_alias_urls'] = implode(',', array_unique($urls));
-
 	// Define primary subforum entry if it is not already defined:
 	if (!is_array($subforum_tree))
 	{
 		$subforum_tree = array(
 			0 => array(		// Primary subforum
-				'forumid' => 0,
+				'forumid' => $forumid = 0,
 				'boardurl' => $boardurl,
 				'boardname' => $mbname,
 				'language' => $language,
@@ -44,56 +36,71 @@ function SplitForum_PreLoad()
 			),
 		);
 	}
-
-	// Determine which subforum we are in and load settings for it ONLY IF not already done:
-	if (empty($forumid))
+	else
 	{
-		$host = strtolower($_SERVER['SERVER_NAME']);
-		$uri = str_replace('/index.php', '', substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/')));
-		foreach ($subforum_tree as $id => $row)
+		// Set the primary forum to whatever the url and directory is set in Settings.php:
+		$subforum_tree[0]['boardurl'] = $boardurl;
+		$subforum_tree[0]['forumdir'] = $forumdir;
+
+		// Determine which subforum we are in and load settings for it ONLY IF not already done:
+		if (empty($forumid))
 		{
-			$url = parse_url($row['boardurl']);
-			$test1 = strtolower($url['host']);
-			$test2 = strtolower(str_replace('www.', '', $test1));
-			$check = ($test1 == $host || $test2 == $host);
-			if (isset($url['path']))
-				$check = $check && (strpos($uri, substr($url['path'], 1)) > 0);
-			if (!$check && !empty($row['sp_standalone']))
+			$forumid = 0;
+			$host = strtolower($_SERVER['SERVER_NAME']);
+			$uri = str_replace('/index.php', '', substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/')));
+			foreach ($subforum_tree as $id => $row)
 			{
-				$url = parse_url($row['sp_standalone']);
+				$url = parse_url($row['boardurl']);
 				$test1 = strtolower($url['host']);
 				$test2 = strtolower(str_replace('www.', '', $test1));
 				$check = ($test1 == $host || $test2 == $host);
 				if (isset($url['path']))
-					$check = ($check && $url['path'] == $uri);
-			}			
-			if ($check)
-				$forumid = (int) $row['forumid'];
+					$check = $check && (strpos($uri, substr($url['path'], 1)) > 0);
+				if (!$check && !empty($row['sp_standalone']))
+				{
+					$url = parse_url($row['sp_standalone']);
+					$test1 = strtolower($url['host']);
+					$test2 = strtolower(str_replace('www.', '', $test1));
+					$check = ($test1 == $host || $test2 == $host);
+					if (isset($url['path']))
+						$check = ($check && $url['path'] == $uri);
+				}			
+				if ($check)
+					$forumid = (int) $row['forumid'];
+			}
 		}
+
+		// Overwrite certain board settings with the Subforum setting if available:
+		$row = &$subforum_tree[$forumid];
+		$boardurl = !empty($row['boardurl']) ? $row['boardurl'] : $boardurl;
+		$forumdir = !empty($row['forumdir']) ? $row['forumdir'] : $forumdir;
+		$subtheme = !empty($row['subtheme']) ? $row['subtheme'] : $subtheme;
+		$mbname = !empty($row['boardname']) ? $row['boardname'] : $mbname;
+		$language = !empty($row['language']) ? $row['language'] : $language;
+		$favicon = !empty($row['favicon']) ? $row['favicon'] : $favicon;
+		$modSettings['primary_membergroup'] = !empty($row['primary_membergroup']) ? $row['primary_membergroup'] : 0;
+		$modSettings['news' . $forumid] = !empty($modSettings['news' . $forumid]) ? $modSettings['news' . $forumid] : $modSettings['news']);
+
+		// Overwrite settings related to Pretty URLs:
+		if (isset($modSettings['pretty_root_url']))
+			$modSettings['pretty_root_url'] = !empty($row['boardurl']) ? $row['boardurl'] : $modSettings['pretty_root_url'];
+		if (isset($row['enable_pretty']))
+			$modSettings['pretty_enable_filters'] = !empty($row['enable_pretty']) ? $row['enable_pretty'] : $modSettings['pretty_enable_filters'];
+
+		// Overwrite settings related to Simple Portal:
+		if (isset($row['sp_portal']))
+			$modSettings['sp_portal_mode'] = !empty($row['sp_portal']) ? $row['sp_portal'] : $modSettings['sp_portal_mode'];
+		if (isset($row['sp_standalone']))
+			$modSettings['sp_standalone_url'] = !empty($row['sp_standalone']) ? $row['sp_standalone'] : ;$modSettings['sp_standalone_url'];
 	}
 
-	// Overwrite certain board settings with the Subforum setting if available:
-	$row = &$subforum_tree[$forumid];
-	$boardurl = $row['boardurl'];
-	$forumdir = $row['forumdir'];
-	$subtheme = $row['subtheme'];
-	$mbname = $row['boardname'];
-	$language = $row['language'];
-	$favicon = $row['favicon'];
-	$modSettings['primary_membergroup'] = $row['primary_membergroup'];
-	$modSettings['news' . $forumid] = (isset($modSettings['news' . $forumid]) ? $modSettings['news' . $forumid] : $modSettings['news']);
-
-	// Overwrite settings related to Pretty URLs:
-	if (isset($modSettings['pretty_root_url']))
-		$modSettings['pretty_root_url'] = $row['boardurl'];
-	if (isset($row['enable_pretty']))
-		$modSettings['pretty_enable_filters'] = $row['enable_pretty'];
-
-	// Overwrite settings related to Simple Portal:
-	if (isset($row['sp_portal']))
-		$modSettings['sp_portal_mode'] = $row['sp_portal'];
-	if (isset($row['sp_standalone']))
-		$modSettings['sp_standalone_url'] = $row['sp_standalone'];
+	// Each subforum is effectively an alias, so let's add all of the them to $modSettings:
+	$urls = array();
+	if (!empty($modSettings['forum_alias_urls']))
+		$urls = explode(',', $modSettings['forum_alias_urls']);
+	foreach ($subforum_tree as $subforum)
+		$urls[] = $subforum['boardurl'];
+	$modSettings['forum_alias_urls'] = implode(',', array_unique($urls));
 }
 
 function SplitForum_EzPortal_Init()

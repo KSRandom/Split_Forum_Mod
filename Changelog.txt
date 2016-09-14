@@ -1,3 +1,10 @@
+v1.34 - June 12th, 2016
+o SMF 2.0: Fixed issue in MoveTopic.php where destination boards weren't limited to that subforum.
+o Added error checking to make sure removal of subforum tree elements doesn't generate errors.
+o Added code to always "fix" primary forum URLs and path using defaults in Settings.php.
+o Removed ability to change path and URL for primary forum (subforum # 0).
+o Fixed issue so that the Alias Boards operations are ignored if it isn't installed.
+
 v1.33 - April 19th, 2016
 o SMF 2.0: Added full support for Alias Boards v2.x mod to this mod.
 o Removed support for Alias Boards v1.x mod from this mod.
