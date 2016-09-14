@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.30</version>
+
+<!-------------------------------------------------------------------------->
+<!-- EZ Portal block management                                           -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/EzPortal2.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[INSERT INTO {db_prefix}ezp_block_layout
+			, forum)
+			VALUES]]></search>
+		<add><![CDATA[INSERT INTO {db_prefix}ezp_block_layout
+			(id_column, id_block, id_order, customtitle, permissions, blockmanagers, can_collapse, active, blockdata, id_icon, hidetitlebar, forum)
+			VALUES]]></search>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-EzPortalMain2.php" error="skip">
+	<operation>
+		<search position="after"><![CDATA[}
+}
+
+function SetupEditor()]]></search>
+		<add><![CDATA[	SplitForum_EzPortal_Init();
+	]]></add>
+	</operation>
+</file>
+<operation>
+<file name="$themedir/EzPortal2.template.php" error="skip">
+	<search position="before"><![CDATA[
+        </h3>
+  </div>
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>';
+
+	// Display the subforums as a tab at the top of the screen:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+		echo '
+				</ul>
+			</div>
+		</div>';
+	}
+	foreach ($subforum_tree as $sub => $data)
+	{
+	echo '
+<div id="subforum' . $sub . '"' . ($sub <> $forumid ? ' style="display: none;"' : '') . '>]]></search>
+		<add><![CDATA[
+        </h3>
+  </div>]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[' . $txt['ezp_blocks']  . '
+        </h3>
+  </div>]]></search>
+		<add><![CDATA[
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>';
+
+	// Display the subforums as a tab at the top of the screen:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+		echo '
+				</ul>
+			</div>
+		</div>';
+	}
+	foreach ($subforum_tree as $sub => $data)
+	{
+	echo '
+<div id="subforum' . $sub . '"' . ($sub <> $forumid ? ' style="display: none;"' : '') . '>]]></add>
+	</operation>
+</file>
+<file name="$themedir/EzPortal2.1.template.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_settings()
+{
+	global $context, $txt, $ezPortalVersion, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_blocks()
+{
+	global $context, $txt, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[' . $txt['ezp_blocks']  . '
+        </h3>
+  </div>]]></search>
+		<add><![CDATA[
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>';
+
+	// Display the subforums as a tab at the top of the screen:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+		echo '
+				</ul>
+			</div>
+		</div>';
+	}
+	foreach ($subforum_tree as $sub => $data)
+	{
+	echo '
+<div id="subforum' . $sub . '"' . ($sub <> $forumid ? ' style="display: none;"' : '') . '>]]></add>
+	</operation>
+</file>
+<file name="$themedir/EzPortal2.1.template.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_settings()
+{
+	global $context, $txt, $ezPortalVersion, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_blocks()
+{
+	global $context, $txt, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[' . $txt['ezp_blocks']  . '
+        </h3>
+  </div>]]></search>
+		<add><![CDATA[
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>';
+
+	// Display the subforums as a tab at the top of the screen:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+		echo '
+				</ul>
+			</div>
+		</div>';
+	}
+	foreach ($subforum_tree as $sub => $data)
+	{
+	echo '
+<div id="subforum' . $sub . '"' . ($sub <> $forumid ? ' style="display: none;"' : '') . '>]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" action="', $scripturl, '?action=ezportal;sa=blocks2]]></search>
+		<add><![CDATA[;sub=' . $sub . ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<a href="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock;column=',$row['id_column'],']]></search>
+		<add><![CDATA[;sub=' . $sub . ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach($row['blocks'] as $blockRow)]]></search>
+		<add><![CDATA[$blocks = isset($row['blocks'][$sub]) ? $row['blocks'][$sub] : array();
+					foreach($blocks as $blockRow)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[</table>';
+
+
+}
+
+function template_ezportal_import()]]></search>
+		<add><![CDATA[</table>
+</div>';
+}
+
+}
+
+function template_ezportal_import()]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock2]]></search>
+		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=ezportal;sa=addblock3]]></search>
+		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
+		<add><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
+		<add><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
+	</operation>
+</file>
+</modification>

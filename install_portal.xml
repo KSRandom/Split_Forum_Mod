@@ -1,0 +1,633 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.30</version>
+
+<!-------------------------------------------------------------------------->
+<!-- Simple Portal block management                                       -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/PortalAdminBlocks.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[global $txt, $context, $modSettings, $smcFunc, $sourcedir, $boarddir, $boards]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['style' => sportal_parse_style('implode'),
+		);]]></search>
+		<add><![CDATA['style' => sportal_parse_style('implode'),
+			'forum' => !empty($_POST['forum']) ? $_POST['forum'] : $forumid,
+		);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['style' => 'string',
+				),
+				$blockInfo,
+				array('id_block')]]></search>
+		<add><![CDATA['style' => 'string',
+					'forum' => 'int',
+				),
+				$blockInfo,
+				array('id_block')]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA["style = {string:style}",]]></search>
+		<add><![CDATA[
+				"forum = {int:forum}",]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $context, $txt, $sourcedir;]]></search>
+		<add><![CDATA[global $context, $txt, $sourcedir, $forumid;
+
+	$context['req_forumid'] = (int) (empty($_REQUEST['sub']) ? $forumid : $_REQUEST['sub']);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['state_icon' => empty($block['state']) ? '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('deactive', $txt['sp-blocksActivate']) . '</a>' : '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('active', $txt['sp-blocksDeactivate']) . '</a>',
+				'edit' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=edit;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('modify') . '</a>',
+				'move' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=select;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('move', $txt['sp-adminColumnMove']) . '</a>',
+				'delete' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=delete;block_id=' . $block['id'] . ';col=' . $block['column'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '" onclick="return confirm(\''.$txt['sp-deleteblock'].'\');">' . sp_embed_image('delete') . '</a>',]]></search>
+		<add><![CDATA['state_icon' => empty($block['state']) ? '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('deactive', $txt['sp-blocksActivate']) . '</a>' : '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('active', $txt['sp-blocksDeactivate']) . '</a>',
+				'edit' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=edit;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('modify') . '</a>',
+				'move' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=select;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('move', $txt['sp-adminColumnMove']) . '</a>',
+				'delete' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=delete;block_id=' . $block['id'] . ';col=' . $block['column'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '" onclick="return confirm(\''.$txt['sp-deleteblock'].'\');">' . sp_embed_image('delete') . '</a>',]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$context['blocks'][$side['name']][$block_id]['move_insert'] = '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=move;block_id=' . $context['block_move'] . ';col=' . $block['column'] . ';row=' . $block['row'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('arrow', $txt['sp-blocks_move_here']) . '</a>';]]></search>
+		<add><![CDATA[$context['blocks'][$side['name']][$block_id]['move_insert'] = '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=move;block_id=' . $context['block_move'] . ';col=' . $block['column'] . ';row=' . $block['row'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('arrow', $txt['sp-blocks_move_here']) . '</a>';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[);
+		}
+
+		redirectexit('action=admin;area=portalblocks');]]></search>
+		<add><![CDATA[);
+		}
+
+		redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[	// ]]]]><![CDATA[></script>]]></search>
+		<add><![CDATA[		function sp_hideBoards(forum)
+		{';
+	foreach ($subforum_tree as $subforum)
+		$context['html_headers'] .= '
+			document.getElementById("sfm_boards' . $subforum['forumid'] . '").style.display = forum == ' . $subforum['forumid'] . ' ? "" : "none";';
+	$context['html_headers'] .= '
+		}
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[SELECT id_board, name
+			FROM {db_prefix}boards
+			ORDER BY name DESC'
+		);
+		$context['display_boards'] = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+			$context['display_boards']['b' . $row['id_board']] = $row['name'];]]></search>
+		<add><![CDATA[SELECT b.id_board, b.name, c.forumid
+			FROM {db_prefix}boards AS b
+				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			' . ($forumid == 0 ? '' : 'WHERE c.forumid = {int:forumid}') . '
+			ORDER BY name DESC',
+			array(
+				'forumid' => (int) $forumid,
+			)
+		);
+		$context['display_boards'] = array();
+		while ($row = $smcFunc['db_fetch_assoc']($request))
+			$context['display_boards'.$row['forumid']]['b' . $row['id_board']] = $row['name'];]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['list_blocks' => !empty($_POST['block_column']) ? getBlockInfo($_POST['block_column']) : array(),]]></search>
+		<add><![CDATA[
+			'forum' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[if (!empty($_POST['display_boards']))
+				foreach ($_POST['display_boards'] as $board)]]></search>
+		<add><![CDATA[$forum = !empty($_POST['forums']) ? $_POST['forums'] : $forumid;
+			if (!empty($_POST['display_boards' . $forum]))
+				foreach ($_POST['display_boards' . $forum] as $board)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[fixColumnRows($side);
+	}
+
+	redirectexit('action=admin;area=portalblocks');]]></search>
+		<add><![CDATA[fixColumnRows($side);
+	}
+
+	redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[function sportal_admin_block_delete()
+{
+	global $smcFunc;]]></search>
+		<add><![CDATA[function sportal_admin_block_delete()
+{
+	global $smcFunc, $context;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[fixColumnRows($_REQUEST['col']);
+
+	// Return back to the block list.
+	redirectexit('action=admin;area=portalblocks');]]></search>
+		<add><![CDATA[fixColumnRows($_REQUEST['col']);
+
+	// Return back to the block list.
+	redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/PortalAdminMain.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[global $smcFunc, $context, $scripturl, $txt]]></search>
+		<add><![CDATA[, $subforum_tree, $forumid, $sourcedir]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[saveDBSettings($config_vars);
+		redirectexit('action=admin;area=portalconfig;sa=generalsettings');]]></search>
+		<add><![CDATA[// Update the subforum array with the new settings:
+		$subforum_tree[$forumid]['sp_portal'] = (int) $_POST['sp_portal_mode'];
+		$subforum_tree[$forumid]['sp_standalone'] = $_POST['sp_standalone_url'];
+
+		// Place the revised subforum array into the Settings.php file:
+		require_once($sourcedir.'/Subs-Admin.php');
+		updateSettingsFile(array('subforum_tree' => str_replace("\n", "", var_export($subforum_tree, true))));
+
+		]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Portal.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[spb.display_custom, spb.style, spp.variable, spp.value]]></search>
+		<add><![CDATA[, spb.forum]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null)
+{
+	global $smcFunc, $context, $options, $txt;
+
+	$query = array();
+	$parameters = array();]]></search>
+		<add><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null)
+{
+	global $smcFunc, $context, $options, $txt, $forumid;
+
+	$query = array('spb.forum = {int:forumid}');
+	$parameters = array(
+		'forumid' => (int) ($forumid == 0 ? (!empty($context['req_forumid']) ? $context['req_forumid'] : $forumid) : $forumid)
+	);]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['parameters' => array(),]]></search>
+		<add><![CDATA[
+				'forum' => $row['forum'],]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-PortalAdmin.php" error="skip">
+	<operation error="ignore">
+		<search position="replace"><![CDATA[function fixColumnRows($column_id = null)
+{
+	global $smcFunc;]]></search>
+		<add><![CDATA[function fixColumnRows($column_id = null)
+{
+	global $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function sportal_admin_state_change()
+{]]></search>
+		<add><![CDATA[function sportal_admin_state_change()
+{
+	global $context;
+
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[redirectexit('action=admin;area=portalblocks;sa=' . $list);
+	}
+	elseif($_REQUEST['type'] == 'category')
+		redirectexit('action=admin;area=portalarticles;sa=categories');
+	elseif($_REQUEST['type'] == 'article')
+		redirectexit('action=admin;area=portalarticles;sa=articles');
+	else
+		redirectexit('action=admin;area=portalconfig');]]></search>
+		<add><![CDATA[redirectexit('action=admin;area=portalblocks;sa=' . $list . ';sub=' . $context['req_forumid']);
+	}
+	elseif($_REQUEST['type'] == 'category')
+		redirectexit('action=admin;area=portalarticles;sa=categories;sub=' . $context['req_forumid']);
+	elseif($_REQUEST['type'] == 'article')
+		redirectexit('action=admin;area=portalarticles;sa=articles;sub=' . $context['req_forumid']);
+	else
+		redirectexit('action=admin;area=portalconfig;sub=' . $context['req_forumid']);]]></add>
+	</operation>
+</file>
+<file name="$themedir/PortalAdminBlocks.template.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[global $context, $settings, $options, $scripturl, $txt, $helptxt, $modSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function template_block_list()
+{
+	global ]]></search>
+		<add><![CDATA[function template_block_list()
+{
+	global $subforum_tree, ]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<div id="sp_manage_blocks">';]]></search>
+		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>
+	<div id="sp_manage_blocks">';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=portalblocks">', $txt['sp-blocks_cancel_moving'], '</a>]', '</p>]]></search>
+		<add><![CDATA[<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , '">', $txt['sp-blocks_cancel_moving'], '</a>]', '</p>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<a class="sp_float_right" href="', $scripturl, '?action=admin;area=portalblocks;sa=add;col=', $side['id'], '">', sp_embed_image('add', sprintf($txt['sp-blocksCreate'], $side['label'])), '</a>
+				<a href="', $scripturl, '?action=helpadmin;help=', $side['help'], '" onclick="return reqWin(this.href);" class="help"><img src="', $settings['images_url'], '/helptopics.gif" alt="', $txt['help'], '" class="icon" /></a>
+				<a href="', $scripturl, '?action=admin;area=portalblocks;sa=', $id, '">', $side['label'], ' ', $txt['sp-blocksBlocks'], '</a>]]></search>
+		<add><![CDATA[<a class="sp_float_right" href="', $scripturl, '?action=admin;area=portalblocks;sa=add;sub=' . $context['req_forumid'] , ';col=', $side['id'], '">', sp_embed_image('add', sprintf($txt['sp-blocksCreate'], $side['label'])), '</a>
+				<a href="', $scripturl, '?action=helpadmin;help=', $side['help'], '" onclick="return reqWin(this.href);" class="help"><img src="', $settings['images_url'], '/helptopics.gif" alt="', $txt['help'], '" class="icon" /></a>
+				<a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=', $id, '">', $side['label'], ' ', $txt['sp-blocksBlocks'], '</a>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td class="sp_center"><a href="', $scripturl, '?action=admin;area=portalblocks;sa=move;block_id=', $context['block_move'], ';col=', $side['id'], ';', $context['session_var'], '=', $context['session_id'], '">', sp_embed_image('arrow', $txt['sp-blocks_move_here']), '</a></td>]]></search>
+		<add><![CDATA[<td class="sp_center"><a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=move;block_id=', $context['block_move'], ';col=', $side['id'], ';', $context['session_var'], '=', $context['session_id'], '">', sp_embed_image('arrow', $txt['sp-blocks_move_here']), '</a></td>]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[foreach($context['sides'] as $id => $side)]]></search>
+		<add><![CDATA[// Display the subforums as a tab at the top of the screen:
+	$flagged = array( 0 => false );
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+		{
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), '><a href="', $scripturl, '?action=admin;area=portalblocks;sub=', $id, (empty($_REQUEST['sa']) ? '' : ';sa=' . $_REQUEST['sa']), '">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+			$flagged[$id] = false;
+		}
+		echo '
+				</ul>
+			</div>
+		</div><hr/>';
+	}
+
+	]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<form name="sp_edit_block_form" id="sp_edit_block_form" action="', $scripturl, '?action=admin;area=portalblocks;sa=edit" method="post" accept-charset="', $context['character_set'], '" onsubmit="submitonce(this);">]]></search>
+		<add><![CDATA[<form name="sp_edit_block_form" id="sp_edit_block_form" action="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=edit" method="post" accept-charset="', $context['character_set'], '" onsubmit="submitonce(this);">]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[', $txt['sp-blocksShowBlock'], ']]></search>
+		<add><![CDATA[';
+		if (count($subforum_tree) > 1)
+		{
+			echo $txt['sp-subforums'], ':
+					<select name="forum" id="forum" onchange="sp_hideBoards(this.options[this.selectedIndex].value);">';
+			foreach ($subforum_tree as $subforum)
+				echo '
+						<option value="', $subforum['forumid'], '"', ($context['req_forumid'] == $subforum['forumid']  ? ' selected="selected"' : ''), '>', $subforum['boardname'], '</option>';
+			echo '
+					</select><br/>';
+		}
+		else
+			echo '
+					<input type="hidden" name="forum" value="', $forumid, '" />';
+		echo '
+					]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$display_types = array('actions', 'boards', 'pages');
+		foreach ($display_types as $type)
+		{
+			if (empty($context['display_' . $type]))
+				continue;]]></search>
+		<add><![CDATA[$display_types = array('actions');
+		foreach ($subforum_tree as $subforum)
+			$display_types[] = 'boards' . $subforum['forumid'];
+		$display_types[] = 'pages';
+		foreach ($display_types as $type)
+		{
+			if (empty($context['display_' . $type]))
+				continue;
+			if ($need_div = empty($txt['sp-blocksSelect' . ucfirst($type)]))
+			{
+				$txt['sp-blocksSelect' . ucfirst($type)] = $txt['sp-blocksSelectBoards'];
+				echo '
+						<div id="sfm_', $type, '" name="sfm_', $type, '"', $context['SPortal']['block']['forum'] <> str_replace('boards', '', $type) ? ' style="display: none;"' : '', '>';
+			}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<li><input type="checkbox" onclick="invertAll(this, this.form, \'display_', $type, '[]\');" class="input_check" /> <em>', $txt['check_all'], '</em></li>
+						</ul>
+						<br />';]]></search>
+		<add><![CDATA[
+			if ($need_div)
+				echo '
+						</div>';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sa=add" method="post" accept-charset="', $context['character_set'], '">]]></search>
+		<add><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=add" method="post" accept-charset="', $context['character_set'], '">]]></add>
+	</operation>
+</file>
+
+<!-------------------------------------------------------------------------->
+<!-- EZ Portal block management                                           -->
+<!-------------------------------------------------------------------------->
+<file name="$sourcedir/EzPortal2.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[l.customtitle, l.id_layout, l.active, l.id_order  ]]></search>
+		<add><![CDATA[, l.forum]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[while($row2 = $smcFunc['db_fetch_assoc']($dbresult2))
+			$blocks[] = $row2;]]></search>
+		<add><![CDATA[while($row2 = $smcFunc['db_fetch_assoc']($dbresult2))
+			$blocks[$row2['forum']][] = $row2;]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$settings, $disableEzPortal, $modSettings]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[WHERE l.active = 1 AND l.id_column = " . $row['id_column'] . " ]]></search>
+		<add><![CDATA[
+				AND l.forum = " . ((int) $forumid) . "]]></add>
+	</operation>
+	<operation>
+		<search position="before><![CDATA[(id_column, id_block, id_order, customtitle, permissions, blockmanagers, can_collapse, active, blockdata, id_icon, hidetitlebar]]></search>
+		<add><![CDATA[, forum]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[// Insert the ezBlock]]></search>
+		<add><![CDATA[
+	$forum = (int) $_REQUEST['sub'];]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[VALUES ($column, $blocktype,1000,'$blocktitle','$finalPermissions','$finalManagers',$can_collapse, 1,'$blockdata','$icon', $hidetitlebar]]></search>
+		<add><![CDATA[, $forum]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-EzPortalMain2.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[function EzBlockRecentPostsBlock($paramters = array(), $numPosts = 10, $exclude_boards = null, $format = 'vertical', $startHtml = '', $endHtml = '')
+{
+
+	global $context, $settings, $scripturl, $txt, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[m.ID_MSG >= " . ($modSettings['maxMsgID'] - 2000 * min($numPosts, 5)) . " AND ]]></search>
+		<add><![CDATA[
+			c.forumid = " . ((int) $forumid) . " AND]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[function EzBlockRecentTopicsBlock($paramters = array(), $numTopics = 10, $exclude_boards = null, $format = 'vertical', $startHtml = '', $endHtml = '')
+{
+	global $context, $settings, $scripturl, $txt, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[FROM ({db_prefix}messages AS m, {db_prefix}topics AS t, {db_prefix}boards AS b, {db_prefix}messages AS ms)]]></search>
+		<add><![CDATA[
+			LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[m.ID_MSG >= " . ($modSettings['maxMsgID'] - 2000 * min($numTopics, 5)) . " AND ]]></search>
+		<add><![CDATA[
+			c.forumid = " . ((int) $forumid) . " AND]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[function EzBlockPollBlock($paramters = array(), $pollTopicID = 0, $startHtml = '', $endHtml = '')
+{
+	global $smcFunc, $txt, $settings, $boardurl, $sc, $user_info]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[WHERE p.ID_POLL = t.ID_POLL]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+		WHERE p.ID_POLL = t.ID_POLL
+			AND c.forumid = " . ((int) $forumid) . "]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[FROM ({db_prefix}messages AS m, {db_prefix}boards AS b)]]></search>
+		<add><![CDATA[
+			LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[}
+}
+
+function SetupEditor()]]></search>
+		<add><![CDATA[	SplitForum_EzPortal_Init();
+	]]></add>
+	</operation>
+</file>
+<file name="$themedir/EzPortal2.template.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_settings()
+{
+	global $context, $txt, $ezPortalVersion, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_blocks()
+{
+	global $context, $txt, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[' . $txt['ezp_blocks']  . '
+        </h3>
+  </div>]]></search>
+		<add><![CDATA[
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>';
+
+	// Display the subforums as a tab at the top of the screen:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+		echo '
+				</ul>
+			</div>
+		</div>';
+	}
+	foreach ($subforum_tree as $sub => $data)
+	{
+	echo '
+<div id="subforum' . $sub . '"' . ($sub <> $forumid ? ' style="display: none;"' : '') . '>]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" action="', $scripturl, '?action=ezportal;sa=blocks2]]></search>
+		<add><![CDATA[;sub=' . $sub . ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<a href="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock;column=',$row['id_column'],']]></search>
+		<add><![CDATA[;sub=' . $sub . ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach($row['blocks'] as $blockRow)]]></search>
+		<add><![CDATA[$blocks = isset($row['blocks'][$sub]) ? $row['blocks'][$sub] : array();
+					foreach($blocks as $blockRow)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[</table>';
+
+
+}
+
+function template_ezportal_import()]]></search>
+		<add><![CDATA[</table>
+</div>';
+}
+
+}
+
+function template_ezportal_import()]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock2]]></search>
+		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=ezportal;sa=addblock3]]></search>
+		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
+		<add><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
+		<add><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
+	</operation>
+</file>
+<file name="$themedir/EzPortal2.1.template.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_settings()
+{
+	global $context, $txt, $ezPortalVersion, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[function template_ezportal_blocks()
+{
+	global $context, $txt, $scripturl, $ezpSettings]]></search>
+		<add><![CDATA[, $forumid, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[' . $txt['ezp_blocks']  . '
+        </h3>
+  </div>]]></search>
+		<add><![CDATA[
+	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
+		function expandTabs(forum)
+		{
+			';
+	foreach ($subforum_tree as $subforum => $info)
+		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
+			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
+			';
+	echo '
+		}
+	// ]]]]><![CDATA[></script>';
+
+	// Display the subforums as a tab at the top of the screen:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
+			echo '
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
+		echo '
+				</ul>
+			</div>
+		</div>';
+	}
+	foreach ($subforum_tree as $sub => $data)
+	{
+	echo '
+<div id="subforum' . $sub . '"' . ($sub <> $forumid ? ' style="display: none;"' : '') . '>]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" action="', $scripturl, '?action=ezportal;sa=blocks2]]></search>
+		<add><![CDATA[;sub=' . $sub . ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<a href="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock;column=',$row['id_column'],']]></search>
+		<add><![CDATA[;sub=' . $sub . ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[foreach($row['blocks'] as $blockRow)]]></search>
+		<add><![CDATA[$blocks = isset($row['blocks'][$sub]) ? $row['blocks'][$sub] : array();
+					foreach($blocks as $blockRow)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[</table>';
+
+
+}
+
+function template_ezportal_import()]]></search>
+		<add><![CDATA[</table>
+</div>';
+}
+
+}
+
+function template_ezportal_import()]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock2]]></search>
+		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=ezportal;sa=addblock3]]></search>
+		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
+		<add><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
+		<add><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
+	</operation>
+</file>
+</modification>

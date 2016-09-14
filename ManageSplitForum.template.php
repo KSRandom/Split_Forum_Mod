@@ -71,6 +71,18 @@ function template_subforums_list()
 			</div>
 		</form>
 	</div>';
+
+	// Display the Paypal donate button so that people can donate to Dougiefresh!
+	echo '
+	<center>
+		Please donate if this mod has helped you!
+		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+			<input type="hidden" name="cmd" value="_s-xclick">
+			<input type="hidden" name="hosted_button_id" value="B6JLMKCYPE5NJ">
+			<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+			<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+		</form>
+	</center>';
 }
 
 function template_subforums_delete()

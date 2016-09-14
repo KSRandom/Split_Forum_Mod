@@ -1,3 +1,13 @@
+v1.30 - January 19th, 2016
+o Added donate button to Subforum management page.
+o Added several settings to subforum UI in order to control EzPortal per subforum.
+o Added template changes for EzPortal running under SMF 2.1.
+o Fixed issue with undefined array element error in [b]ManageNews.php[/b].
+o Fixed issue where theme may not have been able to be changed in subforums.
+o Fixed several issues with new EzPortal changes made in version 1.29.
+o Moved some subforum init code from source files to [b]Subs-SplitForum.php[/b].
+o Made numerous small fixes for better installation compatibility with other mods.
+
 v1.29 - December 30th, 2015
 o Added support for EZ Portal so that the blocks are subforum-restricted.
 o Added support for EZ Portal UI so that blocks can be seperated by subforum.

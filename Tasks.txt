@@ -1,5 +1,8 @@
 TO-DO LIST FOR TASKS INVOLVING THIS MOD
 ======================================================================
+o Subforum usage with Dream Portal
+o Subforum usage with Tiny Portal
+o Subforum usage with PortaMx
 o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
 o Theme settings restricted to members registered on a subforum

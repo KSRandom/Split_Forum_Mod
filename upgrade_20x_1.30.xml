@@ -1,0 +1,224 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.29</version>
+
+<file name="$sourcedir/Load.php">
+	<operation>
+		<search position="replace"><![CDATA[// load subforum theme if we are in one.
+	if ($forumid <> 0) $id_theme = $subtheme;
+
+	]]></search>
+		<add><![CDATA[// Load subforum theme if we are in one.
+	if (!empty($forumid) && empty($id_theme))
+		$id_theme = $subtheme;
+
+	]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $subtheme, $forumid, $txt, $scripturl, $context, $modSettings, $boardurl]]></search>
+		<add><![CDATA[global $txt, $scripturl, $context, $modSettings, $subtheme, $forumid, $boardurl]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Overwrite certain settings with the Subforum setting if available:
+	$modSettings['primary_membergroup'] = $subforum_tree[$forumid]['primary_membergroup'];
+	if (isset($modSettings['pretty_root_url']))
+		$modSettings['pretty_root_url'] = $subforum_tree[$forumid]['boardurl'];
+	if (isset($subforum_tree[$forumid]['sp_portal']))
+		$modSettings['sp_portal_mode'] = $subforum_tree[$forumid]['sp_portal'];
+	if (isset($subforum_tree[$forumid]['sp_standalone']))
+		$modSettings['sp_standalone_url'] = $subforum_tree[$forumid]['sp_standalone'];
+	if (isset($subforum_tree[$forumid]['enable_pretty']))
+		$modSettings['pretty_enable_filters'] = $subforum_tree[$forumid]['enable_pretty'];
+		
+	// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></add>
+		<add><![CDATA[// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function reloadSettings()
+{
+	global $modSettings, $boarddir, $smcFunc, $txt, $db_character_set, $context, $sourcedir;
+	global $boardurl, $cookiename, $boarddir, $forumid, $mbname, $subtheme, $language, $favicon, $subforum_tree;]]></search>
+		<add><![CDATA[function reloadSettings()
+{
+	global $modSettings, $boarddir, $smcFunc, $txt, $db_character_set, $context, $sourcedir;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Define primary subforum entry if it is not already defined:
+	if (!is_array($subforum_tree))
+		$subforum_tree = array(
+			0 => array(		// Primary subforum
+				'forumid' => 0,
+				'boardurl' => $boardurl,
+				'boardname' => $mbname,
+				'language' => $language,
+				'forumdir' => $boarddir,
+				'favicon' => '',
+				'primary_membergroup' => 0,
+				'subtheme' => 0,
+			),
+		);
+
+	// Determine which subforum we are in and load settings for it:
+	$host = strtolower($_SERVER['SERVER_NAME']);
+	$uri = str_replace('/index.php', '', substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/')));
+	foreach ($subforum_tree as $id => $row)
+	{
+		$url = parse_url($row['boardurl']);
+		$test1 = strtolower($url['host']);
+		$test2 = strtolower(str_replace('www.', '', $test1));
+		$check = ($test1 == $host || $test2 == $host);
+		if (isset($url['path']))
+			$check = $check && (strpos($uri, substr($url['path'], 1)) > 0);
+		if (!$check && !empty($row['sp_standalone']))
+		{
+			$url = parse_url($row['sp_standalone']);
+			$test1 = strtolower($url['host']);
+			$test2 = strtolower(str_replace('www.', '', $test1));
+			$check = ($test1 == $host || $test2 == $host);
+			if (isset($url['path']))
+				$check = ($check && $url['path'] == $uri);
+		}			
+		if ($check)
+		{
+			// Assign global variables with row gleaned from database:
+			$forumid = (int) $row['forumid'];
+			$boardurl = $row['boardurl'];
+			$forumdir = $row['forumdir'];
+			$subtheme = $row['subtheme'];
+			$mbname = $row['boardname'];
+			$language = $row['language'];
+			$favicon = $row['favicon'];
+		}
+	}
+
+	// Most database systems have not set UTF-8 as their default input charset.]]></search>
+		<add><![CDATA[// Most database systems have not set UTF-8 as their default input charset.]]></add>		
+	</operation>
+</file>
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc]]></search>
+		<add><![CDATA[global $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[;
+	global $boardurl, $forumid;
+
+	]]></search>
+		<add><![CDATA[, $boardurl, $forumid;
+
+	]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageCalendar.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc;]]></search>
+		<add><![CDATA[global $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc, $forumid;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageMembergroups.php">
+	<operation>
+		<search position="replace"><![CDATA[function AddMembergroup()
+{
+	global $context, $txt, $sourcedir, $modSettings, $smcFunc;]]></search>
+		<add><![CDATA[function AddMembergroup()
+{
+	global $context, $txt, $sourcedir, $modSettings, $smcFunc, $forumid]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageRegistration.php">
+	<operation>
+		<search position="replace"><![CDATA[$smcFunc['db_free_result']($request);
+
+
+	$config_vars = array(]]></search>
+		<add><![CDATA[$smcFunc['db_free_result']($request);
+
+	$config_vars = array(]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Packages.php">
+	<operation>
+		<search position="replace"><![CDATA[if ($forumid <> 0) { // subforum means no packages access]]></search>
+		<add><![CDATA[// Subforum means no packages access
+	if ($forumid <> 0)
+	{]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/PostModeration.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $txt, $scripturl, $context, $user_info, $sourcedir, $smcFunc;]]></search>
+		<add><![CDATA[global $txt, $scripturl, $context, $user_info, $sourcedir, $smcFunc, $forumid;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Profile-Modify.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile;]]></search>
+		<add><![CDATA[global $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile, $forumid;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Reports.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $context, $txt, $sourcedir, $smcFunc;]]></search>
+		<add><![CDATA[global $context, $txt, $sourcedir, $smcFunc, $forumid;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Search.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $txt, $scripturl, $modSettings, $user_info, $context, $smcFunc, $sourcedir;]]></search>
+		<add><![CDATA[global $txt, $scripturl, $modSettings, $user_info, $context, $smcFunc, $sourcedir, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $scripturl, $modSettings, $sourcedir, $txt, $db_connection;]]></search>
+		<add><![CDATA[global $scripturl, $modSettings, $sourcedir, $txt, $db_connection, $forumid;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Admin.php">
+	<operation>
+		<search position="replace"><![CDATA[// Put available data in the Subforum Tree variable:
+	if (isset($config_vars['mbname']))
+		$subforum_tree[$forumid]['boardname'] = $config_vars['mbname'];
+	if (isset($config_vars['boardurl']))
+		$subforum_tree[$forumid]['boardurl'] = $config_vars['boardurl'];
+	if (isset($config_vars['cookiename']))
+		$subforum_tree[$forumid]['cookiename'] = $config_vars['cookiename'];
+	if (isset($config_vars['favicon']))
+		$subforum_tree[$forumid]['favicon'] = $config_vars['favicon'];
+	unset($config_vars['favicon']);
+	
+	// Clear some variables if we are in a subforum:
+	if ((isset($config_vars['mbname']) || isset($config_vars['boardurl']) || isset($config_vars['cookiename'])) && $forumid != 0)
+	{
+		unset($config_vars['mbname']);
+		unset($config_vars['boardurl']);
+		unset($config_vars['cookiename']);
+	}
+
+	// When is Settings.php last changed?]]></search>
+		<add><![CDATA[// Put available data in the Subforum Tree variable:
+	SplitForum_PreUpdate($config_vars);
+
+	// When is Settings.php last changed?]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-BoardIndex.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $settings, $context;]]></search>
+		<add><![CDATA[global $settings, $context, $forumid;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-MessageIndex.php">
+	<operation>
+		<search position="replace"><![CDATA[global $forumid, $smcFunc, $user_info;]]></search>
+		<add><![CDATA[global $smcFunc, $user_info, $forumid;]]></add>
+	</operation>
+</file>
+<file name="$themedir/index.template.php">
+	<operation>
+		<search position="replace"><![CDATA[global $context, $settings, $options, $scripturl, $txt, $modSettings, $favicon;]]></search>
+		<add><![CDATA[global $context, $settings, $options, $scripturl, $txt, $modSettings, $favicon]]></add>
+	</operation>
+</file>
+</modification>

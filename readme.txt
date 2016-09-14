@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.29[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.30[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -54,13 +54,11 @@ o [url=http://www.simplemachines.org/community/index.php?action=profile;u=394494
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.10, but should work on SMF 2.1 Beta 1, as well as SMF 2.0 and up.  SMF 1.x is not and will not be supported.
 
-[url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.6[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  This mod may not install correctly with prior versions of SimplePortal installed in a clean install situation.
-
-[url=http://custom.simplemachines.org/mods/index.php?mod=1461]ezPortal[/url]  should be installed before this mod if you want subforum support for blocks within ezPortal.
-
-[url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.2+[/url] should be installed prior to this mod.  Alias Boards mod has been altered so that it works only within a single subforum, meaning board 1 from category 1 can be aliased into category 2 in subforum 1, but [b]NOT[/b] into any category in subforum 2....
-
-[url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] should be installed prior to this mod.
+These optional mods should be installed (if desired) prior to this mod's installation:
+o [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.2+[/url]
+o [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url]
+o [url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.6[/url]
+o [url=http://custom.simplemachines.org/mods/index.php?mod=1461]ezPortal[/url]
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
 Upgrade is possible from previous version of this mod to this version.  This means [b]1.27[/b] -> [b]1.28[/b], but not [b]1.26[/b] -> [b]1.28[/b]!
@@ -69,7 +67,7 @@ Upgrade is possible from previous version of this mod to this version.  This mea
 The changelog has been removed and can be seen at [url=http://www.xptsp.com/board/index.php?topic=17.msg328#msg328]XPtsp.com[/url].
 
 [color=blue][b][size=12pt][u]License[/u][/size][/b][/color]
-Copyright (c) 2015, Douglas Orend
+Copyright (c) 2013 - 2016, Douglas Orend
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

@@ -109,6 +109,9 @@ function add_subforum(&$row, $exists = true)
 		'primary_membergroup' => (isset($row['primary_membergroup']) ? (int) $row['primary_membergroup'] : 0),
 		'sp_portal' => (isset($row['sp_portal']) ? (int) $row['sp_portal'] : 0),
 		'sp_standalone' => (isset($row['sp_standalone']) ? $row['sp_standalone'] : ''),
+		'ez_portal_enable' => (isset($row['ez_portal_enable']) ? (int) $row['ez_portal_enable'] : 0),
+		'ez_homepage_title' => (isset($row['ez_homepage_title']) ? $row['ez_homepage_title'] : ''),
+		'ez_shoutbox' => (isset($row['ez_shoutbox']) ? (int) $row['ez_shoutbox'] : 0),
 		'enable_pretty' => (isset($row['enable_pretty']) ? $row['enable_pretty'] : ''),
 	);
 	$tree = array();
@@ -152,6 +155,95 @@ function move_attached_categories($from, $dest)
 	);
 }
 
+function relativePath($from, $to, $ps = DIRECTORY_SEPARATOR)
+{
+	$arFrom = explode($ps, rtrim($from, $ps));
+	$arTo = explode($ps, rtrim($to, $ps));
+	while(count($arFrom) && count($arTo) && ($arFrom[0] == $arTo[0]))
+	{
+		array_shift($arFrom);
+		array_shift($arTo);
+	}
+	$base = str_pad("", count($arFrom) * 3, '..' . $ps) . implode($ps, $arTo);
+	return str_replace(DIRECTORY_SEPARATOR, '/', $base);
+}
+
+function remove_bad_aliases()
+{
+	global $smcFunc;
+	return;
+
+	// Gather some basic board information together:
+	$result = $smcFunc['db_query']('', '
+		SELECT
+			IFNULL(b.id_board, 0) AS id_board, b.id_cat, c.forumid, b.alias_cat, b.alias_child
+		FROM {db_prefix}categories AS c
+			LEFT JOIN {db_prefix}boards AS b ON (b.id_cat = c.id_cat)'
+	);
+	$b = $c = array();
+	while ($row = $smcFunc['db_fetch_assoc']($result))
+	{
+		if (!empty($row['alias_cat']))
+			$row['alias_cat'] = explode(',', $row['alias_cat']);
+		else
+			$row['alias_cat'] = array();
+
+		if (!empty($row['alias_child']))
+			$row['alias_child'] = explode(',', $row['alias_child']);
+		else
+			$row['alias_child'] = array();
+
+		$b[$row['forumid']][$row['id_board']] = $row;
+		$c[$row['forumid']][$row['id_cat']] = true;
+	}
+	$smcFunc['db_free_result']($result);
+
+	// Process the entire array, looking for categories/boards that don't exist:
+	foreach ($b as $forumid => $boards)
+	{
+		foreach ($boards as $id_board => $board)
+		{
+			// Remove aliased categories/boards that don't exist in that subforum:
+			$update = false;
+			foreach ($board['alias_cat'] as $id => $alias_cat)
+			{
+				if (empty($c[$forumid][$alias_cat]))
+				{
+					unset($b[$forumid][$id_board]['alias_cat'][$id]);
+					$update = true;
+				}
+			}
+			foreach ($board['alias_child'] as $id => $alias_child)
+			{
+				if (empty($b[$forumid][$alias_child]))
+				{
+					unset($b[$forumid][$id_board]['alias_child'][$id]);
+					$update = true;
+				}
+			}
+
+			// Do we need to update the database?  If not, continue on processing....
+			if (!$update)
+				continue;
+
+			// Evidentally, we need to update the database with the new info:
+			$smcFunc['db_query']('', '
+				UPDATE {db_prefix}boards
+				SET alias_cat = {string:alias_cat}, alias_child = {string:alias_child}
+				WHERE id_board = {int:id_board}',
+				array(
+					'id_board' => (int) $board,
+					'alias_cat' => implode(',', $board['alias_cat']),
+					'alias_child' => implode(',', $board['alias_child']),
+				)
+			);
+		}
+	}
+}
+
+/**********************************************************************************
+* Functions supporting Simple Portal:
+**********************************************************************************/
 function use_default_sp_blocks($forum = -1)
 {
 	global $smcFunc;
@@ -419,6 +511,50 @@ SimplePortal offers high quality professional support with its own well known su
 	);
 }
 
+function delete_sp_blocks($forum)
+{
+	global $smcFunc;
+
+	isAllowedTo('admin_forum');
+	$forum = (int) $forum;
+
+	// Get the id number for blocks with parameters:
+	$request = $smcFunc['db_query']('', '
+		SELECT b.id_block
+		FROM {db_prefix}sp_blocks AS b, {db_prefix}sp_parameters AS p
+		WHERE b.forum = {int:forum}',
+		array(
+			'forum' => $forum,
+		)
+	);
+	$parameters = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$parameters[] = $row['id_block'];
+	$smcFunc['db_free_result']($request);
+
+	// Delete all blocks for the specified forum:
+	$request = $smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}sp_blocks
+		WHERE forum = {int:forum}',
+		array(
+			'forum' => $forum,
+		)
+	);
+
+	// Delete the parameters for blocks from the specified forum:
+	if (!empty($parameters))
+	{
+		$parameters = array_unique($parameters);
+		$request = $smcFunc['db_query']('', '
+			DELETE FROM {db_prefix}sp_parameters
+			WHERE id_block IN ({array_int:id_blocks})',
+			array(
+				'id_blocks' => $parameters
+			)
+		);
+	}
+}
+
 function copy_sp_blocks($from, $forum)
 {
 	global $smcFunc;
@@ -510,160 +646,284 @@ function copy_sp_blocks($from, $forum)
 	);
 }
 
-function delete_sp_blocks($forum)
+/**********************************************************************************
+* Functions supporting EzPortal:
+**********************************************************************************/
+function ez_blocks_max()
+{
+	global $smcFunc;
+	$request = $smcFunc['db_query']('', '
+		SELECT MAX(id_layout) AS id_layout
+		FROM {db_prefix}ezp_block_layout'
+	);
+	list($max) = $smcFunc['db_fetch_row']($request);
+	$smcFunc['db_free_result']($request);
+	return (!empty($max['id_layout']) ? $max['id_layout'] : 0);
+}
+
+function use_default_ez_blocks($forum)
+{
+	global $smcFunc;
+	$max = ez_blocks_max();
+
+	// Place the blocks into the EzPortal table:
+	$default_blocks = array(
+		'user' => array(
+			'id_layout' => $max + 1,
+			'id_column' => 1,
+			'id_block' => 4,
+			'id_order' => 1,
+			'customtitle' => 'User',
+			'permissions' => '-1,0,1,2',
+			'can_collapse' => 1,
+			'active' => 1,
+			'visibileactions' => '',
+			'visibileboards' => '',
+			'visibileareascustom' => '',
+			'blockmanagers' => '',
+			'blockdata' => 'EzBlockLoginBoxBlock',
+			'id_icon' => 0,
+			'visibilepages' => '',
+			'hidetitlebar' => 0,
+			'forum '=> $forum,
+		),
+		'stats' => array(
+			'id_layout' => $max + 2,
+			'id_column' => 1,
+			'id_block' => 27,
+			'id_order' => 2,
+			'customtitle' => 'Stats ezBlock',
+			'permissions' => '-1,0,1,2',
+			'can_collapse' => 1,
+			'active' => 1,
+			'visibileactions' => '',
+			'visibileboards' => '',
+			'visibileareascustom' => '',
+			'blockmanagers' => '',
+			'blockdata' => 'EzBlockStatsBox',
+			'id_icon' => 0,
+			'visibilepages' => '',
+			'hidetitlebar' => 0,
+			'forum '=> $forum,
+		),
+		'recent_topics' => array(
+			'id_layout' => $max + 3,
+			'id_column' => 3,
+			'id_block' => 7,
+			'id_order' => 1,
+			'customtitle' => 'Recent Topics',
+			'permissions' => '-1,0,1,2',
+			'can_collapse' => 1,
+			'active' => 1,
+			'visibileactions' => '',
+			'visibileboards' => '',
+			'visibileareascustom' => '',
+			'blockmanagers' => '',
+			'blockdata' => 'EzBlockRecentTopicsBlock',
+			'id_icon' => 0,
+			'visibilepages' => '',
+			'hidetitlebar' => 0,
+			'forum '=> $forum,
+		),
+		'parsebbc' => array(
+			'id_layout' => $max + 4,
+			'id_column' => 2,
+			'id_block' => 26,
+			'id_order' => 1,
+			'customtitle' => 'ParseBBC ezBlock',
+			'permissions' => '-1,0,1,2',
+			'can_collapse' => 1,
+			'active' => 1,
+			'visibileactions' => '',
+			'visibileboards' => '',
+			'visibileareascustom' => 'portal',
+			'blockmanagers' => '',
+			'blockdata' => 'EzBlockParseBBCBlock',
+			'id_icon' => 0,
+			'visibilepages' => '',
+			'hidetitlebar' => 0,
+			'forum '=> $forum,
+		),
+	);
+	$smcFunc['db_insert']('ignore',
+		'{db_prefix}ezp_block_layout',
+		array(
+			'id_layout' => 'int',
+			'id_column' => 'int',
+			'id_block' => 'int',
+			'id_order' => 'int',
+			'customtitle' => 'text',
+			'permissions' => 'text',
+			'can_collapse' => 'int',
+			'active' => 'int',
+			'visibileactions' => 'text',
+			'visibileboards' => 'text',
+			'visibileareascustom' => 'text',
+			'blockmanagers' => 'text',
+			'blockdata' => 'text',
+			'id_icon' => 'int',
+			'visibilepages' => 'text',
+			'hidetitlebar' => 'int',
+			'forum' => 'text',
+		),
+		$default_blocks,
+		array('id_layout')
+	);
+	
+	// Place the parameters into the EzPortal table:
+	$parameters = array(
+		array(
+			'id_parameter' => 8,
+			'id_layout' => $max + 3,
+			'data' => '10',
+		),
+		array(
+			'id_parameter' => 9,
+			'id_layout' => $max + 3,
+			'data' => 'vertical',
+		),
+		array(
+			'id_parameter' => 10,
+			'id_layout' => $max + 3,
+			'data' => 'true',
+		),
+		array(
+			'id_parameter' => 46,
+			'id_layout' => $max + 4,
+			'data' => 'Welcome to your new install of ezPortal!
+
+You can control which blocks are shown in the ezBlockManager.
+
+Forum refers to your main board index.
+Portal is the main homepage of your site. This block for instance is only shown on the portal page.
+
+
+If you have any questions or need help post in our support forums at [url]http://www.ezportal.com[/url]',
+		),
+	);
+	$smcFunc['db_insert']('replace',
+		'{db_prefix}ezp_block_parameters_values',
+		array(
+			'id_parameter' => 'int',
+			'id_layout' => 'int',
+			'data' => 'text',
+		),
+		$parameters,
+		array()
+	);
+}
+
+function delete_ez_blocks($forum)
 {
 	global $smcFunc;
 
-	isAllowedTo('admin_forum');
-	$forum = (int) $forum;
-
 	// Get the id number for blocks with parameters:
+	isAllowedTo('admin_forum');
 	$request = $smcFunc['db_query']('', '
-		SELECT b.id_block
-		FROM {db_prefix}sp_blocks AS b, {db_prefix}sp_parameters AS p
-		WHERE b.forum = {int:forum}',
+		SELECT id_layout
+		FROM {db_prefix}ezp_block_layout
+		WHERE forum = {int:forum}',
 		array(
-			'forum' => $forum,
+			'forum' => (int) $forum,
 		)
 	);
-	$parameters = array();
+	$blocks = array();
 	while ($row = $smcFunc['db_fetch_assoc']($request))
-		$parameters[] = $row['id_block'];
+		$blocks[] = $row['id_layout'];
 	$smcFunc['db_free_result']($request);
 
 	// Delete all blocks for the specified forum:
 	$request = $smcFunc['db_query']('', '
-		DELETE FROM {db_prefix}sp_blocks
-		WHERE forum = {int:forum}',
+		DELETE FROM {db_prefix}ezp_block_layout
+		WHERE id_layout IN ({array_int:id_blocks})',
 		array(
-			'forum' => $forum,
+			'id_blocks' => $blocks
 		)
 	);
 
 	// Delete the parameters for blocks from the specified forum:
-	if (!empty($parameters))
-	{
-		$parameters = array_unique($parameters);
-		$request = $smcFunc['db_query']('', '
-			DELETE FROM {db_prefix}sp_parameters
-			WHERE id_block IN ({array_int:id_blocks})',
-			array(
-				'id_blocks' => $parameters
-			)
-		);
-	}
-}
-
-function relativePath($from, $to, $ps = DIRECTORY_SEPARATOR)
-{
-	$arFrom = explode($ps, rtrim($from, $ps));
-	$arTo = explode($ps, rtrim($to, $ps));
-	while(count($arFrom) && count($arTo) && ($arFrom[0] == $arTo[0]))
-	{
-		array_shift($arFrom);
-		array_shift($arTo);
-	}
-	$base = str_pad("", count($arFrom) * 3, '..' . $ps) . implode($ps, $arTo);
-	return str_replace(DIRECTORY_SEPARATOR, '/', $base);
-}
-
-function remove_bad_aliases()
-{
-	global $smcFunc;
-	return;
-
-	// Gather some basic board information together:
-	$result = $smcFunc['db_query']('', '
-		SELECT
-			IFNULL(b.id_board, 0) AS id_board, b.id_cat, c.forumid, b.alias_cat, b.alias_child
-		FROM {db_prefix}categories AS c
-			LEFT JOIN {db_prefix}boards AS b ON (b.id_cat = c.id_cat)'
-	);
-	$b = $c = array();
-	while ($row = $smcFunc['db_fetch_assoc']($result))
-	{
-		if (!empty($row['alias_cat']))
-			$row['alias_cat'] = explode(',', $row['alias_cat']);
-		else
-			$row['alias_cat'] = array();
-
-		if (!empty($row['alias_child']))
-			$row['alias_child'] = explode(',', $row['alias_child']);
-		else
-			$row['alias_child'] = array();
-
-		$b[$row['forumid']][$row['id_board']] = $row;
-		$c[$row['forumid']][$row['id_cat']] = true;
-	}
-	$smcFunc['db_free_result']($result);
-
-	// Process the entire array, looking for categories/boards that don't exist:
-	foreach ($b as $forumid => $boards)
-	{
-		foreach ($boards as $id_board => $board)
-		{
-			// Remove aliased categories/boards that don't exist in that subforum:
-			$update = false;
-			foreach ($board['alias_cat'] as $id => $alias_cat)
-			{
-				if (empty($c[$forumid][$alias_cat]))
-				{
-					unset($b[$forumid][$id_board]['alias_cat'][$id]);
-					$update = true;
-				}
-			}
-			foreach ($board['alias_child'] as $id => $alias_child)
-			{
-				if (empty($b[$forumid][$alias_child]))
-				{
-					unset($b[$forumid][$id_board]['alias_child'][$id]);
-					$update = true;
-				}
-			}
-
-			// Do we need to update the database?  If not, continue on processing....
-			if (!$update)
-				continue;
-
-			// Evidentally, we need to update the database with the new info:
-			$smcFunc['db_query']('', '
-				UPDATE {db_prefix}boards
-				SET alias_cat = {string:alias_cat}, alias_child = {string:alias_child}
-				WHERE id_board = {int:id_board}',
-				array(
-					'id_board' => (int) $board,
-					'alias_cat' => implode(',', $board['alias_cat']),
-					'alias_child' => implode(',', $board['alias_child']),
-				)
-			);
-		}
-	}
-}
-
-function use_default_ez_blocks($sub)
-{
-	global $smcFunc;
-	$smcFunc['db_query']('', '
-		INSERT INTO {db_prefix}ezp_block_layout
-			(`id_column`, `id_block`, `id_order`, `customtitle`, `permissions`, `can_collapse`, `active`, `visibileactions`, `visibileboards`, `visibileareascustom`, `blockmanagers`, `blockdata`, `id_icon`, `visibilepages`, `hidetitlebar`, `forum`)
-		VALUES
-			(1, 4, 1, \'User\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'\', \'\', \'EzBlockLoginBoxBlock\', 0, \'\', 0, \'' . $sub . '\'),
-			(1, 27, 2, \'Stats ezBlock\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'\', \'\', \'EzBlockStatsBox\', 0, \'\', 0, \'' . $sub . '\'),
-			(3, 7, 1, \'Recent Topics\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'\', \'\', \'EzBlockRecentTopicsBlock\', 0, \'\', 0, \'' . $sub . '\'),
-			(2, 26, 1, \'ParseBBC ezBlock\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'portal\', \'\', \'EzBlockParseBBCBlock\', 0, \'\', 0, \'' . $sub . '\');'
-	);
-}
-
-function delete_ez_blocks($sub)
-{
-	global $smcFunc;
-	$smcFunc['db_query']('', '
-		DELETE FROM {db_prefix}ezp_block_layout
-		WHERE forum = {int:subforum}',
+	$request = $smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}ezp_block_parameters_values
+		WHERE id_layout IN ({array_int:id_blocks})',
 		array(
-			'subforum' => (int) $sub,
+			'id_blocks' => $blocks
 		)
 	);
+}
+
+function copy_ez_blocks($from, $forum)
+{
+	global $smcFunc;
+
+	// Get the id number for blocks with parameters:
+	isAllowedTo('admin_forum');
+	$request = $smcFunc['db_query']('', '
+		SELECT 
+			id_layout, id_column, id_block, id_order, customtitle, active, permissions, can_collapse, visibileactions,
+			visibileboards, visibileareascustom, blockmanagers, blockdata, id_icon, visibilepages, hidetitlebar
+		FROM {db_prefix}ezp_block_layout
+		WHERE forum = {int:forum}',
+		array(
+			'forum' => (int) $from,
+		)
+	);
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+	{
+		$id_layout = $row['id_layout'];
+		unset($row['id_layout']);
+		$row['forum'] = (int) $forum;
+		
+		// Insert new block into the table:
+		$smcFunc['db_insert']('ignore',
+			'{db_prefix}ezp_block_layout',
+			array(
+				'id_column' => 'int',
+				'id_block' => 'int',
+				'id_order' => 'int',
+				'customtitle' => 'text',
+				'permissions' => 'text',
+				'can_collapse' => 'text',
+				'active' => 'int',
+				'visibileactions' => 'text',
+				'visibileboards' => 'text',
+				'visibileareascustom' => 'text',
+				'blockmanagers' => 'text',
+				'blockdata' => 'text',
+				'id_icon' => 'int',
+				'visibilepages' => 'text',
+				'hidetitlebar' => 'int',
+				'forum' => 'text',
+			),
+			$row,
+			array('id_layout')
+		);
+		$new_layout = $smcFunc['db_insert_id']('{db_prefix}messages', 'id_msg');
+		
+		$request2 = $smcFunc['db_query']('', '
+			SELECT id_parameter, data
+			FROM {db_prefix}ezp_block_parameters_values
+			WHERE id_layout = {int:block}',
+			array(
+				'block' => $id_layout,
+			)
+		);		
+		while ($row2 = $smcFunc['db_fetch_assoc']($request2))
+		{
+			$row2['id_layout'] = $new_layout;
+			$smcFunc['db_insert']('replace',
+				'{db_prefix}ezp_block_parameters_values',
+				array(
+					'id_parameter' => 'int',
+					'data' => 'text',
+					'id_layout' => 'int',
+				),
+				$row2,
+				array()
+			);
+		}
+		$smcFunc['db_free_result']($request2);
+	}
+	$smcFunc['db_free_result']($request);
 }
 
 ?>

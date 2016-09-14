@@ -20,7 +20,7 @@ function SplitForum_Admin_Menu(&$areas)
 	global $txt, $scripturl, $subforum_tree, $modSettings, $context, $forumid, $forum_version;
 
 	// Load some stuff:
-	loadLanguage('ManageSplitForums');
+	loadLanguage('ManageSplitForum');
 	loadTemplate('Admin', 'splitforum_' . (substr($forum_version, 0, 7) == 'SMF 2.1' ? '21' : '20'));
 
 	// Insert the Subforums area into the admin menu:
@@ -30,7 +30,7 @@ function SplitForum_Admin_Menu(&$areas)
 		if ($label == 'featuresettings')
 			$temp['subforums'] = array(
 				'label' => ($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list']),
-				'file' => 'ManageSplitForums.php',
+				'file' => 'ManageSplitForum.php',
 				'function' => 'ManageSplitForums',
 				'icon' => 'server.gif',
 				'subsections' => array(

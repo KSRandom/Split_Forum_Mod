@@ -20,10 +20,10 @@ function ManageSplitForums()
 	isAllowedTo('admin_forum');
 	require_once($sourcedir . '/ManageServer.php');
 	require_once($sourcedir . '/Subs-Boards.php');
-	require_once($sourcedir . '/Subs-ManageSplitForums.php');
+	require_once($sourcedir . '/Subs-SplitForum.php');
 	loadLanguage('Profile');
 	loadLanguage('ManageBoards');
-	loadTemplate('ManageSplitForums');
+	loadTemplate('ManageSplitForum');
 
 	// Create the tabs for the template .
 	$context[$context['admin_menu_name']]['tab_data'] = array(
@@ -68,11 +68,11 @@ Function ListSubForums($sub)
 Function EditSubForum($sub)
 {
 	global $context, $sourcedir, $txt, $scripturl, $modSettings, $forumid;
-	global $subforum_tree, $language, $smcFunc, $db_prefix;
+	global $subforum_tree, $language, $smcFunc, $db_prefix, $ezpSettings;
 
 	// Make sure that the subforum number is a valid one to edit:
 	isAllowedTo('admin_forum');
-	if ($forumid != 0 && ($_REQUEST['sa'] == 'newsub' || $forumid != $sub))
+	if (!empty($forumid) && ($_REQUEST['sa'] == 'newsub' || $forumid != $sub))
 		redirectexit('action=admin;area=subforums');
 	if ($_REQUEST['sa'] != 'newsub' && !isset($subforum_tree[$sub]))
 		redirectexit('action=admin;area=subforums');
@@ -129,29 +129,32 @@ Function EditSubForum($sub)
 		//'',
 		array('title', 'subforum_modify_dontchange'),
 		array('text', 'subforum_modify_forumid', 'size' => 40,
-			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
+			'javascript' => ((!empty($forumid) || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
 		array('text', 'subforum_modify_forumdir', 'size' => 40,
-			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
+			'javascript' => ((!empty($forumid) || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
 		array('select', 'subforum_modify_primary_membergroup', $primary),
 	);
-	if ($sub != 0 || $_REQUEST['sa'] == 'newsub')
+	if (!empty($sub) || $_REQUEST['sa'] == 'newsub')
 		$config_vars[] = array('check', 'subforum_modify_news');
 	foreach ($subforum_tree[$sub] as $var => $val)
 		$modSettings['subforum_modify_' . $var] = $val;
 	$modSettings['subforum_modify_news'] = ($_REQUEST['sa'] == 'newsub');
 	$subforum_tree[$sub]['sp_portal'] = (isset($subforum_tree[$sub]['sp_portal']) ? $subforum_tree[$sub]['sp_portal'] : 0);
 
-	// Populate everything needed for Simple Portal support:
-	if (isset($context['sp_blocks_enabled']) && $context['sp_blocks_enabled'])
+	// Define the options for copying/deleting/defaulting the blocks:
+	$options = array(-1 => $txt['subforum_modify_sp_blocks_nothing']);
+	foreach ($subforum_tree as $subforum)
 	{
-		$options = array(-1 => $txt['subforum_modify_sp_blocks_nothing']);
-		foreach ($subforum_tree as $subforum)
-		{
-			if ($subforum['forumid'] <> $sub)
-				$options[$subforum['forumid']] = $subforum['boardname'];
-		}
-		$options[-2] = $txt['subforum_modify_sp_blocks_default'];
-		$options[-3] = $txt['subforum_modify_sp_blocks_remove'];
+		if ($subforum['forumid'] <> $sub)
+			$options[$subforum['forumid']] = $subforum['boardname'];
+	}
+	$options[-2] = $txt['subforum_modify_sp_blocks_default'];
+	$options[-3] = $txt['subforum_modify_sp_blocks_remove'];
+
+	// Populate everything needed for Simple Portal support:
+	if (file_exists($sourcedir . '/PortalBlocks.php') && isset($context['sp_blocks_enabled']) && $context['sp_blocks_enabled'])
+	{
+		// Add options specific to Simple Portal:
 		$config_vars = array_merge($config_vars, array(
 			array('title', 'subforum_modify_sp_title'),
 			array('select', 'subforum_modify_sp_portal', explode('|', $txt['sp_portal_mode_options']),
@@ -161,6 +164,8 @@ Function EditSubForum($sub)
 			),
 			array('select', 'subforum_modify_sp_blocks', $options),
 		));
+
+		// Make sure the subforum settings are shown in the UI:
 		if (!isset($modSettings['subforum_modify_sp_portal']) && isset($modSettings['sp_portal_mode']))
 			$modSettings['subforum_modify_sp_portal'] = $modSettings['sp_portal_mode'];
 		if (!isset($modSettings['subforum_modify_sp_standalone']) && isset($modSettings['sp_standalone_url']))
@@ -175,6 +180,28 @@ Function EditSubForum($sub)
 			document.getElementById("subforum_modify_sp_standalone").disabled = ($ptype <> 3);
 		}
 	</script>';
+	}
+
+	// Populate everything needed for EzPortal support:
+	if (file_exists($sourcedir . '/EzPortal2.php'))
+	{
+		// Add options specific to EzPortal:
+		$config_vars = array_merge($config_vars, array(
+			array('title', 'subforum_modify_ez_title'),
+			array('check', 'subforum_modify_ez_portal_enable'),
+			array('text', 'subforum_modify_ez_homepage_title'),
+			array('select', 'subforum_modify_ez_blocks', $options),
+			array('check', 'subforum_modify_ez_shoutbox'),
+		));
+
+		// Make sure the subforum settings are shown in the UI:
+		if (!isset($modSettings['subforum_modify_ez_portal_enable']) && isset($ezpSettings['ezp_portal_enable']))
+			$modSettings['subforum_modify_ez_portal_enable'] = $ezpSettings['ezp_portal_enable'];
+		if (!isset($modSettings['subforum_modify_ez_homepage_title']) && isset($ezpSettings['ezp_homepage_title']))
+			$modSettings['subforum_modify_ez_homepage_title'] = $ezpSettings['ezp_homepage_title'];
+		if (!isset($modSettings['subforum_modify_ez_shoutbox']) && isset($ezpSettings['ezp_shoutbox']))
+			$modSettings['subforum_modify_ez_shoutbox'] = $ezpSettings['ezp_shoutbox'];
+		$modSettings['subforum_modify_ez_blocks'] = ($_REQUEST['sa'] == 'newsub' ? -2 : -1);
 	}
 
 	// Add a switch to enable/disable Pretty URLs per Subforum:
@@ -202,7 +229,7 @@ Function EditSubForum($sub)
 function SaveSubForum($sub)
 {
 	global $context, $sourcedir, $txt, $scripturl, $modSettings, $settings, $forumid;
-	global $modSettings, $subforum_tree, $smcFunc, $boarddir, $forumdir, $scripturl, $boardurl;
+	global $modSettings, $subforum_tree, $smcFunc, $boarddir, $forumdir, $sourcedir, $boardurl;
 
 	// Load the variables from the form:
 	checkSession();
@@ -222,9 +249,29 @@ function SaveSubForum($sub)
 	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : $forumid);
 	$arr['forumdir'] = ($sub == 0 ?  $boarddir : (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''));
 	$arr['forumdir'] = str_replace('http://', '', str_replace('https://', '', $arr['forumdir']));
-	$arr['sp_portal'] = (isset($_POST['subforum_modify_sp_portal']) ? (int) $_POST['subforum_modify_sp_portal'] : 0);
-	$arr['sp_standalone'] = (isset($_POST['subforum_modify_sp_standalone']) ? $_POST['subforum_modify_sp_standalone'] : '');
-	$arr['enable_pretty'] = (isset($_POST['subforum_modify_prettyURL_enable']) ? $_POST['subforum_modify_prettyURL_enable'] : 0);
+
+	// Pretty URL support:
+	if (file_exists($sourcedir . '/Subs-PrettyUrls.php'))
+		$arr['enable_pretty'] = (isset($_POST['subforum_modify_prettyURL_enable']) ? $_POST['subforum_modify_prettyURL_enable'] : 0);
+
+	// Simple Portal support:
+	if (file_exists($sourcedir . '/PortalBlocks.php'))
+	{
+		$arr['sp_portal'] = (isset($_POST['subforum_modify_sp_portal']) ? (int) $_POST['subforum_modify_sp_portal'] : 0);
+		$arr['sp_standalone'] = (isset($_POST['subforum_modify_sp_standalone']) ? $_POST['subforum_modify_sp_standalone'] : '');
+	}
+
+	// EzPortal support:
+	if (file_exists($sourcedir . '/EzPortal2.php'))
+	{
+		$arr['ez_portal_enable'] = (isset($_POST['subforum_modify_ez_portal_enable']) ? $_POST['subforum_modify_ez_portal_enable'] : 0);
+		$arr['ez_homepage_title'] = (isset($_POST['subforum_modify_ez_homepage_title']) ? $_POST['subforum_modify_ez_homepage_title'] : 0);	
+		$arr['ez_shoutbox'] = (isset($_POST['subforum_modify_ez_shoutbox']) ? $_POST['subforum_modify_ez_shoutbox'] : 0);	
+	}
+
+	// Save any settings that haven't been set here that are in the array:
+	if (isset($subforum[$arr['forumid']]))
+		$arr = array_merge($arr, $subforum[$arr['forumid']]);
 
 	// Correct variables as necessary, throwing errors only when necessary:
 	if (substr($arr['boardurl'], strlen($arr['boardurl']) - 1, 1) == '/')
@@ -271,21 +318,41 @@ function SaveSubForum($sub)
 	}
 
 	// Populate the Simple Portal blocks for this subforum:
-	if (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -3)
-		delete_sp_blocks($arr['forumid']);
-	elseif (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -2)
+	if (file_exists($sourcedir . '/PortalBlocks.php'))
 	{
-		delete_sp_blocks($arr['forumid']);
-		use_default_sp_blocks($arr['forumid']);
+		if (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -3)
+			delete_sp_blocks($arr['forumid']);
+		elseif (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -2)
+		{
+			delete_sp_blocks($arr['forumid']);
+			use_default_sp_blocks($arr['forumid']);
+		}
+		elseif (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] > -1)
+		{
+			delete_sp_blocks($arr['forumid']);
+			copy_sp_blocks($_POST['subforum_modify_sp_blocks'], $arr['forumid']);
+		}
 	}
-	elseif (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] > -1)
+
+	// Populate the EzPortal blocks for this subforum:
+	if (file_exists($sourcedir . '/EzPortal2.php'))
 	{
-		delete_sp_blocks($arr['forumid']);
-		copy_sp_blocks($_POST['subforum_modify_sp_blocks'], $arr['forumid']);
+		if (isset($_POST['subforum_modify_ez_blocks']) && $_POST['subforum_modify_ez_blocks'] == -3)
+			delete_ez_blocks($arr['forumid']);
+		elseif (isset($_POST['subforum_modify_ez_blocks']) && $_POST['subforum_modify_ez_blocks'] == -2)
+		{
+			delete_ez_blocks($arr['forumid']);
+			use_default_ez_blocks($arr['forumid']);
+		}
+		elseif (isset($_POST['subforum_modify_ez_blocks']) && $_POST['subforum_modify_ez_blocks'] > -1)
+		{
+			delete_ez_blocks($arr['forumid']);
+			copy_ez_blocks($_POST['subforum_modify_ez_blocks'], $arr['forumid']);
+		}
 	}
 
 	// Do this for all subforums, but NOT the primary forum!
-	if ($arr['forumid'] != 0)
+	if (!empty($arr['forumid']))
 	{
 		@mkdir($arr['forumdir']);
 		@chmod($arr['forumdir'], 0755);
@@ -301,7 +368,7 @@ function SaveSubForum($sub)
 		}
 
 		// If requested, copy the news settings to the subforum:
-		if (!empty($_POST['subforum_modify_news']))
+		if (empty($_POST['subforum_modify_news']))
 			updateSettings(array('news' . $sub => $modSettings['news']));
 	}
 
@@ -321,13 +388,13 @@ function SaveSubForum($sub)
 	}
 
 	// Attach some other crap to .htaccess for subforums to prevent 404 errors:
-	if ($arr['forumid'] != 0 && is_dir($arr['forumdir']))
+	if (!empty($arr['forumid']) && is_dir($arr['forumdir']))
 	{
 		$path = relativePath($arr['forumdir'], $boarddir);
-		$oldHtaccess = file_get_contents($arr['forumdir'] . '/.htaccess');
+		$oldHtaccess = @file_get_contents($arr['forumdir'] . '/.htaccess');
 		$insert = "\n\n# SUBFORUM MOD BEGINS\nRewriteEngine on\nOptions +FollowSymlinks\nRewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule (.*)/(.*) " . $path . "$1/$2\n# SUBFORUM MOD ENDS";
 		$oldHtaccess = str_replace($insert, '', $oldHtaccess) . $insert;
-		if ($handle = fopen($arr['forumdir'] . '/.htaccess', 'w'))
+		if ($handle = @fopen($arr['forumdir'] . '/.htaccess', 'w'))
 		{
 			fwrite($handle, $oldHtaccess);
 			fclose($handle);
@@ -341,12 +408,11 @@ function SaveSubForum($sub)
 	unset($arr['action']);
 
 	// Insert the information into the database table:
-	$exists = isset($subforum_tree[$sub['forumid']]);
 	delete_subforum($sub, false);
-	add_subforum($arr, $exists);
+	add_subforum($arr);
 
 	// Create the registration agreement files for the new forum if they don't exist:
-	if ($arr['forumid'] != 0 && !file_exists($boarddir . '/agreement.forum' . $arr['forumid'] . '.*'))
+	if (!empty($arr['forumid']) && !file_exists($boarddir . '/agreement.forum' . $arr['forumid'] . '.*'))
 	{
 		foreach(glob($boarddir . '/agreement.*') as $file)
 		{

@@ -41,15 +41,23 @@ $txt['subforum_modify_dontchange'] = 'DON\'T change these settings unless you kn
 $txt['subforum_modify_forumid'] = 'SubForum ID number:';
 $txt['subforum_modify_forumdir'] = 'Path to SubForum folder:';
 $txt['subforum_modify_cookiename'] = 'Cookie Name:';
+$txt['subforum_modify_confirm'] = 'Are you sure you want to delete this SubForum?';
+$txt['subforum_modify_news'] = 'Copy News from Primary Forum?';
+
+$txt['subforum_modify_prettyURL_title'] = 'Pretty URLs';
+$txt['subforum_modify_prettyURL_enable'] = 'Enable Pretty URLs on this subforum:';
+
 $txt['subforum_modify_sp_title'] = 'Simple Portal Blocks';
 $txt['subforum_modify_sp_blocks'] = 'Copy blocks from Subforum';
 $txt['subforum_modify_sp_blocks_nothing'] = '[ Do Nothing ]';
 $txt['subforum_modify_sp_blocks_default'] = '[ Use Default Blocks ]';
 $txt['subforum_modify_sp_blocks_remove'] = '[ Remove Blocks ]';
-$txt['subforum_modify_confirm'] = 'Are you sure you want to delete this SubForum?';
-$txt['subforum_modify_news'] = 'Copy News from Primary Forum?';
-$txt['subforum_modify_prettyURL_title'] = 'Pretty URLs';
-$txt['subforum_modify_prettyURL_enable'] = 'Enable Pretty URLs on this subforum:';
+
+$txt['subforum_modify_ez_title'] = 'EzPortal Blocks';
+$txt['subforum_modify_ez_portal_enable'] = 'Enable EzPortal HomePage?';
+$txt['subforum_modify_ez_homepage_title'] = 'EzPortal HomePage Title';
+$txt['subforum_modify_ez_shoutbox'] = 'Enable EzPortal ShoutBox on Subforum?';
+$txt['subforum_modify_ez_blocks'] = $txt['subforum_modify_sp_blocks'];
 
 $txt['subforum_server_url'] = 'Root webserver URL for new subforums';
 $txt['subforum_server_root'] = 'Root server path for new subforums';

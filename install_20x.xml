@@ -326,8 +326,8 @@
 </file>
 <file name="$sourcedir/Display.php">
 	<operation>
-		<search position="replace"><![CDATA[global $scripturl, $txt, $modSettings, $context, $settings;]]></search>
-		<add><![CDATA[global $scripturl, $txt, $modSettings, $context, $settings, $forumid;]]></add>
+		<search position="before"><![CDATA[global $scripturl, $txt, $modSettings, $context, $settings]]></search>
+		<add><![CDATA[, $forumid;]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[WHERE cal.id_topic = {int:current_topic}
@@ -344,91 +344,20 @@
 </file>
 <file name="$sourcedir/Load.php">
 	<operation>
-		<search position="after"><![CDATA[// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></search>
-		<add><![CDATA[// Overwrite certain settings with the Subforum setting if available:
-	$modSettings['primary_membergroup'] = $subforum_tree[$forumid]['primary_membergroup'];
-	if (isset($modSettings['pretty_root_url']))
-		$modSettings['pretty_root_url'] = $subforum_tree[$forumid]['boardurl'];
-	if (isset($subforum_tree[$forumid]['sp_portal']))
-		$modSettings['sp_portal_mode'] = $subforum_tree[$forumid]['sp_portal'];
-	if (isset($subforum_tree[$forumid]['sp_standalone']))
-		$modSettings['sp_standalone_url'] = $subforum_tree[$forumid]['sp_standalone'];
-	if (isset($subforum_tree[$forumid]['enable_pretty']))
-		$modSettings['pretty_enable_filters'] = $subforum_tree[$forumid]['enable_pretty'];
-		
+		<search position="before"><![CDATA[global $context, $settings, $options, $sourcedir, $ssi_theme, $smcFunc]]></search>
+		<add><![CDATA[, $subtheme, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// The theme was specified by parameter.]]></search>
+		<add><![CDATA[// Load subforum theme if we are in one.
+	if (!empty($forumid) && empty($id_theme))
+		$id_theme = $subtheme;
+
 	]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function reloadSettings()
-{
-	global $modSettings, $boarddir, $smcFunc, $txt, $db_character_set, $context, $sourcedir;]]></search>
-		<add><![CDATA[function reloadSettings()
-{
-	global $modSettings, $boarddir, $smcFunc, $txt, $db_character_set, $context, $sourcedir;
-	global $boardurl, $cookiename, $boarddir, $forumid, $mbname, $subtheme, $language, $favicon, $subforum_tree;]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[// Most database systems have not set UTF-8 as their default input charset.]]></search>
-		<add><![CDATA[// Define primary subforum entry if it is not already defined:
-	if (!is_array($subforum_tree))
-		$subforum_tree = array(
-			0 => array(		// Primary subforum
-				'forumid' => 0,
-				'boardurl' => $boardurl,
-				'boardname' => $mbname,
-				'language' => $language,
-				'forumdir' => $boarddir,
-				'favicon' => '',
-				'primary_membergroup' => 0,
-				'subtheme' => 0,
-			),
-		);
-
-	// Determine which subforum we are in and load settings for it:
-	$host = strtolower($_SERVER['SERVER_NAME']);
-	$uri = str_replace('/index.php', '', substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/')));
-	foreach ($subforum_tree as $id => $row)
-	{
-		$url = parse_url($row['boardurl']);
-		$test1 = strtolower($url['host']);
-		$test2 = strtolower(str_replace('www.', '', $test1));
-		$check = ($test1 == $host || $test2 == $host);
-		if (isset($url['path']))
-			$check = $check && (strpos($uri, substr($url['path'], 1)) > 0);
-		if (!$check && !empty($row['sp_standalone']))
-		{
-			$url = parse_url($row['sp_standalone']);
-			$test1 = strtolower($url['host']);
-			$test2 = strtolower(str_replace('www.', '', $test1));
-			$check = ($test1 == $host || $test2 == $host);
-			if (isset($url['path']))
-				$check = ($check && $url['path'] == $uri);
-		}			
-		if ($check)
-		{
-			// Assign global variables with row gleaned from database:
-			$forumid = (int) $row['forumid'];
-			$boardurl = $row['boardurl'];
-			$forumdir = $row['forumdir'];
-			$subtheme = $row['subtheme'];
-			$mbname = $row['boardname'];
-			$language = $row['language'];
-			$favicon = $row['favicon'];
-		}
-	}
-
-	// Most database systems have not set UTF-8 as their default input charset.]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[global $context, $settings, $options, $sourcedir, $ssi_theme, $smcFunc;]]></search>
-		<add><![CDATA[global $context, $settings, $options, $sourcedir, $ssi_theme, $smcFunc, $subtheme, $forumid;
-	
-	// load subforum theme if we are in one.
-	if ($forumid <> 0) $id_theme = $subtheme;]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[global $txt, $scripturl, $context, $modSettings;]]></search>
-		<add><![CDATA[global $subtheme, $forumid, $txt, $scripturl, $context, $modSettings, $boardurl;]]></add>
+		<search position="before"><![CDATA[global $txt, $scripturl, $context, $modSettings]]></search>
+		<add><![CDATA[, $subtheme, $forumid, $boardurl]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[b.id_parent, c.name AS cname,]]></search>
@@ -454,8 +383,8 @@
 			]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $board_info, $board, $topic, $user_info, $smcFunc;]]></search>
-		<add><![CDATA[global $board_info, $board, $topic, $user_info, $smcFunc, $subforum_tree;]]></add>
+		<search position="before"><![CDATA[global $board_info, $board, $topic, $user_info, $smcFunc]]></search>
+		<add><![CDATA[, $subforum_tree]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManageBoards.php">
@@ -465,8 +394,8 @@
 	$_REQUEST['sub'] = isset($_REQUEST['sub']) ? (int) $_REQUEST['sub'] : 0;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc;]]></search>
-		<add><![CDATA[global $forumid, $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc;]]></add>
+		<search position="before"><![CDATA[global $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
@@ -493,17 +422,8 @@
 		$catOptions['forumid'] = (int)($_POST['forum_id']);]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function ManageBoardsMain()
-{
-	global $txt, $context, $cat_tree, $boards, $boardList, $scripturl, $sourcedir, $txt;
-
-	loadTemplate('ManageBoards');]]></search>
-		<add><![CDATA[function ManageBoardsMain()
-{
-	global $txt, $context, $cat_tree, $boards, $boardList, $scripturl, $sourcedir, $txt;
-	global $boardurl, $forumid;
-
-	loadTemplate('ManageBoards');]]></add>
+		<search position="before"><![CDATA[global $txt, $context, $cat_tree, $boards, $boardList, $scripturl, $sourcedir, $txt]]></search>
+		<add><![CDATA[, $boardurl, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[$context['categories'][$catid] = array(]]></search>
@@ -767,8 +687,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/ManageCalendar.php">
 	<operation>
-		<search position="replace"><![CDATA[global $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc;]]></search>
-		<add><![CDATA[global $forumid, $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc;]]></add>
+		<search position="before"><![CDATA[global $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)',
@@ -783,7 +703,7 @@ function EditBoard()
 		<search position="before"><![CDATA[function AddMembergroup()
 {
 	global $context, $txt, $sourcedir, $modSettings, $smcFunc]]></search>
-		<add><![CDATA[, $forumid]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[SELECT id_board, name, child_level
@@ -879,17 +799,11 @@ function EditBoard()
 			);
 		}]]></add>
 	</operation>
-	<operation>
-		<search position="before"><![CDATA[function AddMembergroup()
-{
-	global $context, $txt, $sourcedir, $modSettings, $smcFunc]]></search>
-		<add><![CDATA[, $forumid]]></add>
-	</operation>
 </file>
 <file name="$sourcedir/ManageNews.php">
 	<operation>
-		<search position="replace"><![CDATA[global $txt, $modSettings, $context, $sourcedir, $user_info;]]></search>
-		<add><![CDATA[global $txt, $modSettings, $context, $sourcedir, $user_info, $forumid;]]></add>
+		<search position="before"><![CDATA[global $txt, $modSettings, $context, $sourcedir, $user_info]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[require_once($sourcedir . '/Subs-Post.php');]]></search>
@@ -936,21 +850,12 @@ function EditBoard()
 </file>
 <file name="$sourcedir/ManageRegistration.php">
 	<operation>
-		<search position="replace"><![CDATA[function ModifyRegistrationSettings($return_config = false)
-{
-	global $txt, $context, $scripturl, $modSettings, $sourcedir;
-
-	// This is really quite wanting.
-	require_once($sourcedir . '/ManageServer.php');
-]]></search>
-		<add><![CDATA[function ModifyRegistrationSettings($return_config = false)
-{
-	global $txt, $context, $scripturl, $modSettings, $sourcedir, $smcFunc;
-
-	// This is really quite wanting.
-	require_once($sourcedir . '/ManageServer.php');
-
-    // Build an array for the membergroup list:
+		<search position="before"><![CDATA[global $txt, $context, $scripturl, $modSettings, $sourcedir]]></search>
+		<add><![CDATA[, $smcFunc]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[$config_vars = array(]]></search>
+		<add><![CDATA[// Build an array for the membergroup list:
     loadLanguage('Profile');
 	$group_list = array($txt['admin_register_group_none']);
 	$request = $smcFunc['db_query']('', '
@@ -966,7 +871,7 @@ function EditBoard()
 		if ($row['min_posts'] != -1) $group_list[$row['id_group']] = $row['group_name'];
     $smcFunc['db_free_result']($request);
 
-]]></add>
+	]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[array('check', 'send_welcomeEmail'),]]></search>
@@ -974,12 +879,8 @@ function EditBoard()
 			array('select', 'primary_membergroup', $group_list),]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function EditAgreement()
-{
-	global $txt, $boarddir, $context, $modSettings, $smcFunc, $settings;]]></search>
-		<add><![CDATA[function EditAgreement()
-{
-	global $txt, $boarddir, $context, $modSettings, $smcFunc, $settings, $forumid;]]></add>
+		<search position="before"><![CDATA[global $txt, $boarddir, $context, $modSettings, $smcFunc, $settings]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// Try to figure out if we have more agreements.
@@ -1050,20 +951,16 @@ function EditBoard()
 </file>
 <file name="$sourcedir/News.php">
 	<operation>
-		<search position="replace"><![CDATA[function getXmlNews($xml_format)
+		<search position="before"><![CDATA[function getXmlNews($xml_format)
 {
-	global $user_info, $scripturl, $modSettings, $board;]]></search>
-		<add><![CDATA[function getXmlNews($xml_format)
-{
-	global $user_info, $scripturl, $modSettings, $board, $forumid;]]></add>
+	global $user_info, $scripturl, $modSettings, $board]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function getXmlRecent($xml_format)
+		<search position="before"><![CDATA[function getXmlRecent($xml_format)
 {
-	global $user_info, $scripturl, $modSettings, $board;]]></search>
-		<add><![CDATA[function getXmlRecent($xml_format)
-{
-	global $user_info, $scripturl, $modSettings, $board, $forumid;]]></add>
+	global $user_info, $scripturl, $modSettings, $board]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)]]></search>
@@ -1102,14 +999,16 @@ function EditBoard()
 </file>
 <file name="$sourcedir/Packages.php">
 	<operation>
-		<search position="replace"><![CDATA[function Packages()
+		<search position="before"><![CDATA[function Packages()
 {
-	global $txt, $scripturl, $sourcedir, $context;]]></search>
-		<add><![CDATA[function Packages()
-{
-	global $txt, $scripturl, $sourcedir, $context, $forumid;
-
-	if ($forumid <> 0) { // subforum means no packages access
+	global $txt, $scripturl, $sourcedir, $context]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[//!!! Remove this!]]></search>
+		<add><![CDATA[// Subforum means no packages access
+	if ($forumid <> 0)
+	{
 		isAllowedTo('admin_forum');
 		require_once($sourcedir . '/Subs-Package.php');
 		loadLanguage('Packages');
@@ -1119,13 +1018,15 @@ function EditBoard()
 			'description' => $txt['package_manager_desc'],
 			'tabs' => array());
 		fatal_lang_error('no_pack_in_subforum', false);
-	}]]></add>
+	}
+
+	]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Post.php">
 	<operation>
-		<search position="replace"><![CDATA[global $txt, $scripturl, $topic, $modSettings, $board;]]></search>
-		<add><![CDATA[global $txt, $scripturl, $topic, $modSettings, $board, $forumid;]]></add>
+		<search position="before"><![CDATA[global $txt, $scripturl, $topic, $modSettings, $board]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[FROM {db_prefix}calendar
@@ -1142,8 +1043,8 @@ function EditBoard()
 					'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $user_info, $board_info, $options, $smcFunc;]]></search>
-		<add><![CDATA[global $user_info, $board_info, $options, $smcFunc, $forumid;]]></add>
+		<search position="before"><![CDATA[global $user_info, $board_info, $options, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// Get the event's poster.
@@ -1194,8 +1095,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/PostModeration.php">
 	<operation>
-		<search position="replace"><![CDATA[global $txt, $scripturl, $context, $user_info, $sourcedir, $smcFunc;]]></search>
-		<add><![CDATA[global $forumid, $txt, $scripturl, $context, $user_info, $sourcedir, $smcFunc;]]></add>
+		<search position="before"><![CDATA[global $txt, $scripturl, $context, $user_info, $sourcedir, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
@@ -1215,8 +1116,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/Profile-Modify.php">
 	<operation>
-		<search position="replace"><![CDATA[global $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile;]]></search>
-		<add><![CDATA[global $forumid, $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile;]]></add>
+		<search position="before"><![CDATA[global $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
@@ -1232,8 +1133,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/Recent.php">
 	<operation>
-		<search position="replace"><![CDATA[global $user_info, $scripturl, $modSettings, $smcFunc;]]></search>
-		<add><![CDATA[global $user_info, $scripturl, $modSettings, $smcFunc, $forumid;]]></add>
+		<search position="before"><![CDATA[global $user_info, $scripturl, $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[INNER JOIN {db_prefix}messages AS ml ON (ml.id_msg = b.id_last_msg)]]></search>
@@ -1465,8 +1366,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/RemoveTopic.php">
 	<operation>
-		<search position="replace"><![CDATA[global $sourcedir, $modSettings, $smcFunc;]]></search>
-		<add><![CDATA[global $sourcedir, $modSettings, $smcFunc, $forumid;]]></add>
+		<search position="before"><![CDATA[global $sourcedir, $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[DELETE FROM {db_prefix}calendar
@@ -1483,8 +1384,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/Reports.php">
 	<operation>
-		<search position="replace"><![CDATA[global $context, $txt, $sourcedir, $smcFunc;]]></search>
-		<add><![CDATA[global $forumid, $context, $txt, $sourcedir, $smcFunc;]]></add>
+		<search position="before"><![CDATA[global $context, $txt, $sourcedir, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
@@ -1498,8 +1399,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/Search.php">
 	<operation>
-		<search position="replace"><![CDATA[global $txt, $scripturl, $modSettings, $user_info, $context, $smcFunc, $sourcedir;]]></search>
-		<add><![CDATA[global $forumid, $txt, $scripturl, $modSettings, $user_info, $context, $smcFunc, $sourcedir;]]></add>
+		<search position="before"><![CDATA[global $txt, $scripturl, $modSettings, $user_info, $context, $smcFunc, $sourcedir]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[SELECT b.id_cat, c.name AS cat_name, b.id_board, b.name, b.child_level]]></search>
@@ -1512,8 +1413,8 @@ function EditBoard()
 ]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $scripturl, $modSettings, $sourcedir, $txt, $db_connection;]]></search>
-		<add><![CDATA[global $forumid, $scripturl, $modSettings, $sourcedir, $txt, $db_connection;]]></add>
+		<search position="before"><![CDATA[global $scripturl, $modSettings, $sourcedir, $txt, $db_connection]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
@@ -1529,8 +1430,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/SplitTopics.php">
 	<operation>
-		<search position="replace"><![CDATA[global $smcFunc, $language, $modSettings;]]></search>
-		<add><![CDATA[global $smcFunc, $language, $modSettings, $forumid;]]></add>
+		<search position="before"><![CDATA[global $smcFunc, $language, $modSettings]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[UPDATE {db_prefix}calendar
@@ -1563,8 +1464,8 @@ function EditBoard()
 						'show' => allowedTo('admin_forum') && ($forumid == 0),]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $user_settings, $smcFunc;]]></search>
-		<add><![CDATA[global $user_settings, $smcFunc, $forumid;]]></add>
+		<search position="before"><![CDATA[global $user_settings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[$context['news_lines'] = explode("\n", str_replace("\r", '', trim(addslashes($modSettings['news']))));]]></search>
@@ -1582,37 +1483,17 @@ function EditBoard()
 </file>
 <file name="$sourcedir/Subs-Admin.php">
 	<operation>
-		<search position="replace"><![CDATA[function updateSettingsFile($config_vars)
-{
-	global $boarddir, $cachedir;]]></search>
-		<add><![CDATA[function updateSettingsFile($config_vars)
-{
-	global $boarddir, $cachedir, $forumid, $subforum_tree;
+		<search position="after"><![CDATA[// When is Settings.php last changed?]]></search>
+		<add><![CDATA[// Put available data in the Subforum Tree variable:
+	SplitForum_PreUpdate($config_vars);
 
-	// Put available data in the Subforum Tree variable:
-	if (isset($config_vars['mbname']))
-		$subforum_tree[$forumid]['boardname'] = $config_vars['mbname'];
-	if (isset($config_vars['boardurl']))
-		$subforum_tree[$forumid]['boardurl'] = $config_vars['boardurl'];
-	if (isset($config_vars['cookiename']))
-		$subforum_tree[$forumid]['cookiename'] = $config_vars['cookiename'];
-	if (isset($config_vars['favicon']))
-		$subforum_tree[$forumid]['favicon'] = $config_vars['favicon'];
-	unset($config_vars['favicon']);
-	
-	// Clear some variables if we are in a subforum:
-	if ((isset($config_vars['mbname']) || isset($config_vars['boardurl']) || isset($config_vars['cookiename'])) && $forumid != 0)
-	{
-		unset($config_vars['mbname']);
-		unset($config_vars['boardurl']);
-		unset($config_vars['cookiename']);
-	}]]></add>
+	]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs-BoardIndex.php">
 	<operation>
-		<search position="replace"><![CDATA[global $settings, $context;]]></search>
-		<add><![CDATA[global $forumid, $settings, $context;]]></add>
+		<search position="before"><![CDATA[global $settings, $context]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
@@ -1709,8 +1590,8 @@ function EditBoard()
 					'forumid' => $row['forumid']]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $sourcedir, $boards, $smcFunc;]]></search>
-		<add><![CDATA[global $sourcedir, $boards, $smcFunc, $forumid;]]></add>
+		<search position="before"><![CDATA[global $sourcedir, $boards, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[DELETE FROM {db_prefix}calendar
@@ -1725,8 +1606,8 @@ function EditBoard()
 </file>
 <file name="$sourcedir/Subs-Calendar.php">
 	<operation>
-		<search position="replace"><![CDATA[global $scripturl, $modSettings, $user_info, $smcFunc, $context;]]></search>
-		<add><![CDATA[global $scripturl, $modSettings, $user_info, $smcFunc, $context, $forumid;]]></add>
+		<search position="before"><![CDATA[global $scripturl, $modSettings, $user_info, $smcFunc, $context]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[AND (cal.id_board = {int:no_board_link} OR {query_wanna_see_board})' : ''),
@@ -1759,8 +1640,8 @@ function EditBoard()
 			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $modSettings, $smcFunc;]]></search>
-		<add><![CDATA[global $modSettings, $smcFunc, $forumid;]]></add>
+		<search position="before"><![CDATA[global $modSettings, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA['start_date' => 'date', 'end_date' => 'date',]]></search>
@@ -1775,12 +1656,10 @@ function EditBoard()
 			$eventOptions['start_date'], $eventOptions['end_date'], $forumid,]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function modifyEvent($event_id, &$eventOptions)
+		<search position="before"><![CDATA[function modifyEvent($event_id, &$eventOptions)
 {
-	global $smcFunc;]]></search>
-		<add><![CDATA[function modifyEvent($event_id, &$eventOptions)
-{
-	global $smcFunc, $forumid;]]></add>
+	global $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[WHERE id_event = {int:id_event}',
@@ -1809,12 +1688,10 @@ function EditBoard()
 			'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function getEventProperties($event_id)
+		<search position="before"><![CDATA[function getEventProperties($event_id)
 {
-	global $smcFunc;]]></search>
-		<add><![CDATA[function getEventProperties($event_id)
-{
-	global $smcFunc, $forumid;]]></add>
+	global $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}topics AS t ON (t.id_topic = c.id_topic)
@@ -1849,8 +1726,8 @@ function EditBoard()
 </file>	
 <file name="$sourcedir/Subs-MessageIndex.php">
 	<operation>
-		<search position="replace"><![CDATA[global $smcFunc, $user_info;]]></search>
-		<add><![CDATA[global $forumid, $smcFunc, $user_info;]]></add>
+		<search position="before"><![CDATA[global $smcFunc, $user_info]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
@@ -1909,7 +1786,7 @@ function EditBoard()
 		<search position="before"><![CDATA[function template_html_above()
 {
 	global $context, $settings, $options, $scripturl, $txt, $modSettings]]></search>
-		<add><![CDATA[, $favicon;]]></add>
+		<add><![CDATA[, $favicon]]></add>
 	</operation>
 	<operation>
 		<search position="after"><![CDATA[
@@ -2837,524 +2714,6 @@ function template_modify_category()
 	<div id="subforum' . $id . '"' . ($context['req_forumid'] <> $id ? ' style="display: none;"' : '') . '>
 	</div>';
 	}]]></add>
-	</operation>
-</file>
-
-<!-------------------------------------------------------------------------->
-<!-- Simple Portal block management                                       -->
-<!-------------------------------------------------------------------------->
-<file name="$sourcedir/PortalAdminBlocks.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[global $txt, $context, $modSettings, $smcFunc, $sourcedir, $boarddir, $boards]]></search>
-		<add><![CDATA[, $forumid, $subforum_tree]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA['style' => sportal_parse_style('implode'),
-		);]]></search>
-		<add><![CDATA['style' => sportal_parse_style('implode'),
-			'forum' => !empty($_POST['forum']) ? $_POST['forum'] : $forumid,
-		);]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA['style' => 'string',
-				),
-				$blockInfo,
-				array('id_block')]]></search>
-		<add><![CDATA['style' => 'string',
-					'forum' => 'int',
-				),
-				$blockInfo,
-				array('id_block')]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA["style = {string:style}",]]></search>
-		<add><![CDATA[
-				"forum = {int:forum}",]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[global $context, $txt, $sourcedir;]]></search>
-		<add><![CDATA[global $context, $txt, $sourcedir, $forumid;
-
-	$context['req_forumid'] = (int) (empty($_REQUEST['sub']) ? $forumid : $_REQUEST['sub']);]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA['state_icon' => empty($block['state']) ? '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('deactive', $txt['sp-blocksActivate']) . '</a>' : '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('active', $txt['sp-blocksDeactivate']) . '</a>',
-				'edit' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=edit;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('modify') . '</a>',
-				'move' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=select;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('move', $txt['sp-adminColumnMove']) . '</a>',
-				'delete' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=delete;block_id=' . $block['id'] . ';col=' . $block['column'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '" onclick="return confirm(\''.$txt['sp-deleteblock'].'\');">' . sp_embed_image('delete') . '</a>',]]></search>
-		<add><![CDATA['state_icon' => empty($block['state']) ? '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('deactive', $txt['sp-blocksActivate']) . '</a>' : '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=statechange;' . (empty($context['sp_blocks_single_side_list']) ? '' : 'redirect=' . $block['column'] . ';') . 'block_id=' . $block['id'] . ';type=block;' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('active', $txt['sp-blocksDeactivate']) . '</a>',
-				'edit' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=edit;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('modify') . '</a>',
-				'move' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=select;block_id=' . $block['id'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('move', $txt['sp-adminColumnMove']) . '</a>',
-				'delete' => '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=delete;block_id=' . $block['id'] . ';col=' . $block['column'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '" onclick="return confirm(\''.$txt['sp-deleteblock'].'\');">' . sp_embed_image('delete') . '</a>',]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[$context['blocks'][$side['name']][$block_id]['move_insert'] = '<a href="' . $scripturl . '?action=admin;area=portalblocks;sa=move;block_id=' . $context['block_move'] . ';col=' . $block['column'] . ';row=' . $block['row'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('arrow', $txt['sp-blocks_move_here']) . '</a>';]]></search>
-		<add><![CDATA[$context['blocks'][$side['name']][$block_id]['move_insert'] = '<a href="' . $scripturl . '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] . ';sa=move;block_id=' . $context['block_move'] . ';col=' . $block['column'] . ';row=' . $block['row'] . ';' . $context['session_var'] . '=' . $context['session_id'] . '">' . sp_embed_image('arrow', $txt['sp-blocks_move_here']) . '</a>';]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[);
-		}
-
-		redirectexit('action=admin;area=portalblocks');]]></search>
-		<add><![CDATA[);
-		}
-
-		redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
-	</operation>
-	<operation>
-		<search position="after"><![CDATA[	// ]]]]><![CDATA[></script>]]></search>
-		<add><![CDATA[		function sp_hideBoards(forum)
-		{';
-	foreach ($subforum_tree as $subforum)
-		$context['html_headers'] .= '
-			document.getElementById("sfm_boards' . $subforum['forumid'] . '").style.display = forum == ' . $subforum['forumid'] . ' ? "" : "none";';
-	$context['html_headers'] .= '
-		}
-]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[SELECT id_board, name
-			FROM {db_prefix}boards
-			ORDER BY name DESC'
-		);
-		$context['display_boards'] = array();
-		while ($row = $smcFunc['db_fetch_assoc']($request))
-			$context['display_boards']['b' . $row['id_board']] = $row['name'];]]></search>
-		<add><![CDATA[SELECT b.id_board, b.name, c.forumid
-			FROM {db_prefix}boards AS b
-				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
-			' . ($forumid == 0 ? '' : 'WHERE c.forumid = {int:forumid}') . '
-			ORDER BY name DESC',
-			array(
-				'forumid' => (int) $forumid,
-			)
-		);
-		$context['display_boards'] = array();
-		while ($row = $smcFunc['db_fetch_assoc']($request))
-			$context['display_boards'.$row['forumid']]['b' . $row['id_board']] = $row['name'];]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA['list_blocks' => !empty($_POST['block_column']) ? getBlockInfo($_POST['block_column']) : array(),]]></search>
-		<add><![CDATA[
-			'forum' => $forumid,]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[if (!empty($_POST['display_boards']))
-				foreach ($_POST['display_boards'] as $board)]]></search>
-		<add><![CDATA[$forum = !empty($_POST['forums']) ? $_POST['forums'] : $forumid;
-			if (!empty($_POST['display_boards' . $forum]))
-				foreach ($_POST['display_boards' . $forum] as $board)]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[fixColumnRows($side);
-	}
-
-	redirectexit('action=admin;area=portalblocks');]]></search>
-		<add><![CDATA[fixColumnRows($side);
-	}
-
-	redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
-	</operation>
-	<operation error="ignore">
-		<search position="replace"><![CDATA[function sportal_admin_block_delete()
-{
-	global $smcFunc;]]></search>
-		<add><![CDATA[function sportal_admin_block_delete()
-{
-	global $smcFunc, $context;]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[fixColumnRows($_REQUEST['col']);
-
-	// Return back to the block list.
-	redirectexit('action=admin;area=portalblocks');]]></search>
-		<add><![CDATA[fixColumnRows($_REQUEST['col']);
-
-	// Return back to the block list.
-	redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
-	</operation>
-</file>
-<file name="$sourcedir/PortalAdminMain.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[global $smcFunc, $context, $scripturl, $txt]]></search>
-		<add><![CDATA[, $subforum_tree, $forumid, $sourcedir]]></add>
-	</operation>
-	<operation>
-		<search position="after"><![CDATA[saveDBSettings($config_vars);
-		redirectexit('action=admin;area=portalconfig;sa=generalsettings');]]></search>
-		<add><![CDATA[// Update the subforum array with the new settings:
-		$subforum_tree[$forumid]['sp_portal'] = (int) $_POST['sp_portal_mode'];
-		$subforum_tree[$forumid]['sp_standalone'] = $_POST['sp_standalone_url'];
-
-		// Place the revised subforum array into the Settings.php file:
-		require_once($sourcedir.'/Subs-Admin.php');
-		updateSettingsFile(array('subforum_tree' => str_replace("\n", "", var_export($subforum_tree, true))));
-
-		]]></add>
-	</operation>
-</file>
-<file name="$sourcedir/Subs-Portal.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[spb.display_custom, spb.style, spp.variable, spp.value]]></search>
-		<add><![CDATA[, spb.forum]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null)
-{
-	global $smcFunc, $context, $options, $txt;
-
-	$query = array();
-	$parameters = array();]]></search>
-		<add><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null)
-{
-	global $smcFunc, $context, $options, $txt, $forumid;
-
-	$query = array('spb.forum = {int:forumid}');
-	$parameters = array(
-		'forumid' => (int) ($forumid == 0 ? (!empty($context['req_forumid']) ? $context['req_forumid'] : $forumid) : $forumid)
-	);]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA['parameters' => array(),]]></search>
-		<add><![CDATA[
-				'forum' => $row['forum'],]]></add>
-	</operation>
-</file>
-<file name="$sourcedir/Subs-PortalAdmin.php" error="skip">
-	<operation error="ignore">
-		<search position="replace"><![CDATA[function fixColumnRows($column_id = null)
-{
-	global $smcFunc;]]></search>
-		<add><![CDATA[function fixColumnRows($column_id = null)
-{
-	global $smcFunc, $forumid;]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[function sportal_admin_state_change()
-{]]></search>
-		<add><![CDATA[function sportal_admin_state_change()
-{
-	global $context;
-
-]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[redirectexit('action=admin;area=portalblocks;sa=' . $list);
-	}
-	elseif($_REQUEST['type'] == 'category')
-		redirectexit('action=admin;area=portalarticles;sa=categories');
-	elseif($_REQUEST['type'] == 'article')
-		redirectexit('action=admin;area=portalarticles;sa=articles');
-	else
-		redirectexit('action=admin;area=portalconfig');]]></search>
-		<add><![CDATA[redirectexit('action=admin;area=portalblocks;sa=' . $list . ';sub=' . $context['req_forumid']);
-	}
-	elseif($_REQUEST['type'] == 'category')
-		redirectexit('action=admin;area=portalarticles;sa=categories;sub=' . $context['req_forumid']);
-	elseif($_REQUEST['type'] == 'article')
-		redirectexit('action=admin;area=portalarticles;sa=articles;sub=' . $context['req_forumid']);
-	else
-		redirectexit('action=admin;area=portalconfig;sub=' . $context['req_forumid']);]]></add>
-	</operation>
-</file>
-<file name="$themedir/PortalAdminBlocks.template.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[global $context, $settings, $options, $scripturl, $txt, $helptxt, $modSettings]]></search>
-		<add><![CDATA[, $forumid, $subforum_tree]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[function template_block_list()
-{
-	global ]]></search>
-		<add><![CDATA[function template_block_list()
-{
-	global $subforum_tree, ]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<div id="sp_manage_blocks">';]]></search>
-		<add><![CDATA[<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-		function expandTabs(forum)
-		{
-			';
-	foreach ($subforum_tree as $subforum => $info)
-		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
-			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
-			';
-	echo '
-		}
-	// ]]]]><![CDATA[></script>
-	<div id="sp_manage_blocks">';]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=portalblocks">', $txt['sp-blocks_cancel_moving'], '</a>]', '</p>]]></search>
-		<add><![CDATA[<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , '">', $txt['sp-blocks_cancel_moving'], '</a>]', '</p>]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<a class="sp_float_right" href="', $scripturl, '?action=admin;area=portalblocks;sa=add;col=', $side['id'], '">', sp_embed_image('add', sprintf($txt['sp-blocksCreate'], $side['label'])), '</a>
-				<a href="', $scripturl, '?action=helpadmin;help=', $side['help'], '" onclick="return reqWin(this.href);" class="help"><img src="', $settings['images_url'], '/helptopics.gif" alt="', $txt['help'], '" class="icon" /></a>
-				<a href="', $scripturl, '?action=admin;area=portalblocks;sa=', $id, '">', $side['label'], ' ', $txt['sp-blocksBlocks'], '</a>]]></search>
-		<add><![CDATA[<a class="sp_float_right" href="', $scripturl, '?action=admin;area=portalblocks;sa=add;sub=' . $context['req_forumid'] , ';col=', $side['id'], '">', sp_embed_image('add', sprintf($txt['sp-blocksCreate'], $side['label'])), '</a>
-				<a href="', $scripturl, '?action=helpadmin;help=', $side['help'], '" onclick="return reqWin(this.href);" class="help"><img src="', $settings['images_url'], '/helptopics.gif" alt="', $txt['help'], '" class="icon" /></a>
-				<a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=', $id, '">', $side['label'], ' ', $txt['sp-blocksBlocks'], '</a>]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<td class="sp_center"><a href="', $scripturl, '?action=admin;area=portalblocks;sa=move;block_id=', $context['block_move'], ';col=', $side['id'], ';', $context['session_var'], '=', $context['session_id'], '">', sp_embed_image('arrow', $txt['sp-blocks_move_here']), '</a></td>]]></search>
-		<add><![CDATA[<td class="sp_center"><a href="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=move;block_id=', $context['block_move'], ';col=', $side['id'], ';', $context['session_var'], '=', $context['session_id'], '">', sp_embed_image('arrow', $txt['sp-blocks_move_here']), '</a></td>]]></add>
-	</operation>
-	<operation>
-		<search position="after"><![CDATA[foreach($context['sides'] as $id => $side)]]></search>
-		<add><![CDATA[// Display the subforums as a tab at the top of the screen:
-	$flagged = array( 0 => false );
-	if (count($subforum_tree) > 1)
-	{
-		echo '
-		<div id="tabContainer">
-			<div class="tabs">
-				<ul>';
-		foreach ($subforum_tree as $id => $section)
-		{
-			echo '
-					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), '><a href="', $scripturl, '?action=admin;area=portalblocks;sub=', $id, (empty($_REQUEST['sa']) ? '' : ';sa=' . $_REQUEST['sa']), '">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
-			$flagged[$id] = false;
-		}
-		echo '
-				</ul>
-			</div>
-		</div><hr/>';
-	}
-
-	]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<form name="sp_edit_block_form" id="sp_edit_block_form" action="', $scripturl, '?action=admin;area=portalblocks;sa=edit" method="post" accept-charset="', $context['character_set'], '" onsubmit="submitonce(this);">]]></search>
-		<add><![CDATA[<form name="sp_edit_block_form" id="sp_edit_block_form" action="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=edit" method="post" accept-charset="', $context['character_set'], '" onsubmit="submitonce(this);">]]></add>
-	</operation>
-	<operation>
-		<search position="after"><![CDATA[', $txt['sp-blocksShowBlock'], ']]></search>
-		<add><![CDATA[';
-		if (count($subforum_tree) > 1)
-		{
-			echo $txt['sp-subforums'], ':
-					<select name="forum" id="forum" onchange="sp_hideBoards(this.options[this.selectedIndex].value);">';
-			foreach ($subforum_tree as $subforum)
-				echo '
-						<option value="', $subforum['forumid'], '"', ($context['req_forumid'] == $subforum['forumid']  ? ' selected="selected"' : ''), '>', $subforum['boardname'], '</option>';
-			echo '
-					</select><br/>';
-		}
-		else
-			echo '
-					<input type="hidden" name="forum" value="', $forumid, '" />';
-		echo '
-					]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[$display_types = array('actions', 'boards', 'pages');
-		foreach ($display_types as $type)
-		{
-			if (empty($context['display_' . $type]))
-				continue;]]></search>
-		<add><![CDATA[$display_types = array('actions');
-		foreach ($subforum_tree as $subforum)
-			$display_types[] = 'boards' . $subforum['forumid'];
-		$display_types[] = 'pages';
-		foreach ($display_types as $type)
-		{
-			if (empty($context['display_' . $type]))
-				continue;
-			if ($need_div = empty($txt['sp-blocksSelect' . ucfirst($type)]))
-			{
-				$txt['sp-blocksSelect' . ucfirst($type)] = $txt['sp-blocksSelectBoards'];
-				echo '
-						<div id="sfm_', $type, '" name="sfm_', $type, '"', $context['SPortal']['block']['forum'] <> str_replace('boards', '', $type) ? ' style="display: none;"' : '', '>';
-			}]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[<li><input type="checkbox" onclick="invertAll(this, this.form, \'display_', $type, '[]\');" class="input_check" /> <em>', $txt['check_all'], '</em></li>
-						</ul>
-						<br />';]]></search>
-		<add><![CDATA[
-			if ($need_div)
-				echo '
-						</div>';]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sa=add" method="post" accept-charset="', $context['character_set'], '">]]></search>
-		<add><![CDATA[<form action="', $scripturl, '?action=admin;area=portalblocks;sub=' . $context['req_forumid'] , ';sa=add" method="post" accept-charset="', $context['character_set'], '">]]></add>
-	</operation>
-</file>
-
-<!-------------------------------------------------------------------------->
-<!-- EZ Portal block management                                           -->
-<!-------------------------------------------------------------------------->
-<file name="$sourcedir/EzPortal2.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[l.customtitle, l.id_layout, l.active, l.id_order  ]]></search>
-		<add><![CDATA[, l.forum]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[while($row2 = $smcFunc['db_fetch_assoc']($dbresult2))
-			$blocks[] = $row2;]]></search>
-		<add><![CDATA[while($row2 = $smcFunc['db_fetch_assoc']($dbresult2))
-			$blocks[$row2['forum']][] = $row2;]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[$settings, $disableEzPortal, $modSettings]]></search>
-		<add><![CDATA[, $forumid]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[WHERE l.active = 1 AND l.id_column = " . $row['id_column'] . " ]]></search>
-		<add><![CDATA[
-				AND l.forum = " . ((int) $forumid) . "]]></add>
-	</operation>
-	<operation>
-		<search position="before><![CDATA[(id_column, id_block, id_order, customtitle, permissions, blockmanagers, can_collapse, active, blockdata, id_icon, hidetitlebar]]></search>
-		<add><![CDATA[, forum]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[// Insert the ezBlock]]></search>
-		<add><![CDATA[
-	$forum = (int) $_REQUEST['sub'];]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[VALUES ($column, $blocktype,1000,'$blocktitle','$finalPermissions','$finalManagers',$can_collapse, 1,'$blockdata','$icon', $hidetitlebar]]></search>
-		<add><![CDATA[, $forum]]></add>
-	</operation>
-</file>
-<file name="$sourcedir/Subs-EzPortalMain2.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[function EzBlockRecentPostsBlock($paramters = array(), $numPosts = 10, $exclude_boards = null, $format = 'vertical', $startHtml = '', $endHtml = '')
-{
-
-	global $context, $settings, $scripturl, $txt, $smcFunc]]></search>
-		<add><![CDATA[, $forumid]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[m.ID_MSG >= " . ($modSettings['maxMsgID'] - 2000 * min($numPosts, 5)) . " AND ]]></search>
-		<add><![CDATA[
-			c.forumid = " . ((int) $forumid) . " AND]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[function EzBlockRecentTopicsBlock($paramters = array(), $numTopics = 10, $exclude_boards = null, $format = 'vertical', $startHtml = '', $endHtml = '')
-{
-	global $context, $settings, $scripturl, $txt, $smcFunc]]></search>
-		<add><![CDATA[, $forumid]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[FROM ({db_prefix}messages AS m, {db_prefix}topics AS t, {db_prefix}boards AS b, {db_prefix}messages AS ms)]]></search>
-		<add><![CDATA[
-			LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[m.ID_MSG >= " . ($modSettings['maxMsgID'] - 2000 * min($numTopics, 5)) . " AND ]]></search>
-		<add><![CDATA[
-			c.forumid = " . ((int) $forumid) . " AND]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[function EzBlockPollBlock($paramters = array(), $pollTopicID = 0, $startHtml = '', $endHtml = '')
-{
-	global $smcFunc, $txt, $settings, $boardurl, $sc, $user_info]]></search>
-		<add><![CDATA[, $forumid]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[WHERE p.ID_POLL = t.ID_POLL]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
-		WHERE p.ID_POLL = t.ID_POLL
-			AND c.forumid = " . ((int) $forumid) . "]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[FROM ({db_prefix}messages AS m, {db_prefix}boards AS b)]]></search>
-		<add><![CDATA[
-			LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></add>
-	</operation>
-</file>
-<file name="$themedir/EzPortal2.template.php" error="skip">
-	<operation>
-		<search position="before"><![CDATA[function template_ezportal_blocks()
-{
-	global $context, $txt, $scripturl, $ezpSettings]]></search>
-		<add><![CDATA[, $forumid, $subforum_tree]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[
-        </h3>
-  </div>]]></search>
-		<add><![CDATA[
-	<script type="text/javascript"><!-- // --><![CDATA[<]]><![CDATA[![CDATA[
-		function expandTabs(forum)
-		{
-			';
-	foreach ($subforum_tree as $subforum => $info)
-		echo 'document.getElementById("subforum' . $subforum . '").style.display = (forum == ' . $subforum . ' ? "" : "none");
-			document.getElementById("tab' . $subforum . '").className = (forum == ' . $subforum . ' ? "tabActiveHeader" : "");
-			';
-	echo '
-		}
-	// ]]]]><![CDATA[></script>';
-
-	// Display the subforums as a tab at the top of the screen:
-	if (count($subforum_tree) > 1)
-	{
-		echo '
-		<div id="tabContainer">
-			<div class="tabs">
-				<ul>';
-		foreach ($subforum_tree as $id => $section)
-			echo '
-					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), ' id="tab' . $id . '"><a href="javascript:void(0);" onclick="expandTabs(' . $id . '); return false;">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
-		echo '
-				</ul>
-			</div>
-		</div>';
-	}
-	foreach ($subforum_tree as $sub => $data)
-	{
-	echo '
-<div id="subforum' . $sub . '"' . ($sub <> $forumid ? ' style="display: none;"' : '') . '>]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[<form method="post" action="', $scripturl, '?action=ezportal;sa=blocks2]]></search>
-		<add><![CDATA[;sub=' . $sub . ']]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[<a href="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock;column=',$row['id_column'],']]></search>
-		<add><![CDATA[;sub=' . $sub . ']]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[foreach($row['blocks'] as $blockRow)]]></search>
-		<add><![CDATA[$blocks = isset($row['blocks'][$sub]) ? $row['blocks'][$sub] : array();
-					foreach($blocks as $blockRow)]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[</table>';
-
-
-}
-
-function template_ezportal_import()]]></search>
-		<add><![CDATA[</table>
-</div>';
-}
-
-}
-
-function template_ezportal_import()]]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=admin;area=ezpblocks;sa=addblock2]]></search>
-		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
-	</operation>
-	<operation>
-		<search position="before"><![CDATA[<form method="post" name="frmaddblock" id="frmaddblock" action="', $scripturl, '?action=ezportal;sa=addblock3]]></search>
-		<add><![CDATA[;sub=' . ((int) $_REQUEST['sub']) . ']]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
-		<add><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;column=',$context['ezp_column_data']['id_column'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
-	</operation>
-	<operation>
-		<search position="replace"><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
-		<add><![CDATA[<td width="80%"  class="windowbg2"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
 	</operation>
 </file>
 </modification>
