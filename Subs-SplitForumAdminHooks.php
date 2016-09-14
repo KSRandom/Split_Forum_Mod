@@ -21,21 +21,22 @@ function SplitForum_Admin_Menu(&$areas)
 	loadTemplate('Admin', 'splitforum');
 
 	// Insert the Subforums area into the admin menu:
-	$temp = array(
-		'subforums' => array(
-			'label' => ($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list']),
-			'file' => 'ManageSplitForums.php',
-			'function' => 'ManageSplitForums',
-			'icon' => 'server.gif',
-			'subsections' => array(
-				'main' => array($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list'], 'admin_forum'),
-				'newsub' => array($txt['subforums_list_add'], 'admin_forum'),
-				'settings' => array($txt['settings'], 'admin_forum'),
-			),
-		)
-	);
 	foreach ($areas['layout']['areas'] as $label => $area)
+	{
 		$temp[$label] = $area;
+		if ($label == 'manageboards')
+			$temp['subforums'] = array(
+				'label' => ($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list']),
+				'file' => 'ManageSplitForums.php',
+				'function' => 'ManageSplitForums',
+				'icon' => 'server.gif',
+				'subsections' => array(
+					'main' => array($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list'], 'admin_forum'),
+					'newsub' => array($txt['subforums_list_add'], 'admin_forum'),
+					'settings' => array($txt['settings'], 'admin_forum'),
+				),
+			);
+	}
 	$areas['layout']['areas'] = $temp;
 	unset($temp);
 

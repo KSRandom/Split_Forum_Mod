@@ -508,8 +508,12 @@ function template_modify_category()
 		<add><![CDATA[, $forumid, $subforum_tree]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $context, $settings, $options, $scripturl, $txt;]]></search>
-		<add><![CDATA[global $context, $settings, $options, $scripturl, $txt, $subforum_tree;]]></add>
+		<search position="replace"><![CDATA[function template_block_list()
+{
+	global ]]></search>
+		<add><![CDATA[function template_block_list()
+{
+	global $subforum_tree, ]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[<div id="sp_manage_blocks">';]]></search>

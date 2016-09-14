@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.18</version>
+
+<file name="$themedir/PortalAdminBlocks.template.php">
+	<operation>
+		<search position="replace"><![CDATA[function template_block_list()
+{
+	global ]]></search>
+		<add><![CDATA[function template_block_list()
+{
+	global $subforum_tree, ]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $context, $settings, $options, $scripturl, $txt, $subforum_tree]]></search>
+		<add><![CDATA[global $context, $settings, $options, $scripturl, $txt]]></add>
+	</operation>
+</file>
+</modification>

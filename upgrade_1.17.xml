@@ -42,7 +42,8 @@
 			document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
 			document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
 			document.getElementById("alias_child' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");';]]></search>
-		<add><![CDATA[document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+		<add><![CDATA[echo '
+			document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
 			if (document.getElementById("alias_cat' . $subforum['forumid'] . '") != null)
 			{
 				document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");

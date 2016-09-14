@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.17[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.18[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -63,6 +63,10 @@ Upgrade is possible from [b]v1.12[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.18 - November 24th, 2014[/u][/b]
+o Fixed install issue involving SimplePortal's block admin template...
+o Moved [b]Forum[/b] => [b]Subforums[/b] menu beneath [b]Boards[/b] in Admin menu.
+
 [b][u]v1.17 - November 21th, 2014[/u][/b]
 o Fixed template-breaking typo in [b]Sources/ManageBoards.php[/b]
 o Fixed Modify Boards UI to work correctly without Alias Boards mod installed...

@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.17</version>
+	<version>1.18</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -51,6 +51,7 @@
 		<modification>upgrade_1.15.xml</modification>
 		<modification>upgrade_1.16.xml</modification>
 		<modification>upgrade_1.17.xml</modification>
+		<modification>upgrade_1.18.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -66,6 +67,7 @@
 		<modification>upgrade_1.15.xml</modification>
 		<modification>upgrade_1.16.xml</modification>
 		<modification>upgrade_1.17.xml</modification>
+		<modification>upgrade_1.18.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -77,6 +79,7 @@
 		<modification>upgrade_1.15.xml</modification>
 		<modification>upgrade_1.16.xml</modification>
 		<modification>upgrade_1.17.xml</modification>
+		<modification>upgrade_1.18.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
@@ -86,12 +89,20 @@
 		<database>db_install.php</database>
 		<modification>upgrade_1.16.xml</modification>
 		<modification>upgrade_1.17.xml</modification>
+		<modification>upgrade_1.18.xml</modification>
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 	<upgrade from="1.16">
 		<code>add_remove_hook.php</code>
 		<database>db_install.php</database>
 		<modification>upgrade_1.17.xml</modification>
+		<modification>upgrade_1.18.xml</modification>
+		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+	</upgrade>
+	<upgrade from="1.17">
+		<code>add_remove_hook.php</code>
+		<database>db_install.php</database>
+		<modification>upgrade_1.18.xml</modification>
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 </package-info>
