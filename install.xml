@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.2</version>
+<version>1.3</version>
 
 <file name="$boarddir/index.php">
 	<operation>
@@ -23,6 +23,8 @@
 	if ($forumid <> 0) 
 	{
 		unset($admin_areas['forum']['areas']['packages']);
+		unset($admin_areas['layout']['areas']['subforums']['subsections']['newsub']);
+		unset($admin_areas['layout']['areas']['subforums']['subsections']['settings']);
 		unset($admin_areas['config']['areas']['serversettings']);
 	}
 	
@@ -48,13 +50,13 @@
 			'areas' => array(
 ]]></search>
 		<add><![CDATA[				'subforums' => array(
-					'label' => $txt['subforums_list'],
+					'label' => ($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list']),
 					'file' => 'ManageSplitForums.php',
 					'function' => 'ManageSplitForums',
 					'icon' => 'server.gif',
 					'subsections' => array(
 						'main' => array($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list'], 'admin_forum'),
-						'newsub' => array($forumid != 0 ? '' : $txt['subforums_list_add'], 'admin_forum'),
+						'newsub' => array($txt['subforums_list_add'], 'admin_forum'),
 						'settings' => array($txt['settings'], 'admin_forum'),
 					),
 				),
@@ -69,41 +71,51 @@
 		<add><![CDATA[function reloadSettings()
 {
 	global $modSettings, $boarddir, $smcFunc, $txt, $db_character_set, $context, $sourcedir;
-	global $boardurl, $cookiename, $boarddir, $forumid, $mbname, $subtheme, $language, $favicon;]]></add>
+	global $boardurl, $cookiename, $boarddir, $forumid, $mbname, $subtheme, $language, $favicon, $subforum_tree;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></search>
-		<add><![CDATA[// Determine which subforum we are in and load settings for it:
+		<search position="replace"><![CDATA[// Most database systems have not set UTF-8 as their default input charset.]]></search>
+		<add><![CDATA[// Define primary subforum entry if it is not already defined:
+	global $cookiename, $boardurl, $mbname, $language, $boarddir;
+	if (!is_array($subforum_tree))
+		$subforum_tree = array(
+			0 => array(		// Primary subforum
+				'forumid' => 0,
+				'cookiename' => $cookiename,
+				'boardurl' => $boardurl,
+				'boardname' => $mbname,
+				'language' => $language,
+				'forumdir' => $boarddir,
+				'favicon' => '',
+				'primary_membergroup' => 0,
+				'subtheme' => 0,
+			),
+		);
+
+	// Determine which subforum we are in and load settings for it:
+	global $subforum_tree;
 	$dir = $_SERVER['REQUEST_URI'];
 	$dir = 'http://' . $_SERVER['HTTP_HOST'] . substr($dir, 0, strrpos($dir, '/'));
-	$request = $smcFunc['db_query']('', '
-		SELECT * FROM {db_prefix}subforums WHERE boardurl = "{raw:boardurl}" LIMIT 1',
-		array(
-			'boardurl' => $dir,
-		)
-	);
-	if ($request)
+	if (!is_array($subforum_tree))
+		$subforum_tree = array();
+	foreach ($subforum_tree as $id => $row)
 	{
-		$row = $smcFunc['db_fetch_assoc']($request);
-		$smcFunc['db_free_result']($request);
+		if ($row['boardurl'] == $dir)
+		{
+			// Assign global variables with row gleaned from database:
+			$forumid = $row['forumid'];
+			$boardurl = $row['boardurl'];
+			$forumdir = $row['forumdir'];
+			$subtheme = $row['subtheme'];
+			$mbname = $row['boardname'];
+			$cookiename = $row['cookiename'];
+			$language = $row['language'];
+			$favicon = $row['favicon'];
+			$modSettings['primary_membergroup'] = $row['primary_membergroup'];
+		}
 	}
-	if (!empty($row))
-	{
-		// Assign global variables with row gleaned from database:
-		$forumid = $row['forumid'];
-		$boardurl = $row['boardurl'];
-		$forumdir = $row['forumdir'];
-		$subtheme = $row['subtheme'];
-		$mbname = $row['boardname'];
-		$cookiename = $row['cookiename'];
-		$language = $row['language'];
-		$favicon = $row['favicon'];
-		$modSettings['primary_membergroup'] = $row['primary_membergroup'];
-	}
-	else
-    $forumid = 0;
 
-	// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></add>
+	// Most database systems have not set UTF-8 as their default input charset.]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[global $context, $settings, $options, $sourcedir, $ssi_theme, $smcFunc;]]></search>
@@ -124,12 +136,8 @@
 		<search position="after"><![CDATA[// Set the current board.]]></search>
 		<add><![CDATA[if ((int)$row['forumid'] != $forumid) {
 				// Find the right subforum to redirect to:
-				$request = $smcFunc['db_query']('', '
-					SELECT boardurl FROM {db_prefix}subforums WHERE forumid = {int:forumid}',
-					array( 'forumid' => (int) $row['forumid'] )
-				);
-				$sub = $smcFunc['db_fetch_assoc']($request);
-				$smcFunc['db_free_result']($request);
+				global $subforum_tree;
+				$sub = (isset($subforum_tree[(int) $row['forumid']]) ? $subforum_tree[(int) $row['forumid']] : 0);
 
 				// If the "subforum_redirect_wrong" variable is set and $sub isn't empty, then redirect:
 				if ($modSettings['subforum_redirect_wrong'] == 1 && (!empty($sub)))
@@ -667,30 +675,26 @@
 	global $boarddir, $cachedir;]]></search>
 		<add><![CDATA[function updateSettingsFile($config_vars)
 {
-	global $boarddir, $cachedir, $smcFunc, $forumid;
+	global $boarddir, $cachedir, $forumid, $subforum_tree;
 
-	// Put available data in the Split Forums database:
+	// Put available data in the Subforum Tree variable:
 	if (isset($config_vars['mbname']))
-		$smcFunc['db_query']('', '
-			UPDATE {db_prefix}subforums SET boardname = {raw:txt} WHERE forumid = ' . $forumid, 
-			array('txt' => $config_vars['mbname']));
+		$subforum_tree[$forumid]['boardname'] = $config_vars['mbname'];
 	if (isset($config_vars['boardurl']))
-		$smcFunc['db_query']('', '
-			UPDATE {db_prefix}subforums SET boardurl = {raw:txt} WHERE forumid = ' . $forumid, 
-			array('txt' => $config_vars['boardurl']));
-	if (isset($config_vars['boardurl']))
-		$smcFunc['db_query']('', '
-			UPDATE {db_prefix}subforums SET forumdir = {raw:txt} WHERE forumid = ' . $forumid, 
-			array('txt' => $config_vars['boardurl']));
+		$subforum_tree[$forumid]['boardurl'] = $config_vars['boardurl'];
 	if (isset($config_vars['cookiename']))
-		$smcFunc['db_query']('', '
-			UPDATE {db_prefix}subforums SET cookiename = {raw:txt} WHERE forumid = ' . $forumid, 
-			array('txt' => $config_vars['cookiename']));
+		$subforum_tree[$forumid]['cookiename'] = $config_vars['cookiename'];
 	if (isset($config_vars['favicon']))
-		$smcFunc['db_query']('', '
-			UPDATE {db_prefix}subforums SET favicon = {raw:txt} WHERE forumid = ' . $forumid, 
-			array('txt' => $config_vars['favicon']));
-	unset($config_vars['favicon']);]]></add>
+		$subforum_tree[$forumid]['favicon'] = $config_vars['favicon'];
+	unset($config_vars['favicon']);
+	
+	// Clear some variables if we are in a subforum:
+	if ((isset($config_vars['mbname']) || isset($config_vars['boardurl']) || isset($config_vars['cookiename'])) && $forumid != 0)
+	{
+		unset($config_vars['mbname']);
+		unset($config_vars['boardurl']);
+		unset($config_vars['cookiename']);
+	}]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/Subs-BoardIndex.php">
@@ -717,26 +721,33 @@
 	global $cat_tree, $boards, $boardList, $txt, $modSettings, $smcFunc;
 
 	// Getting all the board and category information you'd ever wanted.]]></search>
-		<add><![CDATA[function getBoardTree($reqid = -1)
+		<add><![CDATA[function getBoardTree($reqid = 0)
 {
 	global $cat_tree, $boards, $boardList, $txt, $modSettings, $smcFunc, $forumid, $subforum_tree;
 
 	// Build the subforum tree array:
-	$request = $smcFunc['db_query']('', '
-		SELECT * FROM {db_prefix}subforums'.($forumid <> 0 ? ' WHERE forumid = {int:forumid}' : '').' ORDER BY forumid',
-		array(
-			'forumid' => (int) $forumid,
-		)
-	);
-	$subforum_tree = array();
-	while ($row = $smcFunc['db_fetch_assoc']($request))
-	{
-		$subforum_tree[$row['forumid']] = $row;
-	}
-	$smcFunc['db_free_result']($request);
+	if ($forumid <> 0)
+		$subforum_tree = array($forumid => $subforum_tree[$forumid]);
 	
 	// Getting all the board and category information you'd ever wanted.
 	$reqid = (int) ($forumid == 0 ? (isset($_REQUEST['sub']) ? $_REQUEST['sub'] : $reqid) : $forumid);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$cat_tree = array();
+	$boards = array();
+	$last_board_order = 0;
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+	{
+		]]></search>
+		<add><![CDATA[$cat_tree = array();
+	$boards = array();
+	$last_board_order = 0;
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+	{
+		if (!isset($subforum_tree[$row['forumid']]))
+			$subforum_tree[$row['forumid']] = array('forumid' => (int) $row['forumid']);
+			
+		]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[c.id_cat, c.name AS cat_name, c.cat_order, c.can_collapse
@@ -856,7 +867,7 @@ echo '
 		foreach ($subforum_tree as $id => $section)
 		{
 			echo '
-					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), '><a href="', $scripturl, '?action=admin;area=manageboards;sa=main;sub=', $id, '">', $section['boardname'], '</a></li>';
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), '><a href="', $scripturl, '?action=admin;area=manageboards;sa=main;sub=', $id, '">', (isset($section['boardname']) ? $section['boardname'] : '# '.$section['forumid']), '</a></li>';
 		}
 		echo '
 				</ul>
@@ -904,40 +915,6 @@ echo '
 						<input type="hidden" name="forum_id" value="', $forumid, '" size="4" tabindex="', $context['tabindex']++, '" />';
 	}
 ]]></add>
-	</operation>
-</file>
-<file name="$languagedir/Admin.english.php">
-	<operation>
-		<search position="after"><![CDATA[?>]]></search>
-		<add><![CDATA[// Begin SubForum Mod
-$txt['favicon'] = 'Website Icon URL';
-// End SubForum Mod
-
-]]></add>
-	</operation>
-</file>
-<file name="$languagedir/Errors.english.php">
-	<operation>
-		<search position="before"><![CDATA[$txt['no_board'] = 'The board you specified doesn\'t exist';]]></search>
-		<add><![CDATA[
-$txt['wrong_forum'] = 'The board you specified is located on a different forum';]]></add>
-	</operation>
-</file>
-<file name="$languagedir/Admin.english-utf8.php">
-	<operation>
-		<search position="after"><![CDATA[?>]]></search>
-		<add><![CDATA[// Begin SubForum Mod
-$txt['favicon'] = 'Website Icon URL';
-// End SubForum Mod
-
-]]></add>
-	</operation>
-</file>
-<file name="$languagedir/Errors.english-utf8.php">
-	<operation>
-		<search position="before"><![CDATA[$txt['no_board'] = 'The board you specified doesn\'t exist';]]></search>
-		<add><![CDATA[
-$txt['wrong_forum'] = 'The board you specified is located on a different forum';]]></add>
 	</operation>
 </file>
 </modification>

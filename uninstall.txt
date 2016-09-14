@@ -4,7 +4,11 @@
 [/center]
 [hr]
 
-Per Simple Machines Forum mod-creation guidelines, uninstalling a mod must remove all files and directories created by the mod (and optionally database changes, if the user desires).  
+[center][color=blue][b][size=12pt][u]WARNING!!![/u][/size][/b][/color][/center]
+
+Since uninstalling this mod allows the users to see all boards their membergroup allows them to see (which may be all of them), it would be recommended to put the board into maintanance board prior to uninstalling and/or upgrading this mod.
+
+Per Simple Machines Forum mod-creation guidelines, uninstalling a mod must remove all files and directories created by the mod (and optionally database changes, if the user desires).
 
 This mod creates a directory per subforum that contain a [b]index.php[/b] file, and copies of the [b]agreement.txt[/b] file, all of which will be removed during the uninstall of this mod.  All other data (such as posts, topics, attachments, etc) is stored at the main forum directory.  Categories belonging to subforums will be become visible to the main forum after uninstallation.
 

@@ -1,11 +1,20 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.2[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.3[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
 
 [color=blue][b][size=12pt][u]Introduction[/u][/size][/b][/color]
 This modification allows you to divide your categories into subforums, a pseudo-forum located on a different directory, subdomain, or domain than the "primary forum".  The primary forum is any forum that has this modification installed.
+
+[color=blue][b][size=12pt][u]What It Does[/u][/size][/b][/color]
+[quote author=Terry at Moke link=topic=523055.msg3713355#msg3713355 date=1403833435]
+It is a mod for the User side of things, but obviously it needs to be managed in the Admin pages to create the subforums, and this mod allows you to create Categories and Boards that appear to the end user as a separate Forum, either via the URL or even the domain name, and these separate Forums can have their own Themes as well. However it all shares the same database as your original forum so usernames, passwords, profiles etc are all the same so there is less for you and the end users to manage.
+
+Without this mod if you wanted to limit access to particular Boards based you could set up a membergroup and just give them access to the Board(s) required and then they would see the extra Board(s) as part of the main Forum page, however they would still see the rest of the Forum as it is with the same theme etc. Yes you can change the theme for a Board but that would be a bit abrupt in most cases. 
+
+With this mod you are essentially doing the same thing with the Membergroup and Board(s) regarding settng up the access but they get to see the Boards as a separate Forum, [u]without[/u] all the other boards they might have access too and with a completely different theme if you wish. In the subForum they see the same stats, who is online, News, menu options etc. relative to the membergroup access they have, but with just the Boards you have chosen for them to see.
+[/quote]
 
 [color=blue][b][size=12pt][u]Admin Alterations[/u][/size][/b][/color]
 There is a new area at [b][i]Admin[/i] -> [i]Forum[/i] -> [i]SubForums[/i][/b], which allows you to manage your subforums here.  Clicking on the board title on the left side will take you to the subforum itself.  Clicking on the [b]Boards[/b] link on the right side will take you to the [b][i]Admin[/i] -> [i]Forum[/i] -> [i]Boards[/i][/b] area, restricted to that subforum.
@@ -41,23 +50,34 @@ o Theme settings restricted to members registered on a subforum
 o Language settings restricted to members registered on a subforum
 
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
-This mod was tested on SMF 2.0.7, but should work on earlier versions.  SMF 1.x is not and will not be supported.
+This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x is not and will not be supported.
 
 This mod shares the [b]realtabs.css[/b] from [url=http://custom.simplemachines.org/mods/index.php?mod=3796]Real Tabs for Admin & Moderator Menus[/url], so you need to backup any customized [b]realtabs.css[/b] before installing the mod.
 
+[color=blue][b][size=12pt][u]Known Issues[/u][/size][/b][/color]
+If you installed [b]Version 1.1[/b] and are having errors at the admin screen, go to [url=http://www.simplemachines.org/community/index.php?topic=523055.msg3712535#msg3712535]this post[/url] and follow the instructions given.
+
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.0[/b] to [b]v1.1[/b].
+Upgrade is possible from [b]v1.2[/b] to [b]v1.3[/b].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
-[b][u]v1.2 - June 25, 2014[/u][/b]
+[b][u]v1.3 - July 4th, 2014[/u][/b]
+o Changed name of new subforums to "SubForum # [n]" (where [n] is the new subforum ID)
+o Total rewrite of [b]edit_db.php[/b], now renamed to [b]db_install.php[/b]....
+o Added support for listing undefined subforum IDs present in the system.
+o Changed Database calls upon loading and subforum management to use arrays.
+o Seperated English and English-UTF8 language strings into their own file.
+o Added code to prevent global subforum administration from subforums.
+
+[b][u]v1.2 - June 25th, 2014[/u][/b]
 o Fixed REALLY bad problem in version 1.1 resulting in errors in admin screen!
 
-[b][u]v1.1 - June 23, 2014[/u][/b]
+[b][u]v1.1 - June 23th, 2014[/u][/b]
 o Added English UTF8 language strings
 o Changed the method that subforum boards and categories are listed to a tabbed system
 o [b]edit_db.php[/b] modification to attempt to eliminate some weird error...
 
-[b][u]v1.0 - May 17, 2013[/u][/b]
+[b][u]v1.0 - May 17th, 2013[/u][/b]
 o Initial Release
 
 [hr]

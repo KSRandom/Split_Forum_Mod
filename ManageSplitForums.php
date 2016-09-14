@@ -41,12 +41,12 @@ function ManageSplitForums()
 
 	// Format: 'sub-action' => 'function'
 	$subActions = array(
-		'list'   => 'ListSubForums',
 		'edit'   => 'EditSubForum',
-		'newsub' => 'EditSubForum',
 		'edit2'  => 'SaveSubForum',
-		'delete' => 'DeleteSubForum',
-		'settings' => 'SubForumSettings',
+		'list'   => ($forumid == 0 ? 'ListSubForums' : 'NoAccess_Area'),
+		'newsub' => ($forumid == 0 ? 'EditSubForum' : 'NoAccess_Area'),
+		'delete' => ($forumid == 0 ? 'DeleteSubForum' : 'NoAccess_Area'),
+		'settings' => ($forumid == 0 ? 'SubForumSettings' : 'NoAccess_Area'),
 	);
 
 	// Make sure that the subforum number is a valid one to edit:
@@ -55,12 +55,16 @@ function ManageSplitForums()
 	$subActions[$_REQUEST['sa']]($sub);
 }
 
+function NoAccess_Area()
+{
+	fatal_lang_error('not_subforum_admin');
+}
+
 Function ListSubForums($sub)
 {
 	global $context, $txt, $scripturl;
 
 	isAllowedTo('admin_forum');
-	getBoardTree();
 	$context['sub_template'] = 'subforums_list';
 	$context['post_url'] = $scripturl . '?action=admin;area=subforums';
 	$context['page_title'] = $txt['subforums_list_title'];
@@ -72,7 +76,6 @@ Function EditSubForum($sub)
 
 	// Make sure that the subforum number is a valid one to edit:
 	isAllowedTo('admin_forum');
-	getBoardTree();
 	if ($forumid != 0 && ($_REQUEST['sa'] == 'newsub' || $forumid != $sub))
 		redirectexit('action=admin;area=subforums');
 	if ($_REQUEST['sa'] != 'newsub' && !isset($subforum_tree[$sub]))
@@ -95,12 +98,11 @@ Function EditSubForum($sub)
 	if ($_REQUEST['sa'] == 'newsub')
 	{
 		// Figure out what the largest forum ID in the database is:
-		$sub = get_subforum_count() + 1;
+		$sub = get_subforum_count();
 
 		// Populate a new entry for the template:
-		loadLanguage('Install');
 		$subforum_tree[$sub]['forumid'] = $sub;
-		$subforum_tree[$sub]['boardname'] = $txt['install_settings_name_default'];
+		$subforum_tree[$sub]['boardname'] = $txt['subforums_list_prefix'] . ' # ' . $sub;
 		$subforum_tree[$sub]['boardurl'] = $modSettings['subforum_server_url'] . '/forum' . $sub;
 		$subforum_tree[$sub]['forumdir'] = $modSettings['subforum_server_root'] . '/forum' . $sub;
 		$subforum_tree[$sub]['cookiename'] = 'SmfCookie' . rand(100, 999);
@@ -146,18 +148,17 @@ function SaveSubForum($sub)
 	// Load the variables from the form:
 	checkSession();
 	isAllowedTo('admin_forum');
-	getBoardTree();
 	
 	// Filter all the information passed to this function, putting all the information into the array:
-	$arr['cookiename'] = (isset($_POST['subforum_modify_cookiename']) ? addslashes( $smcFunc['htmlspecialchars']($_POST['subforum_modify_cookiename'])) : '');
-	$arr['boardurl'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_boardurl']) ? addslashes( $smcFunc['htmlspecialchars']( $_POST['subforum_modify_boardurl'] )) : '') );
-	$arr['boardname'] = (isset($_POST['subforum_modify_boardname']) ? addslashes( $smcFunc['htmlspecialchars']( $_POST['subforum_modify_boardname'] )) : '');
+	$arr['cookiename'] = (isset($_POST['subforum_modify_cookiename']) ? $_POST['subforum_modify_cookiename'] : '');
+	$arr['boardurl'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_boardurl']) ?  $_POST['subforum_modify_boardurl']  : '') );
+	$arr['boardname'] = (isset($_POST['subforum_modify_boardname']) ?  $_POST['subforum_modify_boardname']  : '');
 	$arr['subtheme'] = (int) (isset($_POST['subforum_modify_subtheme']) ? $_POST['subforum_modify_subtheme'] : 0);
-	$arr['language'] = (isset($_POST['subforum_modify_language']) ? addslashes( $smcFunc['htmlspecialchars']( $_POST['subforum_modify_language'] )) : '');
-	$arr['favicon'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_favicon']) ? addslashes( $smcFunc['htmlspecialchars']( $_POST['subforum_modify_favicon'] )) : '') );
+	$arr['language'] = (isset($_POST['subforum_modify_language']) ?  $_POST['subforum_modify_language']  : '');
+	$arr['favicon'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_favicon']) ?  $_POST['subforum_modify_favicon']  : '') );
 	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary']) ? $_POST['subforum_modify_primary'] : '');
 	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : 0);
-	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ? addslashes( $smcFunc['htmlspecialchars']( $_POST['subforum_modify_forumdir'] )) : '') )) : $boarddir);
+	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : '')))  : $boarddir);
 
 	// Correct variables as necessary, throwing errors only when necessary:
 	if (substr($arr['boardurl'], strlen($arr['boardurl']) - 1, 1) == '/')
@@ -188,9 +189,8 @@ function SaveSubForum($sub)
 	}
 
 	// Insert the information into the database table:
-	if ($arr['forumid'] != 0)
-		delete_subforum($arr['forumid']);
-	add_subforum($sub, $arr);
+	delete_subforum($sub, false);
+	add_subforum($arr);
 
 	// Create the folder and "index.php" in the new forum folder if necessary:
 	@mkdir($arr['forumdir']);
@@ -297,11 +297,10 @@ function DeleteSubForum($sub)
 
 function SubForumSettings($return_config = false)
 {
-	global $forumid, $context, $txt, $modSettings, $scripturl, $smcFunc, $sourcedir;
+	global $forumid, $context, $txt, $modSettings, $scripturl, $smcFunc, $sourcedir, $forumid;
 
 	// Here and the board settings...
 	isAllowedTo('admin_forum');
-	getBoardTree();
 	$config_vars = array(
 		array('text', 'subforum_server_url', 'size' => 40),
 		array('text', 'subforum_server_root', 'size' => 40),

@@ -56,51 +56,45 @@ function get_membergroups()
 	
 function get_subforum_count()
 {
-	global $smcFunc;
-	
-	$request = $smcFunc['db_query']('', '
-		SELECT MAX(forumid) as max_id
-		FROM {db_prefix}subforums'
-	);
-	$row = $smcFunc['db_fetch_assoc']($request);
-	$smcFunc['db_free_result']($request);
-	return $row['max_id'];
+	global $subforum_tree, $forumid;
+	return ($forumid == 0 ? count($subforum_tree) : 1);
 }
 
-function add_subforum($sub, &$row)
+function add_subforum(&$row)
 {
-	global $smcFunc;
+	global $subforum_tree, $forumid, $sourcedir;
 	
 	isAllowedTo('admin_forum');
-
-	// Insert the information into the database table:
-	$smcFunc['db_insert']('replace',
-		'{db_prefix}subforums',
-		array(
-			'forumid' => 'int', 'cookiename' => 'text', 'boardurl' => 'text', 'boardname' => 'text', 
-			'subtheme' => 'int', 'language' => 'text', 'forumdir' => 'text', 'favicon' => 'text',
-			'primary_membergroup' => 'int',
-		),
-		array(
-			(int) $sub, $row['cookiename'], $row['boardurl'], $row['boardname'], (int) $row['subtheme'], 
-			$row['language'], $row['forumdir'], $row['favicon'], (int) $row['primary_membergroup'],
-		),
-		array('forumid', 'cookiename', 'boardurl', 'boardname', 'subtheme', 'language', 'forumdir', 'favicon', 'primary_membergroup')
+	
+	// Define the contents of the array element:
+	$subforum_tree[(int) isset($row['forumid']) ? $row['forumid'] : $forumid] = array(
+		'forumid' => (int) (isset($row['forumid']) ? $row['forumid'] : $forumid),
+		'cookiename' => (isset($row['cookiename']) ? $row['cookiename'] : ''),
+		'boardurl' => (isset($row['boardurl']) ? $row['boardurl'] : ''),
+		'boardname' => (isset($row['boardname']) ? $row['boardname'] : ''),
+		'subtheme' => (int) (isset($row['subtheme']) ? $row['subtheme'] : 0),
+		'language' => (isset($row['language']) ? $row['language'] : ''),
+		'forumdir' => (isset($row['forumdir']) ? $row['forumdir'] : ''),
+		'favicon' => (isset($row['favicon']) ? $row['favicon'] : ''),
+		'primary_membergroup' => (isset($row['primary_membergroup']) ? (int) $row['primary_membergroup'] : 0),
 	);
+	asort($subforum_tree);
+	
+	// Set the variable "subforum_tree" in the forum's Settings.php:
+	require_once($sourcedir.'/Subs-Admin.php');
+	updateSettingsFile(array('subforum_tree' => str_replace("\n", "", var_export($subforum_tree, true))));
 }
 
-function delete_subforum($sub)
+function delete_subforum($sub, $write_settings = true)
 {
-	global $smcFunc;
-	
+	global $subforum_tree, $sourcedir;
+
 	isAllowedTo('admin_forum');
-	$smcFunc['db_query']('', '
-		DELETE FROM {db_prefix}subforums
-		WHERE forumid = {int:forumid}',
-		array(
-			'forumid' => $sub
-		)
-	);
+	if ($sub == 0) return;
+	require_once($sourcedir.'/Subs-Admin.php');
+	unset($subforum_tree[(int) $sub]);
+	if ($write_settings)
+		updateSettingsFile(array('subforum_tree' => str_replace("\n", "", var_export($subforum_tree, true))));
 }
 
 function move_attached_boards($from, $dest)

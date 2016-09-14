@@ -11,14 +11,7 @@ elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then t
 	die('<b>Error:</b> Cannot install - please verify you put this file in the same place as SMF\'s SSI.php.');
 
 // Per SMF mod-creation guidelines, the directories that the mod has created need to be removed:
-$request = $smcFunc['db_query']('', '
-	SELECT forumid, forumdir
-	FROM {db_prefix}subforums
-	WHERE forumid > 0
-	ORDER BY forumid ASC',
-	array()
-);
-while ($row = $smcFunc['db_fetch_assoc']($request))
+foreach ($subforum_tree as $id => $row)
 {
 	// Remove the index.php file we placed in the specified folder:
 	unlink($row['forumdir'] . '/index.php');
