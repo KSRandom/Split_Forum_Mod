@@ -34,10 +34,14 @@ $txt['subforum_modify_favicon'] = 'Path to Site icon for SubForum:';
 $txt['subforum_modify_subtheme'] = 'Default SubForum theme:';
 $txt['subforum_modify_language'] = 'Default SubForum language:';
 $txt['subforum_modify_primary'] = 'Primary Membergroup for New Users:';
+$txt['subforum_modify_dontchange'] = 'DON\'T change these settings unless you know what you are doing!!';
 $txt['subforum_modify_forumid'] = 'SubForum ID number:';
 $txt['subforum_modify_forumdir'] = 'Path to SubForum folder:';
 $txt['subforum_modify_cookiename'] = 'Cookie Name:';
-$txt['subforum_modify_dontchange'] = 'DON\'T change these settings unless you know what you are doing!!';
+$txt['subforum_modify_sp_title'] = 'Simple Portal Blocks';
+$txt['subforum_modify_sp_blocks'] = 'Copy blocks from Subforum';
+$txt['subforum_modify_sp_blocks_nothing'] = '[ Do Nothing ]';
+$txt['subforum_modify_sp_blocks_default'] = '[ Use Default Blocks ]';
 $txt['subforum_modify_confirm'] = 'Are you sure you want to delete this SubForum?';
 
 $txt['subforum_server_url'] = 'Root webserver URL for new subforums';

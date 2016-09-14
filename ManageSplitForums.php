@@ -21,8 +21,7 @@ function ManageSplitForums()
 	require_once($sourcedir . '/Subs-Boards.php');
 	require_once($sourcedir . '/Subs-ManageSplitForums.php');
 	loadLanguage('Profile');
-	loadLanguage('ManageBoards');
-	loadLanguage('ManageSplitForums');
+	loadLanguage('ManageBoards+ManageSplitForums');
 	loadTemplate('ManageSplitForums');
 
 	// Create the tabs for the template .
@@ -43,21 +42,16 @@ function ManageSplitForums()
 	$subActions = array(
 		'edit'   => 'EditSubForum',
 		'edit2'  => 'SaveSubForum',
-		'list'   => ($forumid == 0 ? 'ListSubForums' : 'NoAccess_Area'),
-		'newsub' => ($forumid == 0 ? 'EditSubForum' : 'NoAccess_Area'),
-		'delete' => ($forumid == 0 ? 'DeleteSubForum' : 'NoAccess_Area'),
-		'settings' => ($forumid == 0 ? 'SubForumSettings' : 'NoAccess_Area'),
+		'list'   => ($forumid == 0 ? 'ListSubForums' : 'EditSubForum'),
+		'newsub' => ($forumid == 0 ? 'EditSubForum' : 'EditSubForum'),
+		'delete' => ($forumid == 0 ? 'DeleteSubForum' : 'EditSubForum'),
+		'settings' => ($forumid == 0 ? 'SubForumSettings' : 'EditSubForum'),
 	);
 
 	// Make sure that the subforum number is a valid one to edit:
 	$_REQUEST['sa'] = isset($_REQUEST['sa']) && isset($subActions[$_REQUEST['sa']]) ? $_REQUEST['sa'] : ($forumid == 0 ? 'list' : 'edit');
-	$sub = (isset($_REQUEST['sub']) ? (int) $_REQUEST['sub'] : $forumid);
+	$sub = ($forumid == 0 && isset($_REQUEST['sub']) ? (int) $_REQUEST['sub'] : $forumid);
 	$subActions[$_REQUEST['sa']]($sub);
-}
-
-function NoAccess_Area()
-{
-	fatal_lang_error('not_subforum_admin');
 }
 
 Function ListSubForums($sub)
@@ -72,7 +66,8 @@ Function ListSubForums($sub)
 
 Function EditSubForum($sub)
 {
-	global $context, $sourcedir, $txt, $scripturl, $modSettings, $forumid, $subforum_tree, $language;
+	global $context, $sourcedir, $txt, $scripturl, $modSettings, $forumid;
+	global $subforum_tree, $language, $smcFunc, $db_prefix;
 
 	// Make sure that the subforum number is a valid one to edit:
 	isAllowedTo('admin_forum');
@@ -80,6 +75,16 @@ Function EditSubForum($sub)
 		redirectexit('action=admin;area=subforums');
 	if ($_REQUEST['sa'] != 'newsub' && !isset($subforum_tree[$sub]))
 		redirectexit('action=admin;area=subforums');
+
+	// Is Simple Portal installed?  We can manipulate those tables if necessary:
+	$request = $smcFunc['db_query']('', 'show tables like "%sp_blocks"', array());
+	while ($row = $smcFunc['db_fetch_row']($request))
+	{
+		if (str_replace('sp_blocks', '', $row[0]) <> $db_prefix)
+			continue;
+		$context['sp_blocks_enabled'] = file_exists($sourcedir . '/PortalAdminBlocks.php');
+	}
+	$smcFunc['db_free_result']($request);
 
 	// Get the names of all installed themes available on this install:
 	$installed_themes = get_installed_themes();
@@ -98,10 +103,10 @@ Function EditSubForum($sub)
 	if ($_REQUEST['sa'] == 'newsub')
 	{
 		// Figure out what the largest forum ID in the database is:
-		$sub = get_subforum_max();
+		$sub = get_subforum_max() + 1;
 
 		// Populate a new entry for the template:
-		$subforum_tree[$sub]['forumid'] = $sub + 1;
+		$subforum_tree[$sub]['forumid'] = $sub;
 		$subforum_tree[$sub]['boardname'] = $txt['subforums_list_prefix'] . ' # ' . $sub;
 		$subforum_tree[$sub]['boardurl'] = $modSettings['subforum_server_url'] . '/forum' . $sub;
 		$subforum_tree[$sub]['forumdir'] = $modSettings['subforum_server_root'] . '/forum' . $sub;
@@ -120,14 +125,40 @@ Function EditSubForum($sub)
 		//'',
 		array('title', 'subforum_modify_dontchange'),
 		array('text', 'subforum_modify_forumid', 'size' => 40,
-			'javascript' => (($forumid == 0 && $_REQUEST['sa']) != 'newsub') || ($sub == 0) ? ' disabled="disabled"' : ''),
+			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
 		array('text', 'subforum_modify_forumdir', 'size' => 40,
-			'javascript' => (($forumid == 0 && $_REQUEST['sa']) != 'newsub') || ($sub == 0) ? ' disabled="disabled"' : ''),
+			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
 		array('text', 'subforum_modify_cookiename', 'size' => 40),
 		array('select', 'subforum_modify_primary', $primary),
 	);
 	foreach ($subforum_tree[$sub] as $var => $val)
 		$modSettings['subforum_modify_' . $var] = $val;
+
+	// Populate everything needed for Simple Portal support:
+	if ($context['sp_blocks_enabled'])
+	{
+		$options = array(-1 => $txt['subforum_modify_sp_blocks_nothing']);
+		foreach ($subforum_tree as $subforum)
+		{
+			if ($subforum['forumid'] <> $sub)
+				$options[$subforum['forumid']] = $subforum['boardname'];
+		}
+		$options[-2] = $txt['subforum_modify_sp_blocks_default'];
+		$config_vars = array_merge($config_vars, array(
+			array('title', 'subforum_modify_sp_title'),
+			array('select', 'subforum_modify_sp_portal', explode('|', $txt['sp_portal_mode_options'])),
+			array('text', 'subforum_modify_sp_standalone'),
+			array('select', 'subforum_modify_sp_blocks', $options),
+		));
+		if (!isset($modSettings['subforum_modify_sp_portal']))
+			$modSettings['subforum_modify_sp_portal'] = $modSettings['sp_portal_mode'];
+		if (!isset($modSettings['subforum_modify_sp_standalone']))
+			$modSettings['subforum_modify_sp_standalone'] = $modSettings['sp_standalone_url'];
+		if ($_REQUEST['sa'] == 'newsub')
+			$modSettings['subforum_modify_sp_blocks'] = -2;
+		$txt['subforum_modify_sp_portal'] = $txt['sp_portal_mode'];
+		$txt['subforum_modify_sp_standalone'] = $txt['sp_standalone_url'];
+	}
 
 	// Needed for the settings template
 	require_once($sourcedir . '/ManageServer.php');
@@ -159,6 +190,8 @@ function SaveSubForum($sub)
 	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary']) ? $_POST['subforum_modify_primary'] : '');
 	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : 0);
 	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : '')))  : $boarddir);
+	$arr['sp_portal'] = (isset($_POST['subforum_modify_sp_portal']) ? (int) $_POST['subforum_modify_sp_portal'] : 0);
+	$arr['sp_standalone'] = (isset($_POST['subforum_modify_sp_standalone']) ? $_POST['subforum_modify_sp_standalone'] : '');
 
 	// Correct variables as necessary, throwing errors only when necessary:
 	if (substr($arr['boardurl'], strlen($arr['boardurl']) - 1, 1) == '/')
@@ -192,6 +225,18 @@ function SaveSubForum($sub)
 	delete_subforum($sub, false);
 	add_subforum($arr);
 
+	// Populate the Simple Portal blocks for this subforum:
+	if ($_POST['subforum_modify_sp_blocks'] == -2)
+	{
+		delete_sp_blocks($arr['forumid']);
+		use_default_sp_blocks($arr['forumid']);
+	}
+	elseif ($_POST['subforum_modify_sp_blocks'] > -1)
+	{
+		delete_sp_blocks($arr['forumid']);
+		copy_sp_blocks($_POST['subforum_modify_sp_blocks'], $arr['forumid']);
+	}
+
 	// Create the folder and "index.php" in the new forum folder if necessary:
 	@mkdir($arr['forumdir']);
  	if (!file_exists($arr['forumdir'] . '/index.php'))
@@ -206,7 +251,7 @@ function SaveSubForum($sub)
 		}
 	}
 
-	// Let's call hook function(s) to handle subdomain/domain removal:
+	// Let's call hook function(s) to handle subdomain addition:
 	$arr['action'] = 'add';
 	call_integration_hook('integrate_subforum_subdomain', array(&$arr));
 
@@ -283,7 +328,7 @@ function DeleteSubForum($sub)
 		if (isset($_POST['delete_action']) && $_POST['delete_action'] == 1)
 		{
 			foreach ($context['categories'] as $catid => $category)
-				move_attached_boards($sub, $_POST['forum_to']);
+				move_attached_categories($sub, $_POST['forum_to']);
 		} else {
 			foreach ($context['categories'] as $catid => $category)
 				deleteCategories(array($catid));

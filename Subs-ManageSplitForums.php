@@ -12,7 +12,8 @@ if (!defined('SMF'))
 function get_installed_themes()
 {
 	global $smcFunc, $txt, $modSettings;
-	
+
+	isAllowedTo('admin_forum');
 	$request = $smcFunc['db_query']('', '
 		SELECT *
 		FROM {db_prefix}themes
@@ -20,7 +21,7 @@ function get_installed_themes()
 			AND id_member = 0
 			AND id_theme IN ({raw:known})',
 		array(
-			'name' => 'name', 
+			'name' => 'name',
 			'known' => $modSettings['knownThemes']
 		)
 	);
@@ -34,7 +35,8 @@ function get_installed_themes()
 function get_membergroups()
 {
 	global $smcFunc, $txt;
-	
+
+	isAllowedTo('admin_forum');
 	$primary = array(
 		0 => $txt['no_primary_membergroup']
 	);
@@ -48,15 +50,17 @@ function get_membergroups()
 		)
 	);
 	while ($row = $smcFunc['db_fetch_assoc']($request))
-		if ($row['min_posts'] != -1) 
+		if ($row['min_posts'] != -1)
 			$primary[$row['id_group']] = $row['group_name'];
 	$smcFunc['db_free_result']($request);
 	return $primary;
 }
-	
+
 function get_subforum_max()
 {
-	global $subforum_tree, $forumid;
+	global $subforum_tree;
+
+	isAllowedTo('admin_forum');
 	$max = 0;
 	foreach ($subforum_tree as $subforum)
 		$max = ($subforum['forumid'] > $max ? $subforum['forumid'] : $max);
@@ -66,9 +70,9 @@ function get_subforum_max()
 function add_subforum(&$row)
 {
 	global $subforum_tree, $forumid, $sourcedir;
-	
+
 	isAllowedTo('admin_forum');
-	
+
 	// Define the contents of the array element:
 	$subforum_tree[(int) isset($row['forumid']) ? $row['forumid'] : $forumid] = array(
 		'forumid' => (int) (isset($row['forumid']) ? $row['forumid'] : $forumid),
@@ -80,13 +84,15 @@ function add_subforum(&$row)
 		'forumdir' => (isset($row['forumdir']) ? $row['forumdir'] : ''),
 		'favicon' => (isset($row['favicon']) ? $row['favicon'] : ''),
 		'primary_membergroup' => (isset($row['primary_membergroup']) ? (int) $row['primary_membergroup'] : 0),
+		'sp_portal' => (isset($row['sp_portal']) ? (int) $row['sp_portal'] : 0),
+		'sp_standalone' => (isset($row['sp_standalone']) ? $row['sp_standalone'] : ''),
 	);
-	asort($subforum_tree);
 	$tree = array();
 	foreach ($subforum_tree as $subforum)
 		$tree[$subforum['forumid']] = $subforum;
+	asort($subforum_tree);
 	$subforum_tree = $tree;
-	
+
 	// Set the variable "subforum_tree" in the forum's Settings.php:
 	require_once($sourcedir.'/Subs-Admin.php');
 	updateSettingsFile(array('subforum_tree' => str_replace("\n", "", var_export($subforum_tree, true))));
@@ -104,10 +110,10 @@ function delete_subforum($sub, $write_settings = true)
 		updateSettingsFile(array('subforum_tree' => str_replace("\n", "", var_export($subforum_tree, true))));
 }
 
-function move_attached_boards($from, $dest)
+function move_attached_categories($from, $dest)
 {
 	global $smcFunc;
-	
+
 	isAllowedTo('admin_forum');
 	$smcFunc['db_query']('', '
 		UPDATE {db_prefix}categories
@@ -120,12 +126,13 @@ function move_attached_boards($from, $dest)
 	);
 }
 
-function insert_sp_blocks($forum = -1)
+function use_default_sp_blocks($forum = -1)
 {
-	global $smcFunc, $forumid;
+	global $smcFunc;
 
-	$forum = (int) ($forum <> -1 ? $forum : $forumid);
-	
+	isAllowedTo('admin_forum');
+	$forum = (int) $forum;
+
 	$welcome_text = '<h2 style="text-align: center;">Welcome to SimplePortal!</h2>
 <p>SimplePortal is one of several portal mods for Simple Machines Forum (SMF). Although always developing, SimplePortal is produced with the user in mind first. User feedback is the number one method of growth for SimplePortal, and our users are always finding ways for SimplePortal to grow. SimplePortal stays competative with other portal software by adding numerous user-requested features such as articles, block types and the ability to completely customize the portal page.</p>
 <p>All this and SimplePortal has remained Simple! SimplePortal is built for simplicity and ease of use; ensuring the average forum administrator can install SimplePortal, configure a few settings, and show off the brand new portal to the users in minutes. Confusing menus, undesired pre-loaded blocks and settings that cannot be found are all avoided as much as possible. Because when it comes down to it, SimplePortal is YOUR portal, and should reflect your taste as much as possible.</p>
@@ -152,7 +159,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'whos_online' => array(
 			'label' => 'Who&#039;s Online',
@@ -163,7 +170,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'board_stats' => array(
 			'label' => 'Board Stats',
@@ -174,7 +181,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'theme_select' => array(
 			'label' => 'Theme Select',
@@ -185,7 +192,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'search' => array(
 			'label' => 'Search',
@@ -196,7 +203,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'news' => array(
 			'label' => 'News',
@@ -207,7 +214,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => 'title_default_class~|title_custom_class~|title_custom_style~|body_default_class~windowbg|body_custom_class~|body_custom_style~|no_title~1|no_body~',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'welcome' => array(
 			'label' => 'Welcome',
@@ -218,7 +225,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => 'title_default_class~|title_custom_class~|title_custom_style~|body_default_class~windowbg|body_custom_class~|body_custom_style~|no_title~1|no_body~',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'board_news' => array(
 			'label' => 'Board News',
@@ -229,7 +236,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'recent_topics' => array(
 			'label' => 'Recent Topics',
@@ -240,7 +247,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'top_poster' => array(
 			'label' => 'Top Poster',
@@ -251,7 +258,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'recent_posts' => array(
 			'label' => 'Recent Posts',
@@ -262,7 +269,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'staff' => array(
 			'label' => 'Forum Staff',
@@ -273,7 +280,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'calendar' => array(
 			'label' => 'Calendar',
@@ -284,7 +291,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 		'top_boards' => array(
 			'label' => 'Top Boards',
@@ -295,7 +302,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => '',
 			'display_custom' => '',
 			'style' => '',
-			'forums' => $forum,
+			'forum' => $forum,
 		),
 	);
 
@@ -310,7 +317,7 @@ SimplePortal offers high quality professional support with its own well known su
 			'display' => 'text',
 			'display_custom' => 'text',
 			'style' => 'text',
-			'forums' => 'text',
+			'forum' => 'text',
 		),
 		$default_blocks,
 		array('id_block')
@@ -319,7 +326,7 @@ SimplePortal offers high quality professional support with its own well known su
 	$request = $smcFunc['db_query']('', '
 		SELECT MIN(id_block) AS id, type
 		FROM {db_prefix}sp_blocks
-		WHERE type IN ({array_string:types}) AND forums = {int:forum}
+		WHERE type IN ({array_string:types}) AND forum = {int:forum}
 		GROUP BY type
 		LIMIT 4',
 		array(
@@ -384,6 +391,132 @@ SimplePortal offers high quality professional support with its own well known su
 		$default_parameters,
 		array()
 	);
+}
+
+function copy_sp_blocks($from, $forum)
+{
+	global $smcFunc;
+
+	isAllowedTo('admin_forum');
+	$from = (int) $from;
+	$forum = (int) $forum;
+
+	// Retrieve & modify all blocks for specified forum:
+	$request = $smcFunc['db_query']('', '
+		SELECT
+			b.label, b.type, b.col, b.row, b.permission_set, b.display, b.display_custom
+			b.style, b.forum, p.variable, p.value
+		FROM {db_prefix}sp_blocks AS b
+			LEFT JOIN {db_prefix}sb_parameters AS p ON (p.id_block = b.id_block)
+		WHERE p.forum = {int:forum}',
+		array(
+			'forum' => $forum,
+		)
+	);
+	$blocks	= array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+	{
+		if (!empty($row['variable']))
+		{
+			$parameters[$row['type']] = array(
+				'variable' => $row['variable'],
+				'value' => $row['value']
+			);
+			unset($row['variable']);
+			unset($row['value']);
+		}
+		$row['forum'] = $forum;
+		$blocks[] = $row;
+	}
+	$smcFunc['db_free_result']($request);
+
+	// Place the new blocks into the Simple Portal table:
+	$smcFunc['db_insert']('ignore',
+		'{db_prefix}sp_blocks',
+		array(
+			'label' => 'text',
+			'type' => 'text',
+			'col' => 'int',
+			'row' => 'int',
+			'permission_set' => 'int',
+			'display' => 'text',
+			'display_custom' => 'text',
+			'style' => 'text',
+			'forum' => 'text',
+		),
+		$blocks,
+		array('id_block')
+	);
+
+	// Try to associate the parameters with the block needing them:
+	$request = $smcFunc['db_query']('', '
+		SELECT MIN(id_block) AS id, type
+		FROM {db_prefix}sp_blocks
+		WHERE type IN ({array_string:types}) AND forum = {int:forum}
+		GROUP BY type
+		LIMIT 4',
+		array(
+			'types' => array('sp_html', 'sp_boardNews', 'sp_calendar', 'sp_recent'),
+			'forum' => $from,
+		)
+	);
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$block_ids[$row['type']] = $row['id'];
+	$smcFunc['db_free_result']($request);
+
+	// Place the parameters into the Simple Portal table:
+	$smcFunc['db_insert']('replace',
+		'{db_prefix}sp_parameters',
+		array(
+			'id_block' => 'int',
+			'variable' => 'text',
+			'value' => 'text',
+		),
+		$parameters,
+		array()
+	);
+}
+
+function delete_sp_blocks($forum)
+{
+	global $smcFunc;
+
+	isAllowedTo('admin_forum');
+
+	// Get the id number for blocks with parameters:
+	$request = $smcFunc['db_query']('', '
+		SELECT b.id_block
+		FROM {db_prefix}sp_blocks AS b, {db_prefix}sp_parameters AS p
+		WHERE b.forum = {int:forum}',
+		array(
+			'forum' => $forum,
+		)
+	);
+	$parameters = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$parameters[] = $row['id_block'];
+	$smcFunc['db_free_result']($request);
+
+	// Delete all blocks for the specified forum:
+	$request = $smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}sp_blocks
+		WHERE forum = {int:forum}',
+		array(
+			'forum' => (int) $forum,
+		)
+	);
+
+	// Delete the parameters for blocks from the specified forum:
+	if (!empty($parameters))
+	{
+		$request = $smcFunc['db_query']('', '
+			DELETE FROM {db_prefix}sp_parameters
+			WHERE id_block IN ({array_int:id_blocks})',
+			array(
+				'id_block' => $parameters
+			)
+		);
+	}
 }
 
 ?>

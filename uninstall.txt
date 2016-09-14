@@ -1,7 +1,0 @@
-[hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.5[/b][/size][/color]
-[url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
-[/center]
-[hr]
-
-Uninstalling this mod without putting the primary subforum into maintenance mode will allows the users to see all categories and boards their membergroup allows them to see (which may be all of them).

@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.6[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.7[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -54,11 +54,19 @@ This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x 
 [url=http://custom.simplemachines.org/mods/index.php?mod=1104]Simple Portal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within Simple Portal.  Earlier versions of Simple Portal have not been tested for compatibility with this mod.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.2 thru v1.5[/b] to [b]v1.6[/b].
+Upgrade is possible from [b]v1.2 thru v1.6[/b] to [b]v1.7[/b].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
-[b][u]v1.6 - Auguest 11th, 2014[/u][/b]
+[b][u]v1.7 - August 16th, 2014, 2014[/u][/b]
+o Added script to rebuild the subforum tree array correctly.
+o Fixed the javascript conditional statements so that subforum ID and path are editable.
+o Moved subdomain removal hook function so it is done immediately before removal of subforum.
+o Added fields to Manage Subforum UI to populate and/or copy Simple Portal blocks.
+o Added ability to change the portal mode per subforum for Simple Portal.
+o Modified Simple Portal's General Settings UI to update subforum settings.
+
+[b][u]v1.6 - August 11th, 2014[/u][/b]
 o Modified Create Subforum functions to properly create new subforums without conflicts
 o Modified Manage Boards UI so that when changing subforum and/or category, category and board list now changes.
 o Fixed browser compatibility issue with revised Manage Category UI.
@@ -67,7 +75,7 @@ o Rewrite of Simple Portal template modifications introduced in version 1.5.
 o Added tab system to Blocks listing UI to make it easier to put seperate blocks in subforums.
 o Modified several SSI functions so that they return results for only that subforum.
 
-[b][u]v1.5 - Auguest 3rd, 2014[/u][/b]
+[b][u]v1.5 - August 3rd, 2014[/u][/b]
 o Fixed the subforum URL detection code that resulted in board doesn't exist errors....
 o Fixed Manage Boards UI so that boards aren't hidden when entering Manage Boards UI...
 o Updated [b]package-info.xml[/b] so that it redirects to clears the SMF file cache
