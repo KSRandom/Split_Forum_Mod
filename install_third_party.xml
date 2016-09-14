@@ -2,7 +2,21 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.32</version>
+<version>1.33</version>
+
+<!---------------------------------------------------------------------------->
+<!-- Pretty URLs file modifications											-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/Subs-PrettyUrls.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[function pretty_update_filters($installing = false)]]></search>
+		<add><![CDATA[function pretty_update_filters($installing = false, $base = false)]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$base = dirname($_SERVER['SCRIPT_NAME']);]]></search>
+		<add><![CDATA[$base = (!empty($base) ? parse_url($base, PHP_URL_PATH) : dirname($_SERVER['SCRIPT_NAME']));]]></add>
+	</operation>
+</file>
 
 <!-------------------------------------------------------------------------->
 <!-- Simple Portal block management                                       -->
@@ -628,6 +642,21 @@ function template_ezportal_import()]]></add>
 	<operation>
 		<search position="replace"><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],'">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></search>
 		<add><![CDATA[<td width="80%"><a href="', $scripturl, '?action=admin;area=ezpblocks;sa=visiblesettings;block=',$context['ezp_block_info']['id_layout'],';sub=' . ((int) $_REQUEST['sub']) . '">',$txt['ezp_txt_update_visible_options'],'</a></td>]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!--Like Posts file modifications											-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/LikePosts/LikePostsAdmin.php" error="skip">
+	<operation>
+		<search position="before"><![CDATA[global $txt, $context, $sourcedir, $cat_tree, $boards, $boardList]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[getBoardTree();]]></search>
+		<add><![CDATA[$context['seperate_aliases'] = true;
+		getBoardTree( ($forumid == 0 ? -1 : $forumid) );]]></add>
 	</operation>
 </file>
 </modification>

@@ -1,5 +1,5 @@
 <?php
-global $smcFunc;
+global $smcFunc, $db_prefix;
 
 $SSI_INSTALL = false;
 if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))

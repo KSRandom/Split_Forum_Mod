@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.33</version>
+
+<file name="$languagedir/Errors.spanish_latin" error="skip">
+	<operation>
+		<search position="before"><![CDATA[$txt['no_board'] = 'El foro que especificaste no existe';]]></search>
+		<add><![CDATA[
+$txt['wrong_forum'] = 'El foro que ha especificado se encuentra en un foro diferente!';]]></add>
+	</operation>
+</file>
+<file name="$languagedir/Errors.spanish_latin-utf8" error="skip">
+	<operation>
+		<search position="before"><![CDATA[$txt['no_board'] = 'El foro que especificaste no existe';]]></search>
+		<add><![CDATA[
+$txt['wrong_forum'] = 'El foro que ha especificado se encuentra en un foro diferente!';]]></add>
+	</operation>
+</file>
+</modification>

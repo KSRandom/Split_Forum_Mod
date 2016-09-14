@@ -1,6 +1,6 @@
 <?php
 /**********************************************************************************
-* ManageSplitForums.english.php - English language file of the Split Forum Mod
+* ManageSplitForum.english.php - English language file of the Split Forum Mod
 ***********************************************************************************
 * This mod is licensed under the 2-clause BSD License, which can be found here:
 *	http://opensource.org/licenses/BSD-2-Clause
@@ -65,6 +65,8 @@ $txt['subforum_redirect_wrong'] = 'Redirect board to correct SubForum instead of
 $txt['subforum_sister_sites_title'] = 'Sister Sites menu title';
 $txt['subforum_settings_topmenu'] = 'Show Sister Sites in top menu';
 $txt['subforum_settings_topmenu_admin_only'] = 'Show Sister Sites in top menu to admin only';
+$txt['subforum_settings_topmenu_under_home'] = 'Sister Sites under Home?';
+$txt['subforum_settings_topmenu_include_this'] = 'Include this Subforum in Sister Sites?';
 $txt['subforum_sister_sites'] = 'Sister Sites';
 $txt['subforum_settings_register_at_primary'] = 'Redirect registration to Primary Forum:';
 $txt['subforum_settings_show_who_in_subforum'] = 'Who\'s Online restricted to subforum?';

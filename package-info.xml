@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.32</version>
+	<version>1.33</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -13,8 +13,9 @@
 		<code>settings_install.php</code>
 		<database>db_install.php</database>
 		<modification>install_20x.xml</modification>
-		<modification>install_portal.xml</modification>
+		<modification>install_third_party.xml</modification>
 		<modification>language_english.xml</modification>
+		<modification>language_spanish_latin.xml</modification>
 		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForum.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
@@ -22,14 +23,16 @@
 		<require-file name="splitforum_20.css" destination="$themedir/css" />
 		<require-file name="ManageSplitForum.template.php" destination="$boarddir/Themes/default" />
 		<require-file name="ManageSplitForum.english.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin-utf8.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="empty.png" destination="$imagesdir" />
-		<redirect timeout="5000" url="?action=admin;area=subforums" />
+		<redirect timeout="5000" url="?action=admin;area=subforums;sa=postinstall" />
 	</install>
 	<uninstall for="2.0 - 2.0.99">
 		<code>add_remove_hooks.php</code>
 		<code>settings_uninstall.php</code>
 		<modification reverse="true">install_20x.xml</modification>
-		<modification reverse="true">install_portal.xml</modification>
+		<modification reverse="true">install_third_party.xml</modification>
 		<modification reverse="true">language_english.xml</modification>
 		<remove-file name="$sourcedir/ManageSplitForum.php" />
 		<remove-file name="$sourcedir/Subs-SplitForum.php" />
@@ -38,6 +41,8 @@
 		<remove-file name="$themedir/css/splitforum_20.css" />
 		<remove-file name="$boarddir/Themes/default/ManageSplitForum.template.php" />
 		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForum.english.php" />
+		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForum.spanish_latin.php" />
+		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForum.spanish_latin-utf8.php" />
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
 
@@ -47,8 +52,9 @@
 		<code>settings_install.php</code>
 		<database>db_install.php</database>
 		<modification>install_21x.xml</modification>
-		<modification>install_portal.xml</modification>
+		<modification>install_third_party.xml</modification>
 		<modification>language_english.xml</modification>
+		<modification>language_spanish_latin.xml</modification>
 		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForum.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
@@ -56,14 +62,16 @@
 		<require-file name="splitforum_21.css" destination="$themedir/css" />
 		<require-file name="ManageSplitForum.template.php" destination="$boarddir/Themes/default" />
 		<require-file name="ManageSplitForum.english.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin-utf8.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="empty.png" destination="$imagesdir" />
-		<redirect timeout="5000" url="?action=admin;area=subforum" />
+		<redirect timeout="5000" url="?action=admin;area=subforums;sa=postinstall" />
 	</install>
 	<uninstall for="2.1 Beta 2 - 2.1.99">
 		<code>add_remove_hooks.php</code>
 		<code>settings_uninstall.php</code>
 		<modification reverse="true">install_21x.xml</modification>
-		<modification reverse="true">install_portal.xml</modification>
+		<modification reverse="true">install_third_party.xml</modification>
 		<modification reverse="true">language_english.xml</modification>
 		<remove-file name="$sourcedir/ManageSplitForum.php" />
 		<remove-file name="$sourcedir/Subs-SplitForum.php" />
@@ -72,14 +80,25 @@
 		<remove-file name="$themedir/css/splitforum_21.css" />
 		<remove-file name="$boarddir/Themes/default/ManageSplitForum.template.php" />
 		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForum.english.php" />
+		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForum.spanish_latin.php" />
+		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForum.spanish_latin-utf8.php" />
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
 
-	<upgrade for="2.0 - 2.0.99" from="1.31">
-		<modification reverse="true">upgrade_20x_1.31.xml</modification>
-		<remove-file name="$sourcedir/Subs-ManageSplitForums.php" />
+	<upgrade for="2.0 - 2.0.99" from="1.32">
+		<modification reverse="true">language_english.xml</modification>
+		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForum.php" destination="$sourcedir" />
+		<require-file name="ManageSplitForum.english.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin-utf8.php" destination="$boarddir/Themes/default/languages" />
 	</upgrade>
-	<upgrade for="2.1 Beta 2 - 2.1.99" from="1.31">
-		<remove-file name="$sourcedir/Subs-ManageSplitForums.php" />
+	<upgrade for="2.1 Beta 2 - 2.1.99" from="1.32">
+		<modification reverse="true">language_english.xml</modification>
+		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForum.php" destination="$sourcedir" />
+		<require-file name="ManageSplitForum.english.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForum.spanish_latin-utf8.php" destination="$boarddir/Themes/default/languages" />
 	</upgrade>
 </package-info>

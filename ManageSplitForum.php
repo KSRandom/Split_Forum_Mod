@@ -47,12 +47,22 @@ function ManageSplitForums()
 		'newsub' => ($forumid == 0 ? 'EditSubForum' : 'EditSubForum'),
 		'delete' => ($forumid == 0 ? 'DeleteSubForum' : 'EditSubForum'),
 		'settings' => ($forumid == 0 ? 'SubForumSettings' : 'EditSubForum'),
+		'postinstall' => 'PostInstall',
 	);
 
 	// Make sure that the subforum number is a valid one to edit:
 	$_REQUEST['sa'] = isset($_REQUEST['sa']) && isset($subActions[$_REQUEST['sa']]) ? $_REQUEST['sa'] : ($forumid == 0 ? 'list' : 'edit');
 	$sub = ($forumid == 0 && isset($_REQUEST['sub']) ? (int) $_REQUEST['sub'] : $forumid);
 	$subActions[$_REQUEST['sa']]($sub);
+}
+
+function PostInstall($sub)
+{
+	global $sourcedir, $txt;
+	
+	require_once($sourcedir.'/Subs-Admin.php');
+	updateSettings(array('subforum_sister_sites_title' => $txt['subforum_sister_sites']));
+	redirectexit('action=admin;area=subforums');
 }
 
 Function ListSubForums($sub)
@@ -237,13 +247,13 @@ function SaveSubForum($sub)
 
 	// Filter all the information passed to this function, putting all the information into the array:
 	$arr['boardurl'] = (isset($_POST['subforum_modify_boardurl']) ?  $_POST['subforum_modify_boardurl']  : '');
-	if (strpos($arr['boardurl'], 'http://') !== 0 && strpos($arr['boardurl'], 'https://') !== 0)
+	if (strpos($arr['boardurl'], 'http://') !== false && strpos($arr['boardurl'], 'https://') !== false)
 		$arr['boardurl'] = 'http://' . $arr['boardurl'];
 	$arr['boardname'] = (isset($_POST['subforum_modify_boardname']) ?  $_POST['subforum_modify_boardname']  : '');
 	$arr['subtheme'] = (int) (isset($_POST['subforum_modify_subtheme']) ? $_POST['subforum_modify_subtheme'] : 0);
 	$arr['language'] = (isset($_POST['subforum_modify_language']) ?  $_POST['subforum_modify_language']  : '');
 	$arr['favicon'] = (isset($_POST['subforum_modify_favicon']) ?  $_POST['subforum_modify_favicon']  : '');
-	if (strpos($arr['favicon'], 'http://') !== 0 && strpos($arr['favicon'], 'https://') !== 0)
+	if (strpos($arr['favicon'], 'http://') !== false && strpos($arr['favicon'], 'https://') !== false)
 		$arr['favicon'] = 'http://' . $arr['favicon'];
 	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary_membergroup']) ? $_POST['subforum_modify_primary_membergroup'] : '');
 	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : $forumid);
@@ -525,6 +535,8 @@ function SubForumSettings($return_config = false)
 		array('text', 'subforum_sister_sites_title', 'size' => 40),
 		array('check', 'subforum_settings_topmenu'),
 		array('check', 'subforum_settings_topmenu_admin_only'),
+		array('check', 'subforum_settings_topmenu_under_home'),
+		array('check', 'subforum_settings_topmenu_include_this'),
 		'',
 		array('check', 'subforum_settings_register_at_primary'),
 		array('check', 'subforum_settings_show_who_in_subforum'),

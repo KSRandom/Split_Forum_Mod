@@ -1,0 +1,172 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.33</version>
+
+<!---------------------------------------------------------------------------->
+<!-- Source File Edits														-->
+<!---------------------------------------------------------------------------->
+<file name="$boarddir/index.php">
+	<operation>
+		<search position="replace"><![CDATA['unread' => array('Recent.php', 'UnreadTopics'),
+		'unreadglobal' => array('Recent.php', 'UnreadTopics'),]]></search>
+		<add><![CDATA['unread' => array('Recent.php', 'UnreadTopics'),]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Load.php">
+	<operation>
+		<search position="after"><![CDATA[if (empty($temp))]]></search>
+		<add><![CDATA[retry_board_info:
+	]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Set the current board.]]></search>
+		<add><![CDATA[// Find the right subforum to redirect to:
+			if (!empty($row['alias_board']) && empty($temp_board))
+			{
+				$temp_board = array('blegh' => 0);
+				$board = $row['alias_board'];
+				$smcFunc['db_free_result']($request);
+				goto retry_board_info;
+			}
+			if ($row['forumid'] != $forumid && empty($temp_board))
+			{
+				// Try to get the board alias if the Alias Boards mod is installed:
+				if (isset($row['alias_board']))
+				{
+					$request2 = $smcFunc['db_query']('', '
+						SELECT b.id_cat, b.id_board, b.id_parent, b.name AS bname, c.name AS cname, b.description
+						FROM {db_prefix}boards AS b
+							LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+						WHERE b.alias_board = {int:board}
+							AND c.forumid = {int:forumid}
+						LIMIT 1',
+						array(
+							'board' => empty($board) ? $row['id_board'] : $board,
+							'forumid' => (int) $forumid,
+						)
+					);
+					if ($smcFunc['db_num_rows']($request2) > 0)
+					{
+						$temp_board = $smcFunc['db_fetch_assoc']($request2);
+						$smcFunc['db_free_result']($request2);
+					}
+				}
+				if (empty($temp_board))
+				{
+					// If the "subforum_redirect_wrong" variable is set and $sub isn't empty, then redirect:
+					$sub = (isset($subforum_tree[(int) $row['forumid']]) ? $subforum_tree[(int) $row['forumid']] : 0);
+					if (!empty($modSettings['subforum_redirect_wrong']) && (!empty($sub)))
+					{
+						$url = (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off' ? 'http://' : 'https://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+						redirectexit(str_replace($boardurl, $sub['boardurl'], $url));
+					}
+
+					// Throw error about wrong forum:
+					loadPermissions();
+					loadTheme();
+					fatal_lang_error('wrong_forum', false);
+				}
+			}
+
+			]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Set the current board.]]></search>
+		<add><![CDATA[
+			if (!empty($temp_board))
+				$row = array_merge($row, $temp_board, array('redirect' => ''));]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[foreach ($context['board_order'] as $cat => $boards)]]></search>
+		<add><![CDATA[foreach ($context['board_order'] as $cat => $boards2)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$boards[$row['id_board']] = array(]]></search>
+		<add><![CDATA[
+				'forumid' => $row['forumid'],]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[$boardOptions['alias_cat'] = isset($_POST['alias_cat']) ? implode(',', $_POST['alias_cat']) : '';
+		$boardOptions['alias_child'] = isset($_POST['alias_child']) ? implode(',', $_POST['alias_child']) : '';]]></search>
+		<add><![CDATA[$boardOptions['alias_cat'] = isset($_POST['alias_cat' . $sub]) ? implode(',', $_POST['alias_cat' . $sub]) : '';
+		$boardOptions['alias_child'] = isset($_POST['alias_child' . $sub]) ? implode(',', $_POST['alias_child' . $sub]) : '';]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Template File Edits													-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			if (document.getElementById("alias_cat' . $subforum['forumid'] . '") != null)
+			{
+				document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+				document.getElementById("alias_child' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			}';]]></search>
+		<add><![CDATA[document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[</dt>';
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		echo '
+							<dd id="alias_cat', $id, '"', ($_REQUEST['sub'] != $id ? ' style="display: none;"' : '') . '>
+								<select name="alias_cat' . $id . '[]" multiple="multiple">
+									<option value="">', $txt['no_cat_selected'], '</option>';
+		foreach ($cat_tree as $category)
+			if ($category['node']['forumid'] == $id)
+				echo '
+									<option', !isset($context['board']['is_new']) && in_array($category['node']['id'], $context['board']['alias_cat']) ? ' selected="selected"' : '', ' value="', $category['node']['id'], '">', $category['node']['name'], '</option>';
+		echo '
+								</select>
+							</dd>';
+	}
+	echo ']]></search>
+		<add><![CDATA[</dt>
+							<dd>
+								<select name="alias_cat[]" multiple="multiple">
+									<option value="">', $txt['no_cat_selected'], '</option>';
+	foreach ($cat_tree as $category)
+		echo '
+									<option', !isset($context['board']['is_new']) && in_array($category['node']['id'], $context['board']['alias_cat']) ? ' selected="selected"' : '', ' value="', $category['node']['id'], '">', $category['node']['name'], '</option>';
+	echo '
+								</select>
+							</dd>]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[</dt>';
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		echo '
+							<dd id="alias_child', $id, '"', ($_REQUEST['sub'] != $id ? ' style="display: none;"' : '') . '>
+								<select name="alias_child' . $id . '[]" multiple="multiple">
+									<option value="">', $txt['no_boards_selected'], '</option>';
+		foreach ($boards as $board)
+		{
+			if ($cat_tree[$board['category']]['node']['forumid'] == $id)
+				echo '
+									<option', !isset($context['board']['is_new']) && in_array($board['id'], $context['board']['alias_child']) ? ' selected="selected"' : '', ' value="', $board['id'], '">', $board['name'], '</option>';
+		}
+		echo '
+								</select>
+							</dd>';
+	}
+	echo ']]></search>
+		<add><![CDATA[</dt>
+							<dd>
+								<select name="alias_child[]" multiple="multiple">
+									<option value="">', $txt['no_boards_selected'], '</option>';
+	foreach ($boards as $board)
+		echo '
+									<option', !isset($context['board']['is_new']) && in_array($board['id'], $context['board']['alias_child']) ? ' selected="selected"' : '', ' value="', $board['id'], '">', $board['name'], '</option>';
+	echo '
+								</select>
+							</dd>]]></add>
+	</operation>
+</file>
+</modification>

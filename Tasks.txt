@@ -7,4 +7,3 @@ o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
 o Theme settings restricted to members registered on a subforum
 o Language settings restricted to members registered on a subforum
-o Copy/Alias a category/board from one subforum to another

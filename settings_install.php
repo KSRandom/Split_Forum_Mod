@@ -34,8 +34,8 @@ foreach ($subforum_tree as $subforum)
 	$tree[$subforum['forumid']] = $subforum;
 	if (!empty($subforum['forumid']) && !empty($subforum['forumdir']))
 	{
-		chmod($subforum['forumdir'] . '/.htaccess', 0x644);
-		chmod($subforum['forumdir'] . '/index.php', 0x644);
+		@chmod($subforum['forumdir'] . '/.htaccess', 0x644);
+		@chmod($subforum['forumdir'] . '/index.php', 0x644);
 	}
 }
 $subforum_tree = $tree;
@@ -54,6 +54,7 @@ updateSettings(
 		'subforum_server_root' => $boarddir,
 		'subforum_sister_site_title' => '',
 		'subforum_mod_version' => $mod_version,
+		'subforum_sister_sites_title' => 'Sister Sites',
 	)
 );
 
@@ -79,13 +80,13 @@ foreach ($subforum_tree as $subforum)
 	// Attach some other crap for subforums to prevent 404 errors:
 	$path = relativePath($subforum['forumdir'], $boarddir);
 	$oldHtaccess = @file_get_contents($subforum['forumdir'] . '/.htaccess');
-	$insert = "\n\n# SUBFORUM MOD BEGINS\nRewriteEngine on\nOptions +FollowSymlinks\nRewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule (.*)/(.*) " . $path . "$1/$2\n# SUBFORUM MOD ENDS";
+	$insert = "\n\n# SUBFORUM MOD BEGINS\nRewriteEngine on\nOptions +FollowSymlinks\nRewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule (.*)/(.*) " . $path . "/$1/$2\n# SUBFORUM MOD ENDS";
 	$oldHtaccess = str_replace($insert, '', $oldHtaccess) . $insert;
 	if ($handle = @fopen($subforum['forumdir'] . '/.htaccess', 'w'))
 	{
 		fwrite($handle, $oldHtaccess);
 		fclose($handle);
-		@chmod($subforum['forumdir'] . '/.htaccess', 0755);
+		@@chmod($subforum['forumdir'] . '/.htaccess', 0755);
 	}
 }
 

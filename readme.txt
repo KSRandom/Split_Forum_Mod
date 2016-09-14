@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.32[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.33[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -41,13 +41,6 @@ All recent posts, xml-based feeds, and other forum-related functionality works f
 [color=blue][b][size=12pt][u]New Hook Added[/u][/size][/b][/color]
 o [b]integrate_subforum_subdomain[/b] - Hook for creating/deleting subdomains and/or domains
 
-[color=blue][b][size=12pt][u]To-Do List[/u][/size][/b][/color]
-o Copy a category/board from one subforum to another
-o Themes that are restricted to a single subforum
-o Additional permissions for "subforum admins" and the like
-o Theme settings restricted to members registered on a subforum
-o Language settings restricted to members registered on a subforum
-
 [color=blue][b][size=12pt][u]Special Credits[/u][/size][/b][/color]
 o [url=http://www.simplemachines.org/community/index.php?action=profile;u=394494]Greygal[/url] made the mod compatible with [url=http://custom.simplemachines.org/mods/index.php?mod=3238]Event Registration for SMF2[/url] in 3 posts starting [url=http://www.simplemachines.org/community/index.php?topic=523055.msg3767088#msg3767088]here[/url]!  Thanks, greygal!!
 
@@ -59,6 +52,7 @@ o [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.
 o [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.6[/url]
 o [url=http://custom.simplemachines.org/mods/index.php?mod=1461]ezPortal[/url]
+o [url=http://custom.simplemachines.org/mods/index.php?mod=3708]Like Posts[/url]
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
 Upgrade is possible from previous version of this mod to this version.  This means [b]1.27[/b] -> [b]1.28[/b], but not [b]1.26[/b] -> [b]1.28[/b]!

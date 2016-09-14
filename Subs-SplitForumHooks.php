@@ -130,10 +130,13 @@ function SplitForum_Menu_Buttons(&$areas)
 		return;
 
 	// Return if top menu for admin only option is set AND user isn't an admin:
-	if (!empty($modSettings['subforum_settings_topmenu']) || (!empty($modSettings['subforum_settings_topmenu_admin_only']) && !$user_info['is_admin']))
-	{	
-		// Add the Subforums list to the top menu:
-		loadLanguage('ManageSplitForum');
+	if (!empty($modSettings['subforum_settings_topmenu_admin_only']) && empty($user_info['is_admin']))
+		return;
+
+	// Add the Subforums list to the top menu:
+	loadLanguage('ManageSplitForum');
+	if (empty($modSettings['subforum_settings_topmenu_under_home']))
+	{
 		$new = array();
 		foreach ($areas as $needle => $section)
 		{
@@ -147,19 +150,24 @@ function SplitForum_Menu_Buttons(&$areas)
 					'sub_buttons' => array(
 					),
 				);
-				foreach ($subforum_tree as $id => $subforum)
-				{
-					if ($subforum['forumid'] == $forumid)
-						continue;
-					$new['subforums']['sub_buttons'][$id] = array(
-						'title' => $subforum['boardname'],
-						'href' => $subforum['boardurl'],
-						'show' => true,
-					);
-				}
 			}
 		}
 		$areas = $new;
+		$new = &$areas['subforums'];
+	}
+	else
+		$new = &$areas['home'];
+
+	// Populate the specified area with the Subforum name(s):
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		if (empty($modSettings['subforum_settings_topmenu_include_this']) && $subforum['forumid'] == $forumid)
+			continue;
+		$new['sub_buttons'][$id] = array(
+			'title' => $subforum['boardname'],
+			'href' => $subforum['boardurl'],
+			'show' => true,
+		);
 	}
 }
 
