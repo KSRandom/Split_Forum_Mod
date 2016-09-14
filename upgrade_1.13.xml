@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.13</version>
+
+<!---------------------------------------------------------------------------->
+<!-- Fix for identifying subforum ID for standalone portals (Load.php)		-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/Load.php">
+	<operation>
+		<search position="replace"><![CDATA[// Determine which subforum we are in and load settings for it:
+	global $subforum_tree;
+		$host = strtolower($_SERVER['SERVER_NAME']);]]></search>
+		<add><![CDATA[// Determine which subforum we are in and load settings for it:
+	$host = strtolower($_SERVER['SERVER_NAME']);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$url = parse_url($row['boardurl']);
+		$test1 = strtolower($url['host']);
+		$test2 = strtolower(str_replace('www.', '', $test1));
+		if (($test1 == $host || $test2 == $host) && $url['path'] == $uri)]]></search>
+		<add><![CDATA[$url = parse_url($row['boardurl']);
+		$test1 = strtolower($url['host']);
+		$test2 = strtolower(str_replace('www.', '', $test1));
+		$check = (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
+		if (!empty($row['sp_standalone']))
+		{
+			$url = parse_url($row['sp_standalone']);
+			$test1 = strtolower($url['host']);
+			$test2 = strtolower(str_replace('www.', '', $test1));
+			$check = $check || (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
+		}			
+		if ($check)]]></add>
+	</operation>
+</file>
+</modification>

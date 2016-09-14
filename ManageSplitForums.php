@@ -145,10 +145,14 @@ Function EditSubForum($sub)
 				$options[$subforum['forumid']] = $subforum['boardname'];
 		}
 		$options[-2] = $txt['subforum_modify_sp_blocks_default'];
+		$options[-3] = $txt['subforum_modify_sp_blocks_remove'];
 		$config_vars = array_merge($config_vars, array(
 			array('title', 'subforum_modify_sp_title'),
-			array('select', 'subforum_modify_sp_portal', explode('|', $txt['sp_portal_mode_options'])),
-			array('text', 'subforum_modify_sp_standalone'),
+			array('select', 'subforum_modify_sp_portal', explode('|', $txt['sp_portal_mode_options']),
+				'javascript' => 'onchange="SetPortalType(this.options[this.selectedIndex].value); return false;"'),
+			array('text', 'subforum_modify_sp_standalone',
+				'javascript' => ($subforum_tree[$sub]['sp_portal'] != 3 ? ' disabled="disabled"' : ''),
+			),
 			array('select', 'subforum_modify_sp_blocks', $options),
 		));
 		if (!isset($modSettings['subforum_modify_sp_portal']))
@@ -158,6 +162,13 @@ Function EditSubForum($sub)
 		$modSettings['subforum_modify_sp_blocks'] = ($_REQUEST['sa'] == 'newsub' ? -2 : -1);
 		$txt['subforum_modify_sp_portal'] = $txt['sp_portal_mode'];
 		$txt['subforum_modify_sp_standalone'] = $txt['sp_standalone_url'];
+		$context['html_headers'] .= '
+	<script type="text/javascript">
+		function SetPortalType($ptype)
+		{
+			document.getElementById("subforum_modify_sp_standalone").disabled = ($ptype <> 3);
+		}
+	</script>';
 	}
 
 	// Needed for the settings template
@@ -179,7 +190,7 @@ function SaveSubForum($sub)
 	// Load the variables from the form:
 	checkSession();
 	isAllowedTo('admin_forum');
-	
+
 	// Filter all the information passed to this function, putting all the information into the array:
 	$arr['cookiename'] = (isset($_POST['subforum_modify_cookiename']) ? $_POST['subforum_modify_cookiename'] : '');
 	$arr['boardurl'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_boardurl']) ?  $_POST['subforum_modify_boardurl']  : '') );
@@ -215,9 +226,25 @@ function SaveSubForum($sub)
 		fatal_lang_error('subforum_error_issub', false);
 
 	// Make sure another subforum with this path doesn't already exist:
-	foreach ($subforum_tree as $f)
+	$host = parse_url($arr['boardurl']);
+	$uri = str_replace('/index.php', '', substr($host['path'], 0, strrpos($host['path'], '/')));
+	$host = $host['url'];
+	foreach ($subforum_tree as $row)
 	{
-		if (($f['forumdir'] == $arr['forumdir'] || $f['boardurl'] == $arr['boardurl']) && ($f['forumid'] != $sub))
+		if ($row['forumid'] == $sub)
+			continue;
+		$url = parse_url($row['boardurl']);
+		$test1 = strtolower($url['host']);
+		$test2 = strtolower(str_replace('www.', '', $test1));
+		$check = (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
+		if (!empty($row['sp_standalone']))
+		{
+			$url = parse_url($row['sp_standalone']);
+			$test1 = strtolower($url['host']);
+			$test2 = strtolower(str_replace('www.', '', $test1));
+			$check = $check || (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
+		}
+		if ($check || $row['boardurl'] == $arr['boardurl'])
 			fatal_lang_error('subforum_error_dup_path', false);
 	}
 
@@ -226,7 +253,9 @@ function SaveSubForum($sub)
 	add_subforum($arr);
 
 	// Populate the Simple Portal blocks for this subforum:
-	if (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -2)
+	if (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -3)
+		delete_sp_blocks($arr['forumid']);
+	elseif (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -2)
 	{
 		delete_sp_blocks($arr['forumid']);
 		use_default_sp_blocks($arr['forumid']);
@@ -254,9 +283,12 @@ function SaveSubForum($sub)
 
 			// Write out the new ".htaccess" file for the subforum:
 			$path = relativePath($arr['forumdir'], $boarddir);
+			if (substr($path, -1) == '\\')
+				$path = substr($path, 0, strlen($path) - 1) . '/';
+			echo $path; exit;
 			if ($handle = fopen($arr['forumdir'] . '/.htaccess', 'w'))
 			{
-				fwrite($handle, "Options +FollowSymlinks\nRewriteEngine on\nRewriteRule (.*)/(.*) " . $path . "/$1/$2");
+				fwrite($handle, "Options +FollowSymlinks\nRewriteEngine on\nRewriteRule (.*)/(.*) " . $path . "$1/$2");
 				fclose($handle);
 				@chmod($arr['forumdir'] . '/.htaccess', 0755);
 			}
@@ -362,8 +394,9 @@ function SubForumSettings($return_config = false)
 		array('text', 'subforum_server_url', 'size' => 40),
 		array('text', 'subforum_server_root', 'size' => 40),
 		'',
-		array('check', 'subforum_settings_redirect'),
+		array('check', 'subforum_redirect_wrong'),
 		'',
+		array('text', 'subforum_sister_sites_title', 'size' => 40),
 		array('check', 'subforum_settings_topmenu'),
 		array('check', 'subforum_settings_topmenu_admin_only'),
 	);
@@ -372,6 +405,8 @@ function SubForumSettings($return_config = false)
 
 	// Needed for the settings template
 	require_once($sourcedir . '/ManageServer.php');
+	if (empty($modSettings['subforum_sister_sites_title']))
+		$modSettings['subforum_sister_sites_title'] = $txt['subforum_sister_sites'];
 	$context['sub_template'] = 'show_settings';
 	$context['page_title'] = $txt['subforums_list_title'] . ' - ' . $txt['settings'];
 	$context['post_url'] = $scripturl . '?action=admin;area=subforums;sa=settings;save';

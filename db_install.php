@@ -51,11 +51,8 @@ if (count($subforum_tree) < 2)
 		$request = $smcFunc['db_query']('', '
 			SELECT *
 			FROM {db_prefix}subforums
-			WHERE forumid = {int:forumid}
-			ORDER BY forumid',
-			array(
-				'forumid' => (int) $forumid,
-			)
+			ORDER BY forumid ASC',
+			array()
 		);
 		$subforum_tree = array();
 		while ($row = $smcFunc['db_fetch_assoc']($request))
@@ -82,7 +79,13 @@ $subforum_tree = $tree;
 
 // Insert the current board path as the default server path for subforums:
 require_once($sourcedir.'/Subs-Admin.php');
-updateSettings(array('subforum_server_url' => $boardurl, 'subforum_server_root' => $boarddir ));
+updateSettings(
+	array(
+		'subforum_server_url' => $boardurl, 
+		'subforum_server_root' => $boarddir,
+		'subforum_sister_site_title' => '',
+	)
+);
 
 // Figure out where the attachment path(s) are:
 $tblchk = $smcFunc['db_query']('', 'show tables like "' . $db_prefix . 'sp_blocks"', array());

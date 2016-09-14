@@ -450,15 +450,22 @@
 		);
 
 	// Determine which subforum we are in and load settings for it:
-	global $subforum_tree;
-		$host = strtolower($_SERVER['SERVER_NAME']);
+	$host = strtolower($_SERVER['SERVER_NAME']);
 	$uri = str_replace('/index.php', '', substr($_SERVER['REQUEST_URI'], 0, strrpos($_SERVER['REQUEST_URI'], '/')));
 	foreach ($subforum_tree as $id => $row)
 	{
 		$url = parse_url($row['boardurl']);
 		$test1 = strtolower($url['host']);
 		$test2 = strtolower(str_replace('www.', '', $test1));
-		if (($test1 == $host || $test2 == $host) && $url['path'] == $uri)
+		$check = (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
+		if (!empty($row['sp_standalone']))
+		{
+			$url = parse_url($row['sp_standalone']);
+			$test1 = strtolower($url['host']);
+			$test2 = strtolower(str_replace('www.', '', $test1));
+			$check = $check || (($test1 == $host || $test2 == $host) && $url['path'] == $uri);
+		}			
+		if ($check)
 		{
 			// Assign global variables with row gleaned from database:
 			$forumid = $row['forumid'];

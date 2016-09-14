@@ -14,7 +14,7 @@ if (!defined('SMF'))
 **********************************************************************************/
 function SplitForum_Menu_Buttons(&$areas)
 {
-	global $txt, $scripturl, $subforum_tree, $modSettings, $context;
+	global $txt, $scripturl, $subforum_tree, $modSettings, $context, $forumid;
 
 	// Return if only one subforum is defined OR top menu option is turned completely off:
 	if (count($subforum_tree) <= 1 || empty($modSettings['subforum_settings_topmenu']))
@@ -33,18 +33,22 @@ function SplitForum_Menu_Buttons(&$areas)
 		if ($needle == 'home')
 		{
 			$new['subforums'] = array(
-				'title' => $txt['subforums_list'],
+				'title' => (empty($modSettings['subforum_sister_sites']) ? $txt['subforum_sister_sites'] : $modSettings['subforum_sister_sites']),
 				'href' => $scripturl,
 				'show' => true,
 				'sub_buttons' => array(
 				),
 			);
 			foreach ($subforum_tree as $id => $subforum)
+			{
+				if ($subforum['forumid'] == $forumid)
+					continue;
 				$new['subforums']['sub_buttons'][$id] = array(
 					'title' => $subforum['boardname'],
 					'href' => $subforum['boardurl'],
 					'show' => true,
 				);
+			}
 		}
 	}
 	$areas = $new;

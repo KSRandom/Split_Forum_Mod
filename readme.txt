@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.12[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.13[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -43,6 +43,9 @@ All recent posts, xml-based feeds, and other forum-related functionality works f
 o [b]integrate_subforum_subdomain[/b] - Hook for creating/deleting subdomains and/or domains
 
 [color=blue][b][size=12pt][u]To-Do List[/u][/size][/b][/color]
+o Each subforum has it's own news section.
+o An action permitting viewing of all recent posts/topics across all subforums....
+o Copy a category/board from one subforum to another
 o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
 o Theme settings restricted to members registered on a subforum
@@ -58,6 +61,15 @@ Upgrade is possible from [b]v1.2 and up[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.13 - October 12th, 2014[/u][/b]
+o Fixed database installer for older versions of this mod.
+o Fixed SimplePortal block copying function to correctly duplicate blocks.
+o Added ability to remove all defined blocks for a particular subforum.
+o Added ability to change the SubForums top menu title.  (Defaults now to "Sister Sites")
+o Fixed missing option description within SubForums Settings page.
+o Added standalone portal URL checks to try to load the correct subforum ID.
+o Added duplicate standalone portal URL check within Edit SubForum code.
+
 [b][u]v1.12 - October 8th, 2014[/u][/b]
 o Mod rearranged due to some servers having difficulty processing this mod correctly...
 

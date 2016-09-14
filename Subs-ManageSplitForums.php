@@ -423,14 +423,20 @@ function copy_sp_blocks($from, $forum)
 	);
 	$blocks	= array();
 	$parameters = array();
+	$last = 0;
 	while ($row = $smcFunc['db_fetch_assoc']($request))
 	{
-		$max++;
-		$row['id_block'] = $max;
+		$current = $row['id_block'];
+		if ($current <> $last)
+		{
+			$max++;
+			$row['id_block'] = $max;
+			$last = $current;
+		}
 		if (!empty($row['variable']))
 		{
 			$parameters[] = array(
-				'id_block' => $row['id_block'],
+				'id_block' => $max,
 				'variable' => $row['variable'],
 				'value' => $row['value']
 			);
@@ -438,7 +444,7 @@ function copy_sp_blocks($from, $forum)
 		$row['forum'] = $forum;
 		unset($row['variable']);
 		unset($row['value']);
-		$blocks[] = $row;
+		$blocks[$max] = $row;
 	}
 	$smcFunc['db_free_result']($request);
 
@@ -511,6 +517,7 @@ function delete_sp_blocks($forum)
 	// Delete the parameters for blocks from the specified forum:
 	if (!empty($parameters))
 	{
+		$parameters = array_unique($parameters);
 		$request = $smcFunc['db_query']('', '
 			DELETE FROM {db_prefix}sp_parameters
 			WHERE id_block IN ({array_int:id_blocks})',

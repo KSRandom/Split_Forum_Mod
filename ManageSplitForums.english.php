@@ -42,13 +42,16 @@ $txt['subforum_modify_sp_title'] = 'Simple Portal Blocks';
 $txt['subforum_modify_sp_blocks'] = 'Copy blocks from Subforum';
 $txt['subforum_modify_sp_blocks_nothing'] = '[ Do Nothing ]';
 $txt['subforum_modify_sp_blocks_default'] = '[ Use Default Blocks ]';
+$txt['subforum_modify_sp_blocks_remove'] = '[ Remove Blocks ]';
 $txt['subforum_modify_confirm'] = 'Are you sure you want to delete this SubForum?';
 
 $txt['subforum_server_url'] = 'Root webserver URL for new subforums';
 $txt['subforum_server_root'] = 'Root server path for new subforums';
 $txt['subforum_redirect_wrong'] = 'Redirect board to correct SubForum instead of error message';
-$txt['subforum_settings_topmenu'] = 'Show list of SubForums in top menu';
-$txt['subforum_settings_topmenu_admin_only'] = 'Show list of SubForums in top menu to admin only';
+$txt['subforum_sister_sites_title'] = 'Sister Sites menu title';
+$txt['subforum_settings_topmenu'] = 'Show Sister Sites in top menu';
+$txt['subforum_settings_topmenu_admin_only'] = 'Show Sister Sites in top menu to admin only';
+$txt['subforum_sister_sites'] = 'Sister Sites';
 
 $txt['subforum_delete_title'] = 'Delete SubForum';
 $txt['subforum_delete_line'] = 'Deleting this subforum will also delete the below categories and boards, including all topics, posts and attachments within each board:';
