@@ -187,7 +187,7 @@ Function EditSubForum($sub)
 function SaveSubForum($sub)
 {
 	global $context, $sourcedir, $txt, $scripturl, $modSettings, $settings, $forumid;
-	global $modSettings, $subforum_tree, $smcFunc, $boarddir;
+	global $modSettings, $subforum_tree, $smcFunc, $boarddir, $forumdir;
 
 	// Load the variables from the form:
 	checkSession();
@@ -229,7 +229,7 @@ function SaveSubForum($sub)
 	// Make sure another subforum with this path doesn't already exist:
 	$host = parse_url($arr['boardurl']);
 	$uri = str_replace('/index.php', '', substr($host['path'], 0, strrpos($host['path'], '/')));
-	$host = $host['url'];
+	$host = $host['path'];
 	foreach ($subforum_tree as $row)
 	{
 		if ($row['forumid'] == $sub)
@@ -248,10 +248,6 @@ function SaveSubForum($sub)
 		if ($check || $row['boardurl'] == $arr['boardurl'])
 			fatal_lang_error('subforum_error_dup_path', false);
 	}
-
-	// Insert the information into the database table:
-	delete_subforum($sub, false);
-	add_subforum($arr);
 
 	// Populate the Simple Portal blocks for this subforum:
 	if (isset($_POST['subforum_modify_sp_blocks']) && $_POST['subforum_modify_sp_blocks'] == -3)
@@ -281,17 +277,6 @@ function SaveSubForum($sub)
 				fclose($handle);
 				@chmod($arr['forumdir'] . '/index.php', 0755);
 			}
-
-			// Write out the new ".htaccess" file for the subforum:
-			$path = relativePath($arr['forumdir'], $boarddir);
-			if (substr($path, -1) == '\\')
-				$path = substr($path, 0, strlen($path) - 1) . '/';
-			if ($handle = fopen($arr['forumdir'] . '/.htaccess', 'w'))
-			{
-				fwrite($handle, "Options +FollowSymlinks\nRewriteEngine on\nRewriteRule (.*)/(.*) " . $path . "$1/$2");
-				fclose($handle);
-				@chmod($arr['forumdir'] . '/.htaccess', 0755);
-			}
 		}
 		
 		// If requested, copy the news settings to the subforum:
@@ -299,9 +284,40 @@ function SaveSubForum($sub)
 			updateSettings(array('news' . $sub => $modSettings['news']));
 	}
 
+	// Make sure we update the .htaccess for Pretty URLs if it is installed:
+	if (file_exists($sourcedir . '/Subs-PrettyUrls.php'))
+	{
+		unlink($arr['forumdir'] . '/.htaccess');
+		require_once($sourcedir . '/Subs-PrettyUrls.php');
+		$old_boarddir = $boarddir;
+		$boarddir = $subforum_tree[$arr['forumid']]['forumdir'];
+		pretty_update_filters();
+		$boarddir = $old_boarddir;
+	}
+
+	// Write out the new ".htaccess" file for the subforum:
+	if ($arr['forumid'] != 0 && is_dir($arr['forumdir']))
+	{
+		$path = relativePath($arr['forumdir'], $boarddir);
+		$oldHtaccess = file_get_contents($arr['forumdir'] . '/.htaccess');
+		$insert = "\n\n# SUBFORUM MOD BEGINS\nRewriteEngine on\nOptions +FollowSymlinks\nRewriteCond %{REQUEST_FILENAME} !-f\nRewriteRule (.*)/(.*) " . $path . "$1/$2\n# SUBFORUM MOD ENDS";
+		$oldHtaccess = str_replace($insert, '', $oldHtaccess) . $insert;
+		if ($handle = fopen($arr['forumdir'] . '/.htaccess', 'w'))
+		{
+			fwrite($handle, $oldHtaccess);
+			fclose($handle);
+			@chmod($arr['forumdir'] . '/.htaccess', 0755);
+		}
+	}
+
 	// Let's call hook function(s) to handle subdomain addition:
 	$arr['action'] = 'add';
 	call_integration_hook('integrate_subforum_subdomain', array(&$arr));
+	unset($arr['action']);
+
+	// Insert the information into the database table:
+	delete_subforum($sub, false);
+	add_subforum($arr);
 
 	// Create the registration agreement files for the new forum if they don't exist:
 	if ($arr['forumid'] != 0 && !file_exists($boarddir . '/agreement.forum' . $arr['forumid'] . '.*'))

@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.12</version>
+<version>1.19</version>
 
 <file name="$themedir/ManageBoards.template.php">
 	<operation>
@@ -472,8 +472,8 @@ function template_modify_category()
 							<dd>
 								<select name="alias_child[]" multiple="multiple">
 									<option value="">', $txt['no_boards_selected'], '</option>';
-		foreach ($boards as $board)
-			echo '
+	foreach ($boards as $board)
+		echo '
 									<option', !isset($context['board']['is_new']) && in_array($board['id'], $context['board']['alias_child']) ? ' selected="selected"' : '', ' value="', $board['id'], '">', $board['name'], '</option>';
 	echo '
 								</select>

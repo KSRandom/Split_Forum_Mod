@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.18</version>
+	<version>1.19</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -43,66 +43,30 @@
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
 	
-	<upgrade from="1.12">
-		<code>add_remove_hook.php</code>
-		<database>db_install.php</database>
-		<modification>upgrade_1.13.xml</modification>
-		<modification>upgrade_1.14.xml</modification>
-		<modification>upgrade_1.15.xml</modification>
-		<modification>upgrade_1.16.xml</modification>
-		<modification>upgrade_1.17.xml</modification>
-		<modification>upgrade_1.18.xml</modification>
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
-		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
-		<require-file name="ManageSplitForums.english-utf8.php" destination="$boarddir/Themes/default/languages" />
-		<redirect timeout="5000" url="?action=admin;area=maintain;sa=routine;activity=cleancache" />
-	</upgrade>
-	<upgrade from="1.13">
-		<code>add_remove_hook.php</code>
-		<database>db_install.php</database>
-		<modification>upgrade_1.14.xml</modification>
-		<modification>upgrade_1.15.xml</modification>
-		<modification>upgrade_1.16.xml</modification>
-		<modification>upgrade_1.17.xml</modification>
-		<modification>upgrade_1.18.xml</modification>
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
-		<redirect timeout="5000" url="?action=admin;area=maintain;sa=routine;activity=cleancache" />
-	</upgrade>
-	<upgrade from="1.14">
-		<code>add_remove_hook.php</code>
-		<database>db_install.php</database>
-		<modification>upgrade_1.15.xml</modification>
-		<modification>upgrade_1.16.xml</modification>
-		<modification>upgrade_1.17.xml</modification>
-		<modification>upgrade_1.18.xml</modification>
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
-	</upgrade>
 	<upgrade from="1.15">
-		<code>add_remove_hook.php</code>
-		<database>db_install.php</database>
 		<modification>upgrade_1.16.xml</modification>
 		<modification>upgrade_1.17.xml</modification>
 		<modification>upgrade_1.18.xml</modification>
+		<modification>upgrade_1.19.xml</modification>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 	<upgrade from="1.16">
-		<code>add_remove_hook.php</code>
-		<database>db_install.php</database>
 		<modification>upgrade_1.17.xml</modification>
 		<modification>upgrade_1.18.xml</modification>
+		<modification>upgrade_1.19.xml</modification>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 	<upgrade from="1.17">
-		<code>add_remove_hook.php</code>
-		<database>db_install.php</database>
 		<modification>upgrade_1.18.xml</modification>
+		<modification>upgrade_1.19.xml</modification>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+	</upgrade>
+	<upgrade from="1.18">
+		<modification>upgrade_1.19.xml</modification>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 </package-info>

@@ -4,7 +4,7 @@
 <id>Dougiefresh:Split_Forum</id>
 <version>1.18</version>
 
-<file name="$themedir/PortalAdminBlocks.template.php">
+<file name="$themedir/PortalAdminBlocks.template.php" error="skip">
 	<operation>
 		<search position="replace"><![CDATA[function template_block_list()
 {

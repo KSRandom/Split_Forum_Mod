@@ -74,7 +74,7 @@ function add_subforum(&$row)
 	isAllowedTo('admin_forum');
 
 	// Define the contents of the array element:
-	$subforum_tree[(int) isset($row['forumid']) ? $row['forumid'] : $forumid] = array(
+	$subforum_tree[isset($row['forumid']) ? (int) $row['forumid'] : $forumid] = array(
 		'forumid' => (int) (isset($row['forumid']) ? $row['forumid'] : $forumid),
 		'cookiename' => (isset($row['cookiename']) ? $row['cookiename'] : ''),
 		'boardurl' => (isset($row['boardurl']) ? $row['boardurl'] : ''),
@@ -539,7 +539,8 @@ function relativePath($from, $to, $ps = DIRECTORY_SEPARATOR)
 		array_shift($arFrom);
 		array_shift($arTo);
 	}
-	return str_pad("", count($arFrom) * 3, '..' . $ps) . implode($ps, $arTo);
+	$base = str_pad("", count($arFrom) * 3, '..' . $ps) . implode($ps, $arTo);
+	return str_replace(DIRECTORY_SEPARATOR, '/', $base);
 }
 
 function remove_bad_aliases()

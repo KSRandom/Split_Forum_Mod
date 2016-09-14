@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.19</version>
+
+<file name="$sourcedir/Load.php">
+	<operation>
+		<search position="replace"><![CDATA[$modSettings['pretty_root_url'] = $subforum_tree[$forumid]['boardurl'];
+	$modSettings['primary_membergroup'] = $subforum_tree[$forumid]['primary_membergroup'];]]></search>
+		<add><![CDATA[$modSettings['primary_membergroup'] = $subforum_tree[$forumid]['primary_membergroup'];
+	if (isset($modSettings['pretty_root_url']))
+		$modSettings['pretty_root_url'] = $subforum_tree[$forumid]['boardurl'];]]></add>
+	</operation>
+</file>
+<file name="$themedir/ManageBoards.template.php">
+	<operation error="ignore">
+		<search position="replace"><![CDATA[</dt>
+							<dd>
+								<select name="alias_child[]" multiple="multiple">
+									<option value="">', $txt['no_boards_selected'], '</option>';
+	foreach ($boards as $board)
+		echo '
+									<option', !isset($context['board']['is_new']) && in_array($board['id'], $context['board']['alias_child']) ? ' selected="selected"' : '', ' value="', $board['id'], '">', $board['name'], '</option>';
+	echo '
+								</select>
+							</dd>]]></search>
+		<add><![CDATA[</dt>';
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		echo '
+							<dd id="alias_child', $id, '"', ($_REQUEST['sub'] != $id ? ' style="display: none;"' : '') . '>
+								<select name="alias_child' . $id . '[]" multiple="multiple">
+									<option value="">', $txt['no_boards_selected'], '</option>';
+		foreach ($boards as $board)
+		{
+			if ($cat_tree[$board['category']]['node']['forumid'] == $id)
+				echo '
+									<option', !isset($context['board']['is_new']) && in_array($board['id'], $context['board']['alias_child']) ? ' selected="selected"' : '', ' value="', $board['id'], '">', $board['name'], '</option>';
+		}
+		echo '
+								</select>
+							</dd>';
+	}
+	echo ']]></add>
+	</operation>
+</file>
+</modification>

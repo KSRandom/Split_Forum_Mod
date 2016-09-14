@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.17</version>
+<version>1.19</version>
 
 <file name="$boarddir/index.php">
 	<operation>
@@ -327,15 +327,11 @@
 		<add><![CDATA[global $scripturl, $txt, $modSettings, $context, $settings, $forumid;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[FROM {db_prefix}calendar AS cal
-				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = cal.id_member)
-			WHERE cal.id_topic = {int:current_topic}
+		<search position="replace"><![CDATA[WHERE cal.id_topic = {int:current_topic}
 			ORDER BY start_date',
 			array(
 				'current_topic' => $topic,]]></search>
-		<add><![CDATA[FROM {db_prefix}calendar AS cal
-				LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = cal.id_member)
-			WHERE cal.id_topic = {int:current_topic}
+		<add><![CDATA[WHERE cal.id_topic = {int:current_topic}
 				AND cal.forumid = {int:forumid}
 			ORDER BY start_date',
 			array(
@@ -347,8 +343,9 @@
 	<operation>
 		<search position="after"><![CDATA[// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></search>
 		<add><![CDATA[// Overwrite certain settings with the Subforum setting if available:
-	$modSettings['pretty_root_url'] = $subforum_tree[$forumid]['boardurl'];
 	$modSettings['primary_membergroup'] = $subforum_tree[$forumid]['primary_membergroup'];
+	if (isset($modSettings['pretty_root_url']))
+		$modSettings['pretty_root_url'] = $subforum_tree[$forumid]['boardurl'];
 	if (isset($subforum_tree[$forumid]['sp_portal']))
 		$modSettings['sp_portal_mode'] = $subforum_tree[$forumid]['sp_portal'];
 	if (isset($subforum_tree[$forumid]['sp_standalone']))
@@ -1017,22 +1014,12 @@ function EditBoard()
 		<add><![CDATA[global $txt, $scripturl, $topic, $modSettings, $board, $forumid;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[// Get the current event information.
-			$request = $smcFunc['db_query']('', '
-				SELECT
-					id_member, title, MONTH(start_date) AS month, DAYOFMONTH(start_date) AS day,
-					YEAR(start_date) AS year, (TO_DAYS(end_date) - TO_DAYS(start_date)) AS span
-				FROM {db_prefix}calendar
+		<search position="replace"><![CDATA[FROM {db_prefix}calendar
 				WHERE id_event = {int:id_event}
 				LIMIT 1',
 				array(
 					'id_event' => $context['event']['id'],]]></search>
-		<add><![CDATA[// Get the current event information.
-			$request = $smcFunc['db_query']('', '
-				SELECT
-					id_member, title, MONTH(start_date) AS month, DAYOFMONTH(start_date) AS day,
-					YEAR(start_date) AS year, (TO_DAYS(end_date) - TO_DAYS(start_date)) AS span
-				FROM {db_prefix}calendar
+		<add><![CDATA[FROM {db_prefix}calendar
 				WHERE id_event = {int:id_event}
 					AND forumid = {int:forumid}
 				LIMIT 1',
@@ -1081,20 +1068,14 @@ function EditBoard()
 					'forumid' => (int) $forumid,]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[UPDATE {db_prefix}calendar
-				SET end_date = {date:end_date},
-					start_date = {date:start_date},
-					title = {string:title}
-				WHERE id_event = {int:id_event}',
-				array(]]></search>
-		<add><![CDATA[UPDATE {db_prefix}calendar
-				SET end_date = {date:end_date},
-					start_date = {date:start_date},
-					title = {string:title}
-				WHERE id_event = {int:id_event}
+		<search position="replace"><![CDATA[WHERE id_event = {int:id_event}',
+				array(
+					'end_date']]></search>
+		<add><![CDATA[WHERE id_event = {int:id_event}
 					AND forumid = {int:forumid}',
 				array(
-					'forumid' => (int) $forumid,]]></add>
+					'forumid' => (int) $forumid,
+					'end_date']]></add>
 	</operation>
 </file>
 <file name="$sourcedir/PostModeration.php">
@@ -1682,14 +1663,14 @@ function EditBoard()
 		<add><![CDATA[global $modSettings, $smcFunc, $forumid;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA['start_date' => 'date', 'end_date' => 'date',
-		),
-		array(
+		<search position="replace"><![CDATA['start_date' => 'date', 'end_date' => 'date',]]></search>
+		<add><![CDATA['start_date' => 'date', 'end_date' => 'date', 'forumid' => 'int',]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[array(
 			$eventOptions['board'], $eventOptions['topic'], $eventOptions['title'], $eventOptions['member'],
 			$eventOptions['start_date'], $eventOptions['end_date'],]]></search>
-		<add><![CDATA['start_date' => 'date', 'end_date' => 'date', 'forumid' => 'int',
-		),
-		array(
+		<add><![CDATA[array(
 			$eventOptions['board'], $eventOptions['topic'], $eventOptions['title'], $eventOptions['member'],
 			$eventOptions['start_date'], $eventOptions['end_date'], $forumid,]]></add>
 	</operation>
@@ -1702,14 +1683,14 @@ function EditBoard()
 	global $smcFunc, $forumid;]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[id_topic = {int:id_topic}
-		WHERE id_event = {int:id_event}',
-		array(]]></search>
-		<add><![CDATA[id_topic = {int:id_topic}
-		WHERE id_event = {int:id_event}
+		<search position="replace"><![CDATA[WHERE id_event = {int:id_event}',
+		array(
+			'start_date']]></search>
+		<add><![CDATA[WHERE id_event = {int:id_event}
 			AND forumid = {int:forumid}',
 		array(
-			'forumid' => (int) $forumid,]]></add>
+			'forumid' => (int) $forumid,
+			'start_date']]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[global $smcFunc;
