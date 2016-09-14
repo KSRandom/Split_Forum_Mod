@@ -89,14 +89,15 @@ function get_subforum_max()
 	return $max;
 }
 
-function add_subforum(&$row)
+function add_subforum(&$row, $exists = true)
 {
-	global $subforum_tree, $forumid, $sourcedir;
+	global $subforum_tree, $forumid, $sourcedir, $txt;
 
 	isAllowedTo('admin_forum');
 
 	// Define the contents of the array element:
-	$subforum_tree[isset($row['forumid']) ? (int) $row['forumid'] : $forumid] = array(
+	$new_forumid = (isset($row['forumid']) ? (int) $row['forumid'] : $forumid);
+	$subforum_tree[$new_forumid] = array(
 		'forumid' => (int) (isset($row['forumid']) ? $row['forumid'] : $forumid),
 		'cookiename' => (isset($row['cookiename']) ? $row['cookiename'] : ''),
 		'boardurl' => (isset($row['boardurl']) ? $row['boardurl'] : ''),
@@ -637,6 +638,32 @@ function remove_bad_aliases()
 			);
 		}
 	}
+}
+
+function use_default_ez_blocks($sub)
+{
+	global $smcFunc;
+	$smcFunc['db_query']('', '
+		INSERT INTO {db_prefix}ezp_block_layout
+			(`id_column`, `id_block`, `id_order`, `customtitle`, `permissions`, `can_collapse`, `active`, `visibileactions`, `visibileboards`, `visibileareascustom`, `blockmanagers`, `blockdata`, `id_icon`, `visibilepages`, `hidetitlebar`, `forum`)
+		VALUES
+			(1, 4, 1, \'User\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'\', \'\', \'EzBlockLoginBoxBlock\', 0, \'\', 0, \'' . $sub . '\'),
+			(1, 27, 2, \'Stats ezBlock\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'\', \'\', \'EzBlockStatsBox\', 0, \'\', 0, \'' . $sub . '\'),
+			(3, 7, 1, \'Recent Topics\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'\', \'\', \'EzBlockRecentTopicsBlock\', 0, \'\', 0, \'' . $sub . '\'),
+			(2, 26, 1, \'ParseBBC ezBlock\', \'-1,0,1,2\', 1, 1, \'\', \'\', \'portal\', \'\', \'EzBlockParseBBCBlock\', 0, \'\', 0, \'' . $sub . '\');'
+	);
+}
+
+function delete_ez_blocks($sub)
+{
+	global $smcFunc;
+	$smcFunc['db_query']('', '
+		DELETE FROM {db_prefix}ezp_block_layout
+		WHERE forum = {int:subforum}',
+		array(
+			'subforum' => (int) $sub,
+		)
+	);
 }
 
 ?>

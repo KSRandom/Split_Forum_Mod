@@ -341,8 +341,9 @@ function SaveSubForum($sub)
 	unset($arr['action']);
 
 	// Insert the information into the database table:
+	$exists = isset($subforum_tree[$sub['forumid']]);
 	delete_subforum($sub, false);
-	add_subforum($arr);
+	add_subforum($arr, $exists);
 
 	// Create the registration agreement files for the new forum if they don't exist:
 	if ($arr['forumid'] != 0 && !file_exists($boarddir . '/agreement.forum' . $arr['forumid'] . '.*'))

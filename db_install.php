@@ -66,14 +66,29 @@ while ($row = $smcFunc['db_fetch_row']($tblchk))
 		)
 	);
 	$smcFunc['db_remove_column']('{db_prefix}sp_blocks', 'forums');
+}
+$smcFunc['db_free_result']($tblchk);
 
-	// Make sure all subforum Simple Portal blocks are active:
-	$smcFunc['db_query']('', '
-		UPDATE {db_prefix}sp_blocks
-		SET state = 1
-		WHERE forum > 0',
-		array());
-	break;
+//==============================================================================
+// If EZ Portal is installed, add support for subforums within the DB:
+//==============================================================================
+$tblchk = $smcFunc['db_query']('', 'show tables like "' . $db_prefix . 'ezp_block_layout"', array());
+while ($row = $smcFunc['db_fetch_row']($tblchk))
+{
+	if (str_replace('ezp_block_layout', '', $row[0]) <> $db_prefix)
+		continue;
+
+	// Insert forumid column into categories table to associate each category with a particular forum:
+	$smcFunc['db_add_column'](
+		'{db_prefix}ezp_block_layout',
+		array(
+			'name' => 'forum',
+			'type' => 'int',
+			'size' => 4,
+			'default' => '0'
+		)
+	);
+	$smcFunc['db_remove_column']('{db_prefix}ezp_block_layout', 'forums');
 }
 $smcFunc['db_free_result']($tblchk);
 
