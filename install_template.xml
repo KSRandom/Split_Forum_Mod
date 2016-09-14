@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.20</version>
+<version>1.21</version>
 
 <file name="$themedir/ManageBoards.template.php">
 	<operation>
@@ -266,6 +266,7 @@ function template_modify_category()
 	<operation>
 		<search position="after"><![CDATA[// Option for choosing the category the board lives in.]]></search>
 		<add><![CDATA[// Option for choosing the subforum the board lives in.
+	$_REQUEST['sub'] = (isset($_REQUEST['sub']) ? $_REQUEST['sub'] : 0);
 	if (count($subforum_tree) > 1)
 	{
 		echo '

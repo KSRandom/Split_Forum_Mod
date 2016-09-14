@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.20</version>
+	<version>1.21</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -42,39 +42,9 @@
 		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForums.english-utf8.php" />
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
-	
-	<upgrade from="1.15">
-		<modification>upgrade_1.16.xml</modification>
-		<modification>upgrade_1.17.xml</modification>
-		<modification>upgrade_1.18.xml</modification>
-		<modification>upgrade_1.19.xml</modification>
-		<modification>upgrade_1.20.xml</modification>
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
-	</upgrade>
-	<upgrade from="1.16">
-		<modification>upgrade_1.17.xml</modification>
-		<modification>upgrade_1.18.xml</modification>
-		<modification>upgrade_1.19.xml</modification>
-		<modification>upgrade_1.20.xml</modification>
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
-	</upgrade>
-	<upgrade from="1.17">
-		<modification>upgrade_1.18.xml</modification>
-		<modification>upgrade_1.19.xml</modification>
-		<modification>upgrade_1.20.xml</modification>
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
-	</upgrade>
-	<upgrade from="1.18">
-		<modification>upgrade_1.19.xml</modification>
-		<modification>upgrade_1.20.xml</modification>
-		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
-		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
-	</upgrade>
-	<upgrade from="1.18">
-		<modification>upgrade_1.20.xml</modification>
+
+	<upgrade from="1.20">
+		<modification>upgrade_1.21.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 </package-info>

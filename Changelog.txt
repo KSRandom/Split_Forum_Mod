@@ -1,0 +1,141 @@
+v1.21 - February 18th, 2015
+o POLICY CHANGE: Mod upgrade capability limited to previous version of the mod.
+o Resolved several undefined index errors within ManageBoards.template.php
+o Resolved several undefined index errors within ManageSplitForums.php
+
+v1.20 - January 19th, 2015
+o License change to Simplified BSD.
+o Fixed issue with the registration agreement not being pulled up for subforums....
+o Modified Edit Subforum code so that .htaccess is properly updated by Pretty URLs.
+
+v1.19 - November 29th, 2014
+o Modifications made by Greygal made it compatible with "Event Registration for SMF2" mod.
+o Fixed subforum management code to include "Pretty URLs" htaccess modifications.  Thanks, Greygal!
+o upgrade_1.19.xml attempts to execute failed operation regarding Alias Boards mod.
+o Fixed upgrade_1.18.xml to skip SimplePortal template operations if file doesn't exist.
+
+v1.18 - November 24th, 2014
+o Fixed install issue involving SimplePortal's block admin template...
+o Moved Forum => Subforums menu beneath Boards in Admin menu.
+
+v1.17 - November 21th, 2014
+o Fixed template-breaking typo in Sources/ManageBoards.php
+o Fixed Modify Boards UI to work correctly without Alias Boards mod installed...
+o Fixed Modify Boards UI moving boards to bottom when making no position changes...
+o Fixed undefined variable error within the Edit Categories UI...
+
+v1.16 - November 19th, 2014
+o Fixed a few security issues within database queries in the mod.
+o Fixed some query variable type-casting issues within the mod.
+o Modified Edit Category UI so that SubForum selection box is on top of the form.
+o Modified Recent Posts code so that it is limited to the subforum it is displaying for.
+o Fixed compatibility with Pretty URLs mod...
+o Fixed both the SSI bug report and undefined array element report in Load.php by SauloA...
+o Fixed a small bug for Manage Board UI.
+
+v1.15 - November 1st, 2014
+o Moved code responsible for primary membership setting after loading forum settings...
+o Removed seperate cookie per subforum in favor of a more unified login Process....
+o A user logging into one subforum will log that user into all subforums automatically.
+o Slight changes involved with changing SimplePortal compatibility from v2.3.5 to 2.3.6.
+o Alias Boards v1.2+ now works within subforums.
+
+v1.14 - October 15th, 2014
+o Fixed database installer by removing the "gathering information from subforum table" code...
+o Converted admin menu changes into hook and removed changes from Admin.php...
+o Modified news admin and loader code in order to create seperate news per subforum.
+o Added "unreadglobal" action to see unread topics from all subforums.
+o Removed "subforums" action because of multiple issues, including security issues.
+o Modified calendar system to allow seperate events per subforum.
+
+v1.13 - October 12th, 2014
+o Fixed database installer by integrating multiple install scripts into one.
+o Fixed SimplePortal block copying function to correctly duplicate blocks.
+o Added ability to remove all defined blocks for a particular subforum.
+o Added ability to change the SubForums top menu title.  (Defaults now to "Sister Sites")
+o Fixed missing option description within SubForums Settings page.
+o Added standalone portal URL checks to try to load the correct subforum ID.
+o Added duplicate standalone portal URL check within Edit SubForum code.
+
+v1.12 - October 8th, 2014
+o Mod rearranged due to some servers having difficulty Processing this mod correctly...
+
+v1.11 - October 3rd, 2014
+o Removed some forgotten debugging code left in ManageSplitForum.php.
+o Added new SubForums top menu item, which is visible with more than 1 subforum.
+o Added option to enable new SubForums top menu.
+o Added option to enable new SubForums top menu for ADMIN only.
+
+v1.10 - September 6th, 2014
+o Added code to attempt to change permissions of created folders and files.
+o Rewrote some code added by v1.9 so that it creates the folders Properly (again)....
+
+v1.9 - September 5th, 2014
+o Added creation of .htaccess to redirect subdirectory requests to primary forum.
+o Fixed some undefined errors found in ManageBoards.php.
+o Fixed some undefined errors found in ManageSplitForums.php.
+o Fixed bugs in Manage Category UI so that category order can be changed again.
+o Fixed bugs in Delete Category UI so that categories to move to are selectable again.
+o Fixed bugs in Manage Board UI so that board order can be changed again if creating new board.
+o Fixed bug within rewritten SimplePortal block copying code because fields were omitted.
+o Minor compatibility fix within upgrade_v1.4.xml for Pretty URL.  Functionality not changed.
+
+v1.8 - August 24th, 2014
+o Fixed some undefined errors found in ManageSplitForums.php.
+o Fixed issue with Manage Boards UI installed where copying blocks was selected by default.
+o Modified code so that domain names with and without www. are Properly recognized.
+o Rewrote function that copies SimplePortal blocks from one subforum to another.
+o Fixed bug with SimplePortal saving configuration settings because variable wasn't globalized.
+o Fixed variable type-casting bug with deleting SimplePortal blocks from a subforum.
+o Fixed mod installer issue for people without SimplePortal installed.
+
+v1.7 - August 16th, 2014
+o Added script to rebuild the subforum tree array correctly.
+o Fixed the javascript conditional statements so that subforum ID and path are editable.
+o Moved subdomain removal hook function so it is done immediately before removal of subforum.
+o Added fields to Manage Subforum UI to populate and/or copy SimplePortal blocks.
+o Added ability to change the portal mode per subforum for SimplePortal.
+o Modified SimplePortal's General Settings UI to update subforum settings.
+
+v1.6 - August 11th, 2014
+o Modified Create Subforum functions to Properly create new subforums without conflicts
+o Modified Manage Boards UI so that when changing subforum and/or category, category and board list now changes.
+o Fixed browser compatibility issue with revised Manage Category UI.
+o Addition of a tabbed interface for SimplePortal block listing template.
+o Rewrite of SimplePortal template modifications introduced in version 1.5.
+o Added tab system to Blocks listing UI to make it easier to put seperate blocks in subforums.
+o Modified several SSI functions so that they return results for only that subforum.
+
+v1.5 - August 3rd, 2014
+o Fixed the subforum URL detection code that resulted in board doesn't exist errors....
+o Fixed Manage Boards UI so that boards aren't hidden when entering Manage Boards UI...
+o Updated package-info.xml so that it redirects to clears the SMF file cache
+o Modified SimplePortal code to support subforums selection for blocks.
+
+v1.4 - July 26th, 2014
+o While changing the subforum a category is assigned to, the category order list now changes.
+o Added the ability to move boards between subforums
+o Fixed multiple Manage Boards UI bugs, resulting from subforum ID not being passed
+o Fixed an undeclared array element error found in Load.php
+o Modified tab system so that it works better with revised move boards ability
+o Modified db_install.php so that it doesn't overwrite previous subforum settings when installing
+o Removed code from uninstall.php that automatically removes subforum files...
+
+v1.3 - July 4th, 2014
+o Changed name of new subforums to "SubForum # [n]" (where [n] is the new subforum ID)
+o Total rewrite of edit_db.php, now renamed to db_install.php....
+o Added support for listing undefined subforum IDs present in the system.
+o Changed Database calls upon loading and subforum management to use arrays.
+o Seperated English and English-UTF8 language strings into their own file.
+o Added code to prevent global subforum administration from subforums.
+
+v1.2 - June 25th, 2014
+o Fixed REALLY bad Problem in version 1.1 resulting in errors in admin screen!
+
+v1.1 - June 23th, 2014
+o Added English UTF8 language strings
+o Changed the method that subforum boards and categories are listed to a tabbed system
+o edit_db.php modification to attempt to eliminate some weird error...
+
+v1.0 - May 27th, 2014
+o Initial Public Release

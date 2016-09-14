@@ -21,6 +21,7 @@ function SplitForum_Admin_Menu(&$areas)
 	loadTemplate('Admin', 'splitforum');
 
 	// Insert the Subforums area into the admin menu:
+	$temp = array();
 	foreach ($areas['layout']['areas'] as $label => $area)
 	{
 		$temp[$label] = $area;

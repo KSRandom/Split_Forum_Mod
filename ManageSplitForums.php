@@ -152,7 +152,7 @@ Function EditSubForum($sub)
 			array('select', 'subforum_modify_sp_portal', explode('|', $txt['sp_portal_mode_options']),
 				'javascript' => 'onchange="SetPortalType(this.options[this.selectedIndex].value); return false;"'),
 			array('text', 'subforum_modify_sp_standalone',
-				'javascript' => ($subforum_tree[$sub]['sp_portal'] != 3 ? ' disabled="disabled"' : ''),
+				'javascript' => (isset($subforum_tree[$sub]['sp_portal']) && $subforum_tree[$sub]['sp_portal'] != 3 ? ' disabled="disabled"' : ''),
 			),
 			array('select', 'subforum_modify_sp_blocks', $options),
 		));
@@ -228,8 +228,8 @@ function SaveSubForum($sub)
 
 	// Make sure another subforum with this path doesn't already exist:
 	$host = parse_url($arr['boardurl']);
-	$uri = str_replace('/index.php', '', substr($host['path'], 0, strrpos($host['path'], '/')));
-	$host = $host['path'];
+	$host = (isset($host['path']) ? $host['path'] : '');
+	$uri = str_replace('/index.php', '', substr($host, 0, strrpos($host, '/')));
 	foreach ($subforum_tree as $row)
 	{
 		if ($row['forumid'] == $sub)
@@ -290,9 +290,9 @@ function SaveSubForum($sub)
 		unlink($arr['forumdir'] . '/.htaccess');
 		require_once($sourcedir . '/Subs-PrettyUrls.php');
 		$old_boarddir = $boarddir;
-		$boarddir = $arr['forumdir'];
+		$boarddir = (isset($arr['forumdir']) ? $arr['forumdir'] : $old_boarddir);
 		$old_boardurl = $boardurl;
-		$boardurl = $arr['boardurl'];
+		$boardurl = (isset($arr['boardurl']) ? $arr['boardurl'] : $old_boardurl);
 		pretty_update_filters();
 		$boarddir = $old_boarddir;
 		$boardurl = $old_boardurl;
