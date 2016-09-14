@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.10[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.11[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -54,10 +54,16 @@ This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x 
 [url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  Earlier versions of SimplePortal have not been tested for compatibility with this mod.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
-Upgrade is possible from [b]v1.2 thru v1.8[/b] to [b]v1.9[/b].
+Upgrade is possible from [b]v1.2 and up[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.11 - October 3rd, 2014[/u][/b]
+o Removed some forgotten debugging code left in [b]ManageSplitForum.php[/b].
+o Added new SubForums top menu item, which is visible with more than 1 subforum.
+o Added option to enable new SubForums top menu.
+o Added option to enable new SubForums top menu for ADMIN only.
+
 [b][u]v1.10 - September 6th, 2014[/u][/b]
 o Added code to attempt to change permissions of created folders and files.
 o Rewrote some code added by v1.9 so that it creates the folders properly (again)....

@@ -104,8 +104,6 @@ Function EditSubForum($sub)
 	{
 		// Figure out what the largest forum ID in the database is:
 		$sub = get_subforum_max() + 1;
-		
-		echo strpos($modSettings['subforum_server_root'], "\\"); exit;
 		$addition = (!strpos($modSettings['subforum_server_root'], "\\") ? '/forum' : '\\forum') . $sub;
 
 		// Populate a new entry for the template:
@@ -365,6 +363,9 @@ function SubForumSettings($return_config = false)
 		array('text', 'subforum_server_root', 'size' => 40),
 		'',
 		array('check', 'subforum_settings_redirect'),
+		'',
+		array('check', 'subforum_settings_topmenu'),
+		array('check', 'subforum_settings_topmenu_admin_only'),
 	);
 	if ($return_config)
 		return $config_vars;
