@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.17</version>
+
+<!---------------------------------------------------------------------------->
+<!-- Fix for template-breaking typo (ManageBoards.php)						-->
+<!---------------------------------------------------------------------------->
+<file name="$sourcedir/ManageBoards.php">
+	<operation error="ignore">
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid}')]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})]]></add>
+	</operation>
+
+<!---------------------------------------------------------------------------->
+<!-- Fix for Manage Boards UI moving boards to bottom (ManageBoards.php)	-->
+<!---------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA['id' => $catID,
+			'name' => $tree['node']['name'],]]></search>
+		<add><![CDATA['id' => $catID == $curBoard['category'] ? 0 : $catID,
+			'name' => $tree['node']['name'],]]></add>
+	</operation>
+
+<!---------------------------------------------------------------------------->
+<!-- Fix for undefined error in Edit Categories UI (ManageBoards.php)		-->
+<!---------------------------------------------------------------------------->
+	<operation>
+		<search position="replace"><![CDATA[$_REQUEST['cat'] = isset($_REQUEST['cat']) ? (int) $_REQUEST['cat'] : 0;]]></search>
+		<add><![CDATA[$_REQUEST['cat'] = isset($_REQUEST['cat']) ? (int) $_REQUEST['cat'] : 0;
+	$_REQUEST['sub'] = isset($_REQUEST['cat']) ? (int) $_REQUEST['sub'] : 0;]]></add>
+	</operation>
+</file>
+
+<!---------------------------------------------------------------------------->
+<!-- Modified Modify Boards UI so it works without Alias Boards installed	-->
+<!---------------------------------------------------------------------------->
+<file name="$themedir/ManageBoards.template.php">
+	<operation>
+		<search position="replace"><![CDATA[echo '
+			document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			document.getElementById("alias_child' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");';]]></search>
+		<add><![CDATA[document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			if (document.getElementById("alias_cat' . $subforum['forumid'] . '") != null)
+			{
+				document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+				document.getElementById("alias_child' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			}';]]></add>
+	</operation>
+</file>
+</modification>

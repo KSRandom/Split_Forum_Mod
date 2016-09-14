@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.16[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.17[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -28,7 +28,6 @@ o Adding a favorites icon to the subforum
 o Changing the default theme of the subforum
 o Changing the default language of the subforum
 o Changing the subforum ID on secondary subforums
-o Changing the cookie name of the subforum
 o Changing the primary membergroup of new users registered to the subforum
 
 Clicking on the [b]Delete[/b] button will prompt what to do with categories within the board and will delete once the decision has been made by the user.
@@ -57,13 +56,19 @@ This mod was tested on SMF 2.0.9, but should work on earlier versions.  SMF 1.x 
 
 [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.2+[/url] should be installed prior to this mod.  Alias Boards mod has been altered so that it works only within a single subforum, meaning board 1 from category 1 can be aliased into category 2 in subforum 1, but [b]NOT[/b] into any category in subforum 2....
 
-[url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] should be installed prior to this mod.
+[url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] can be installed at any time.
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
 Upgrade is possible from [b]v1.12[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.17 - November 21th, 2014[/u][/b]
+o Fixed template-breaking typo in [b]Sources/ManageBoards.php[/b]
+o Fixed Modify Boards UI to work correctly without Alias Boards mod installed...
+o Fixed Modify Boards UI moving boards to bottom when making no position changes...
+o Fixed undefined variable error within the Edit Categories UI...
+
 [b][u]v1.16 - November 19th, 2014[/u][/b]
 o Fixed a few security issues within database queries in the mod.
 o Fixed some query variable type-casting issues within the mod.

@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.15</version>
+<version>1.17</version>
 
 <file name="$boarddir/index.php">
 	<operation>
@@ -458,6 +458,11 @@
 </file>
 <file name="$sourcedir/ManageBoards.php">
 	<operation>
+		<search position="replace"><![CDATA[$_REQUEST['cat'] = isset($_REQUEST['cat']) ? (int) $_REQUEST['cat'] : 0;]]></search>
+		<add><![CDATA[$_REQUEST['cat'] = isset($_REQUEST['cat']) ? (int) $_REQUEST['cat'] : 0;
+	$_REQUEST['sub'] = isset($_REQUEST['cat']) ? (int) $_REQUEST['sub'] : 0;]]></add>
+	</operation>
+	<operation>
 		<search position="replace"><![CDATA[global $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc;]]></search>
 		<add><![CDATA[global $forumid, $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc;]]></add>
 	</operation>
@@ -465,7 +470,7 @@
 		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
 		WHERE redirect = {string:empty_string}',
 		array(]]></search>
-		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid}')
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = {int:forumid})
 		WHERE redirect = {string:empty_string}',
 		array(
 			'forumid' => (int) $forumid,]]></add>
@@ -689,13 +694,11 @@ function EditBoard()
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[foreach ($cat_tree as $catID => $tree)
-		$context['categories'][] = array(
-			'id' => $catID == $curBoard['category'] ? 0 : $catID,]]></search>
+		$context['categories'][] = array(]]></search>
 		<add><![CDATA[foreach ($subforum_tree as $subforum)
 		$context['categories'][$subforum['forumid']] = array();
 	foreach ($cat_tree as $catID => $tree)
-		$context['categories'][$tree['node']['forumid']][] = array(
-			'id' => $catID,]]></add>
+		$context['categories'][$tree['node']['forumid']][] = array(]]></add>
 	</operation>
 	<operation>
 		<search position="before"><![CDATA[global $txt, $sourcedir, $modSettings, $smcFunc, $context]]></search>

@@ -181,8 +181,11 @@ function template_modify_category()
 	foreach ($subforum_tree as $subforum)
 		echo '
 			document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
-			document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
-			document.getElementById("alias_child' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");';
+			if (document.getElementById("alias_cat' . $subforum['forumid'] . '") != null)
+			{
+				document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+				document.getElementById("alias_child' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			}';
 	echo '
 			hideBoards(document.getElementById("new_cat" + forum).options[document.getElementById("new_cat" + forum).selectedIndex].value);
 		}
