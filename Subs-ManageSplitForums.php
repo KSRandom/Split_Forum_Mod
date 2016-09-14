@@ -86,6 +86,7 @@ function add_subforum(&$row)
 		'primary_membergroup' => (isset($row['primary_membergroup']) ? (int) $row['primary_membergroup'] : 0),
 		'sp_portal' => (isset($row['sp_portal']) ? (int) $row['sp_portal'] : 0),
 		'sp_standalone' => (isset($row['sp_standalone']) ? $row['sp_standalone'] : ''),
+		'enable_pretty' => (isset($row['enable_pretty']) ? $row['enable_pretty'] : ''),
 	);
 	$tree = array();
 	foreach ($subforum_tree as $subforum)

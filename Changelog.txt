@@ -1,3 +1,13 @@
+v1.22 - June 6th, 2015
+o Fixed Modify Board UI so that boards can be moved between subforums & categories.
+o Added online version check to the Split Forum Mod settings page.
+o Fixed package-info.xml to remove Subs-SplitForumAdminHooks.php upon uninstall.
+o Added an option to enable or disable Pretty URLs per subforum.
+o Added an option in Subforum Settings to redirect registration attempts to Primary forum.
+o Resolved some undefined variables and index error within ManageSplitForums.php
+o Fixed an undefined variable error in ManageBoards.php.
+o Moved SubForums admin area from Forum section to the Configuration section.
+
 v1.21 - February 18th, 2015
 o POLICY CHANGE: Mod upgrade capability limited to previous version of the mod.
 o Resolved several undefined index errors within ManageBoards.template.php

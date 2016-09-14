@@ -5,14 +5,13 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.21</version>
+	<version>1.22</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
 		<code>add_remove_hook.php</code>
 		<database>db_install.php</database>
-		<modification>install_source.xml</modification>
-		<modification>install_template.xml</modification>
+		<modification>install_20x.xml</modification>
 		<modification>language_english.xml</modification>
 		<modification>language_english-utf8.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
@@ -29,12 +28,12 @@
 	<uninstall for="2.0 - 2.0.99">
 		<code>add_remove_hook.php</code>
 		<code>uninstall.php</code>
-		<modification reverse="true">install_source.xml</modification>
-		<modification reverse="true">install_template.xml</modification>
+		<modification reverse="true">install_20x.xml</modification>
 		<modification reverse="true">language_english.xml</modification>
 		<modification reverse="true">language_english-utf8.xml</modification>
 		<remove-file name="$sourcedir/ManageSplitForums.php" />
 		<remove-file name="$sourcedir/Subs-ManageSplitForums.php" />
+		<remove-file name="$sourcedir/Subs-SplitForumAdminHooks.php" />
 		<remove-file name="$sourcedir/Subs-SplitForumHooks.php" />
 		<remove-file name="$themedir/css/splitforum.css" />
 		<remove-file name="$boarddir/Themes/default/ManageSplitForums.template.php" />
@@ -43,8 +42,12 @@
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
 
-	<upgrade from="1.20">
-		<modification>upgrade_1.21.xml</modification>
+	<upgrade from="1.21">
+		<modification>upgrade_1.22.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
+		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="ManageSplitForums.english-utf8.php" destination="$boarddir/Themes/default/languages" />
 	</upgrade>
 </package-info>

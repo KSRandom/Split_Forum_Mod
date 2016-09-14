@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.22</version>
+
+<file name="$sourcedir/Load.php">
+	<operation>
+		<search position="replace"><![CDATA[if (isset($subforum_tree[$forumid]['sp_standalone']))
+		$modSettings['sp_standalone_url'] = $subforum_tree[$forumid]['sp_standalone'];]]></search>
+		<add><![CDATA[if (isset($subforum_tree[$forumid]['sp_standalone']))
+		$modSettings['sp_standalone_url'] = $subforum_tree[$forumid]['sp_standalone'];
+	if (isset($subforum_tree[$forumid]['enable_pretty']))
+		$modSettings['pretty_enable_filters'] = $subforum_tree[$forumid]['enable_pretty'];]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[$_REQUEST['sub'] = isset($_REQUEST['cat']) ? (int) $_REQUEST['sub'] : 0;]]></search>
+		<add><![CDATA[$_REQUEST['sub'] = isset($_REQUEST['sub']) ? (int) $_REQUEST['sub'] : 0;]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Register.php">
+	<operation>
+		<search position="before"><![CDATA[global $txt, $boarddir, $context, $settings, $modSettings, $user_info, $forumid]]></search>
+		<add><![CDATA[, $subforum_tree]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Do we need them to agree to the registration agreement, first?]]></search>
+		<add><![CDATA[// If admin requires registration to be redirected to the primary forum, do so now:
+	if (!empty($modSettings['subforum_settings_register_at_primary']) && $forumid != 0)
+		redirectExit($subforum_tree[0]['boardurl'] . '/index.php?action=register');
+	
+	]]></add>
+	</operation>
+</file>
+<file name="$themedir/ManageBoards.template.php">
+	<operation>
+		<search position="replace"><![CDATA[foreach ($context['categories'][$subforum['forumid']] as $category)
+			echo '
+								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
+		echo '
+							</select>';]]></search>
+		<add><![CDATA[foreach ($context['categories'][$subforum['forumid']] as $category)
+		{
+			$first = $category['id'];
+			echo '
+								<option', $category['selected'] ? ' selected="selected"' : '', ' value="', $category['id'], '">', $category['name'], '</option>';
+		}
+		echo '
+							</select>';
+		if (!((isset($context['board']['is_new']) && count($context['categories'][$subforum['forumid']]) > 0) || count($context['categories'][$subforum['forumid']]) > 1))
+			echo '
+							<input type="hidden" name="new_cat', $subforum['forumid'], '" value="', $first, '" />';]]></add>
+	</operation>
+</file>
+</modification>

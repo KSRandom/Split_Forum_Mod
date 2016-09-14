@@ -22,10 +22,9 @@ function SplitForum_Admin_Menu(&$areas)
 
 	// Insert the Subforums area into the admin menu:
 	$temp = array();
-	foreach ($areas['layout']['areas'] as $label => $area)
+	foreach ($areas['config']['areas'] as $label => $area)
 	{
-		$temp[$label] = $area;
-		if ($label == 'manageboards')
+		if ($label == 'featuresettings')
 			$temp['subforums'] = array(
 				'label' => ($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list']),
 				'file' => 'ManageSplitForums.php',
@@ -37,8 +36,9 @@ function SplitForum_Admin_Menu(&$areas)
 					'settings' => array($txt['settings'], 'admin_forum'),
 				),
 			);
+		$temp[$label] = $area;
 	}
-	$areas['layout']['areas'] = $temp;
+	$areas['config']['areas'] = $temp;
 	unset($temp);
 
 	// Alter the SimplePortal area to reflect the subforum specified:

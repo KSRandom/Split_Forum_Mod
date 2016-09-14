@@ -13,6 +13,14 @@ elseif (!defined('SMF')) // If we are outside SMF and can't find SSI.php, then t
 db_extend('packages');
 require_once($sourcedir.'/Subs-Admin.php');
 
+// Capture mod version number during the run of this script:
+$new = array();
+$contents = file( dirname(__FILE__) . '/package-info.xml' );
+if (preg_match('#\<version\>(.+?)\</version\>#i', implode('', $contents), $version))
+	$mod_version = $version[0];
+else
+	$mod_version = '';
+
 // Insert forumid column into categories and calendar table to associate with a particular forum:
 $smcFunc['db_add_column'](
 	'{db_prefix}categories', 
@@ -70,6 +78,7 @@ updateSettings(
 		'subforum_server_url' => $boardurl, 
 		'subforum_server_root' => $boarddir,
 		'subforum_sister_site_title' => '',
+		'subforum_mod_version' => $mod_version,
 	)
 );
 

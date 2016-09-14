@@ -135,6 +135,7 @@ Function EditSubForum($sub)
 	foreach ($subforum_tree[$sub] as $var => $val)
 		$modSettings['subforum_modify_' . $var] = $val;
 	$modSettings['subforum_modify_news'] = ($_REQUEST['sa'] == 'newsub');
+	$subforum_tree[$sub]['sp_portal'] = (isset($subforum_tree[$sub]['sp_portal']) ? $subforum_tree[$sub]['sp_portal'] : 0);
 
 	// Populate everything needed for Simple Portal support:
 	if (isset($context['sp_blocks_enabled']) && $context['sp_blocks_enabled'])
@@ -152,13 +153,13 @@ Function EditSubForum($sub)
 			array('select', 'subforum_modify_sp_portal', explode('|', $txt['sp_portal_mode_options']),
 				'javascript' => 'onchange="SetPortalType(this.options[this.selectedIndex].value); return false;"'),
 			array('text', 'subforum_modify_sp_standalone',
-				'javascript' => (isset($subforum_tree[$sub]['sp_portal']) && $subforum_tree[$sub]['sp_portal'] != 3 ? ' disabled="disabled"' : ''),
+				'javascript' => ($subforum_tree[$sub]['sp_portal'] != 3 ? ' disabled="disabled"' : ''),
 			),
 			array('select', 'subforum_modify_sp_blocks', $options),
 		));
-		if (!isset($modSettings['subforum_modify_sp_portal']))
+		if (!isset($modSettings['subforum_modify_sp_portal']) && isset($modSettings['sp_portal_mode']))
 			$modSettings['subforum_modify_sp_portal'] = $modSettings['sp_portal_mode'];
-		if (!isset($modSettings['subforum_modify_sp_standalone']))
+		if (!isset($modSettings['subforum_modify_sp_standalone']) && isset($modSettings['sp_standalone_url']))
 			$modSettings['subforum_modify_sp_standalone'] = $modSettings['sp_standalone_url'];
 		$modSettings['subforum_modify_sp_blocks'] = ($_REQUEST['sa'] == 'newsub' ? -2 : -1);
 		$txt['subforum_modify_sp_portal'] = $txt['sp_portal_mode'];
@@ -170,6 +171,16 @@ Function EditSubForum($sub)
 			document.getElementById("subforum_modify_sp_standalone").disabled = ($ptype <> 3);
 		}
 	</script>';
+	}
+
+	// Add a switch to enable/disable Pretty URLs per Subforum:
+	if (file_exists($sourcedir . '/Subs-PrettyUrls.php'))
+	{
+		$config_vars = array_merge($config_vars, array(
+			array('title', 'subforum_modify_prettyURL_title'),
+			array('check', 'subforum_modify_prettyURL_enable'),
+		));
+		$modSettings['subforum_modify_prettyURL_enable'] = $modSettings['pretty_enable_filters'];
 	}
 
 	// Needed for the settings template
@@ -187,7 +198,7 @@ Function EditSubForum($sub)
 function SaveSubForum($sub)
 {
 	global $context, $sourcedir, $txt, $scripturl, $modSettings, $settings, $forumid;
-	global $modSettings, $subforum_tree, $smcFunc, $boarddir, $forumdir, $scripturl;
+	global $modSettings, $subforum_tree, $smcFunc, $boarddir, $forumdir, $scripturl, $boardurl;
 
 	// Load the variables from the form:
 	checkSession();
@@ -204,6 +215,7 @@ function SaveSubForum($sub)
 	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''))) : $boarddir);
 	$arr['sp_portal'] = (isset($_POST['subforum_modify_sp_portal']) ? (int) $_POST['subforum_modify_sp_portal'] : 0);
 	$arr['sp_standalone'] = (isset($_POST['subforum_modify_sp_standalone']) ? $_POST['subforum_modify_sp_standalone'] : '');
+	$arr['enable_pretty'] = (isset($_POST['subforum_modify_prettyURL_enable']) ? $_POST['subforum_modify_prettyURL_enable'] : 0);
 
 	// Correct variables as necessary, throwing errors only when necessary:
 	if (substr($arr['boardurl'], strlen($arr['boardurl']) - 1, 1) == '/')
@@ -278,7 +290,7 @@ function SaveSubForum($sub)
 				@chmod($arr['forumdir'] . '/index.php', 0755);
 			}
 		}
-		
+
 		// If requested, copy the news settings to the subforum:
 		if (!empty($_POST['subforum_modify_news']))
 			updateSettings(array('news' . $sub => $modSettings['news']));
@@ -287,7 +299,8 @@ function SaveSubForum($sub)
 	// Make sure we update the .htaccess for Pretty URLs if it is installed:
 	if (file_exists($sourcedir . '/Subs-PrettyUrls.php'))
 	{
-		unlink($arr['forumdir'] . '/.htaccess');
+		if (file_exists($arr['forumdir'] . '/.htaccess'))
+			unlink($arr['forumdir'] . '/.htaccess');
 		require_once($sourcedir . '/Subs-PrettyUrls.php');
 		$old_boarddir = $boarddir;
 		$boarddir = (isset($arr['forumdir']) ? $arr['forumdir'] : $old_boarddir);
@@ -411,6 +424,20 @@ function SubForumSettings($return_config = false)
 {
 	global $forumid, $context, $txt, $modSettings, $scripturl, $smcFunc, $sourcedir, $forumid;
 
+	// Get latest version of the mod and display whether current mod is up-to-date:
+	if (($file = cache_get_data('sfm_mod_version', 86400)) == null)
+	{
+		$file = file_get_contents('http://www.xptsp.com/tools/mod_version.php?url=Split_Forum_Mod');
+		cache_put_data('sfm_mod_version', $file, 86400);
+	}
+	if (preg_match('#Split_Forum_Mod_v(.+?)\.zip#i', $file, $version))
+	{
+		if (isset($modSettings['ila_version']) && $version[1] > $modSettings['ila_version'])
+			$context['settings_message'] = '<strong>' . sprintf($txt['subforum_mod_update'], $version[1]) . '</strong>';
+		else
+			$context['settings_message'] = '<strong>' . $txt['subforum_no_mod_update'] . '</strong>';
+	}
+
 	// Here and the board settings...
 	isAllowedTo('admin_forum');
 	$config_vars = array(
@@ -422,6 +449,8 @@ function SubForumSettings($return_config = false)
 		array('text', 'subforum_sister_sites_title', 'size' => 40),
 		array('check', 'subforum_settings_topmenu'),
 		array('check', 'subforum_settings_topmenu_admin_only'),
+		'',
+		array('check', 'subforum_settings_register_at_primary'),
 	);
 	if ($return_config)
 		return $config_vars;
