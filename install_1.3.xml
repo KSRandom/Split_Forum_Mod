@@ -31,12 +31,8 @@
 	// Any files to include for administration?]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[function AdminMain()
-{
-	global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir]]></search>
-		<add><![CDATA[function AdminMain()
-{
-	global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir, $forumid]]></add>
+		<search position="replace"><![CDATA[global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir]]></search>
+		<add><![CDATA[global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// Load the language and templates....]]></search>

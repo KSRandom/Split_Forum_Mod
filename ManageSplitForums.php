@@ -104,12 +104,15 @@ Function EditSubForum($sub)
 	{
 		// Figure out what the largest forum ID in the database is:
 		$sub = get_subforum_max() + 1;
+		
+		echo strpos($modSettings['subforum_server_root'], "\\"); exit;
+		$addition = (!strpos($modSettings['subforum_server_root'], "\\") ? '/forum' : '\\forum') . $sub;
 
 		// Populate a new entry for the template:
 		$subforum_tree[$sub]['forumid'] = $sub;
 		$subforum_tree[$sub]['boardname'] = $txt['subforums_list_prefix'] . ' # ' . $sub;
 		$subforum_tree[$sub]['boardurl'] = $modSettings['subforum_server_url'] . '/forum' . $sub;
-		$subforum_tree[$sub]['forumdir'] = $modSettings['subforum_server_root'] . '/forum' . $sub;
+		$subforum_tree[$sub]['forumdir'] = $modSettings['subforum_server_root'] . $addition;
 		$subforum_tree[$sub]['cookiename'] = 'SmfCookie' . rand(100, 999);
 		$subforum_tree[$sub]['subtheme'] = 0;
 		$subforum_tree[$sub]['language'] = $language;
@@ -187,8 +190,8 @@ function SaveSubForum($sub)
 	$arr['language'] = (isset($_POST['subforum_modify_language']) ?  $_POST['subforum_modify_language']  : '');
 	$arr['favicon'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_favicon']) ?  $_POST['subforum_modify_favicon']  : '') );
 	$arr['primary_membergroup'] = (int) (isset($_POST['subforum_modify_primary']) ? $_POST['subforum_modify_primary'] : '');
-	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : 0);
-	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('/', '\\', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : '')))) : $boarddir);
+	$arr['forumid'] = (int) (isset($_POST['subforum_modify_forumid']) ? $_POST['subforum_modify_forumid'] : $forumid);
+	$arr['forumdir'] = ($sub <> 0 ? str_replace('http://', '', str_replace('//', '/', (isset($_POST['subforum_modify_forumdir']) ?  $_POST['subforum_modify_forumdir'] : ''))) : $boarddir);
 	$arr['sp_portal'] = (isset($_POST['subforum_modify_sp_portal']) ? (int) $_POST['subforum_modify_sp_portal'] : 0);
 	$arr['sp_standalone'] = (isset($_POST['subforum_modify_sp_standalone']) ? $_POST['subforum_modify_sp_standalone'] : '');
 
@@ -237,9 +240,10 @@ function SaveSubForum($sub)
 	}
 
 	// Do this for all subforums, but NOT the primary forum!
-	if ($arr['forumid'] <> 0)
+	if ($arr['forumid'] != 0)
 	{
 		@mkdir($arr['forumdir']);
+		@chmod($arr['forumdir'], 0755);
 		if (is_dir($arr['forumdir']))
 		{
 			// Create the new forum folder and write "index.php" for the subforum:
@@ -247,6 +251,7 @@ function SaveSubForum($sub)
 			{
 				fwrite($handle, "<" . "?php" . "\n" . "require_once('" . $boarddir . "/index.php');" . "\n" . "?" . ">");
 				fclose($handle);
+				@chmod($arr['forumdir'] . '/index.php', 0755);
 			}
 
 			// Write out the new ".htaccess" file for the subforum:
@@ -255,6 +260,7 @@ function SaveSubForum($sub)
 			{
 				fwrite($handle, "Options +FollowSymlinks\nRewriteEngine on\nRewriteRule (.*)/(.*) " . $path . "/$1/$2");
 				fclose($handle);
+				@chmod($arr['forumdir'] . '/.htaccess', 0755);
 			}
 		}
 	}

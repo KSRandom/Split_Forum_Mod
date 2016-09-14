@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.9[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.10[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -58,6 +58,10 @@ Upgrade is possible from [b]v1.2 thru v1.8[/b] to [b]v1.9[/b].
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.10 - September 6th, 2014[/u][/b]
+o Added code to attempt to change permissions of created folders and files.
+o Rewrote some code added by v1.9 so that it creates the folders properly (again)....
+
 [b][u]v1.9 - September 5th, 2014[/u][/b]
 o Added creation of [b].htaccess[/b] to redirect subdirectory requests to primary forum.
 o Fixed some undefined errors found in [b]ManageBoards.php[/b].

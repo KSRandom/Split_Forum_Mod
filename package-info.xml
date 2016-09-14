@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.9</version>
+	<version>1.10</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -131,5 +131,8 @@
 		<modification>upgrade_1.9.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+	</upgrade>
+	<upgrade from="1.9">
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 </package-info>
