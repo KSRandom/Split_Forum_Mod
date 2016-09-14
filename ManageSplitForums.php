@@ -111,7 +111,6 @@ Function EditSubForum($sub)
 		$subforum_tree[$sub]['boardname'] = $txt['subforums_list_prefix'] . ' # ' . $sub;
 		$subforum_tree[$sub]['boardurl'] = $modSettings['subforum_server_url'] . '/forum' . $sub;
 		$subforum_tree[$sub]['forumdir'] = $modSettings['subforum_server_root'] . $addition;
-		$subforum_tree[$sub]['cookiename'] = 'SmfCookie' . rand(100, 999);
 		$subforum_tree[$sub]['subtheme'] = 0;
 		$subforum_tree[$sub]['language'] = $language;
 	}
@@ -129,7 +128,6 @@ Function EditSubForum($sub)
 			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
 		array('text', 'subforum_modify_forumdir', 'size' => 40,
 			'javascript' => (($forumid != 0 || ($_REQUEST['sa'] != 'newsub' && $sub == 0)) ? ' disabled="disabled"' : '')),
-		array('text', 'subforum_modify_cookiename', 'size' => 40),
 		array('select', 'subforum_modify_primary', $primary),
 	);
 	if ($sub != 0 || $_REQUEST['sa'] == 'newsub')
@@ -196,7 +194,6 @@ function SaveSubForum($sub)
 	isAllowedTo('admin_forum');
 
 	// Filter all the information passed to this function, putting all the information into the array:
-	$arr['cookiename'] = (isset($_POST['subforum_modify_cookiename']) ? $_POST['subforum_modify_cookiename'] : '');
 	$arr['boardurl'] = str_replace('http://http://', 'http://', 'http://' . (isset($_POST['subforum_modify_boardurl']) ?  $_POST['subforum_modify_boardurl']  : '') );
 	$arr['boardname'] = (isset($_POST['subforum_modify_boardname']) ?  $_POST['subforum_modify_boardname']  : '');
 	$arr['subtheme'] = (int) (isset($_POST['subforum_modify_subtheme']) ? $_POST['subforum_modify_subtheme'] : 0);

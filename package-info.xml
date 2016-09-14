@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.14</version>
+	<version>1.15</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -55,6 +55,7 @@
 		<modification>upgrade_1.9.xml</modification>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -73,6 +74,7 @@
 		<modification>upgrade_1.9.xml</modification>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -90,6 +92,7 @@
 		<modification>upgrade_1.9.xml</modification>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -106,6 +109,7 @@
 		<modification>upgrade_1.9.xml</modification>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -121,6 +125,7 @@
 		<modification>upgrade_1.9.xml</modification>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -133,6 +138,7 @@
 		<modification>upgrade_1.9.xml</modification>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -144,6 +150,7 @@
 		<database>db_install.php</database>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
@@ -154,6 +161,7 @@
 		<database>db_install.php</database>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
@@ -164,6 +172,7 @@
 		<database>db_install.php</database>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
 		<redirect timeout="5000" url="?action=admin;area=maintain;sa=routine;activity=cleancache" />
@@ -173,6 +182,7 @@
 		<database>db_install.php</database>
 		<modification>upgrade_1.13.xml</modification>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
@@ -185,8 +195,16 @@
 		<code>add_remove_hook.php</code>
 		<database>db_install.php</database>
 		<modification>upgrade_1.14.xml</modification>
+		<modification>upgrade_1.15.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
 		<redirect timeout="5000" url="?action=admin;area=maintain;sa=routine;activity=cleancache" />
+	</upgrade>
+	<upgrade from="1.14">
+		<code>add_remove_hook.php</code>
+		<database>db_install.php</database>
+		<modification>upgrade_1.15.xml</modification>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
 	</upgrade>
 </package-info>

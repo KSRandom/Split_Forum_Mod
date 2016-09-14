@@ -10,7 +10,15 @@ if (!defined('SMF'))
 	die('Hacking attempt...');
 
 /**********************************************************************************
-* Split Forum top menu hook
+* Actions hook
+**********************************************************************************/
+function SplitForum_Actions(&$actions)
+{
+	$actions['unreadglobal'] = array('Recent.php', 'UnreadTopics');
+}
+
+/**********************************************************************************
+* Top menu hook
 **********************************************************************************/
 function SplitForum_Menu_Buttons(&$areas)
 {
@@ -52,6 +60,22 @@ function SplitForum_Menu_Buttons(&$areas)
 		}
 	}
 	$areas = $new;
+}
+
+/**********************************************************************************
+* Pre-Load integration hook
+**********************************************************************************/
+function SplitForum_PreLoad()
+{
+	global $subforum_tree, $modSettings;
+	
+	// Each subforum is effectively an alias, so let's add all of the them to $modSettings:
+	$urls = array();
+	if (!empty($modSettings['forum_alias_urls']))
+		$urls = explode(',', $modSettings['forum_alias_urls']);
+	foreach ($subforum_tree as $subforum)
+		$urls[] = $subforum['boardurl'];
+	$modSettings['forum_alias_urls'] = implode(',', array_unique($urls));
 }
 
 ?>

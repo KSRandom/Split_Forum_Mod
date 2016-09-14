@@ -9,8 +9,12 @@ if (SMF == 'SSI')
 	
 // Define the hooks
 $hook_functions = array(
+	// >> General hooks <<
 	'integrate_pre_include' => '$sourcedir/Subs-SplitForumHooks.php',
 	'integrate_menu_buttons' => 'SplitForum_Menu_Buttons',
+	'integrate_actions' => 'SplitForum_Actions',
+	'integrate_pre_load' => 'SplitForum_PreLoad',
+	// >>  Admin hooks  <<
 	'integrate_admin_include' => '$sourcedir/Subs-SplitForumAdminHooks.php',
 	'integrate_admin_areas' => 'SplitForum_Admin_Menu',
 );

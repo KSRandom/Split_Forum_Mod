@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.12</version>
+<version>1.15</version>
 
 <file name="$boarddir/index.php">
 	<operation>
@@ -346,7 +346,8 @@
 <file name="$sourcedir/Load.php">
 	<operation>
 		<search position="after"><![CDATA[// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></search>
-		<add><![CDATA[// Replace the Simple Portal settings with the Subforum setting if available:
+		<add><![CDATA[// Replace certain settings with the Subforum setting if available:
+	$modSettings['primary_membergroup'] = $subforum_tree[$forumid]['primary_membergroup'];
 	if (isset($subforum_tree[$forumid]['sp_portal']))
 		$modSettings['sp_portal_mode'] = $subforum_tree[$forumid]['sp_portal'];
 	if (isset($subforum_tree[$forumid]['sp_standalone']))
@@ -406,10 +407,9 @@
 			$forumdir = $row['forumdir'];
 			$subtheme = $row['subtheme'];
 			$mbname = $row['boardname'];
-			$cookiename = $row['cookiename'];
 			$language = $row['language'];
 			$favicon = $row['favicon'];
-			$modSettings['primary_membergroup'] = $row['primary_membergroup'];
+			break;
 		}
 	}
 	$forumid = (int) $forumid;
@@ -600,7 +600,7 @@ function EditBoard()
 			}
 		}
 	}
-	foreach ($context['board_order'] as $cat => $boards)
+	foreach ($context['board_order'] as $cat => $boards2)
 	{
 		if ($selected_cat != $cat && !empty($context['board_order'][$cat][0]['selected']))
 			$context['board_order'][$cat][0]['selected'] = true;
@@ -741,6 +741,12 @@ function EditBoard()
 			foreach ($list as $board)
 				if ($board['is_child'] == false && $board['selected'] == false)
 					$context['can_move_children'] = true;]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[$boardOptions['alias_cat'] = isset($_POST['alias_cat']) ? implode(',', $_POST['alias_cat']) : '';
+		$boardOptions['alias_child'] = isset($_POST['alias_child']) ? implode(',', $_POST['alias_child']) : '';]]></search>
+		<add><![CDATA[$boardOptions['alias_cat'] = isset($_POST['alias_cat' . $sub]) ? implode(',', $_POST['alias_cat' . $sub]) : '';
+		$boardOptions['alias_child'] = isset($_POST['alias_child' . $sub]) ? implode(',', $_POST['alias_child' . $sub]) : '';]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManageCalendar.php">
@@ -1366,9 +1372,8 @@ function EditBoard()
 	<operation>
 		<search position="before"><![CDATA[function setupMenuContext()
 {
-	global $context, $modSettings, $user_info, $txt, $scripturl;]]></search>
-		<add><![CDATA[
-	global $forumid;]]></add>
+	global $context, $modSettings, $user_info, $txt, $scripturl]]></search>
+		<add><![CDATA[, $forumid]]></add>
 	</operation>
 	<operation>
 		<search position="replace"><![CDATA['href' => $scripturl . '?action=admin;area=packages',
@@ -1478,12 +1483,12 @@ function EditBoard()
 		]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[c.id_cat, c.name AS cat_name, c.cat_order, c.can_collapse
+		<search position="replace"><![CDATA[
 		FROM {db_prefix}categories AS c
 			LEFT JOIN {db_prefix}boards AS b ON (b.id_cat = c.id_cat)
 		ORDER BY c.cat_order, b.child_level, b.board_order',
 		array(]]></search>
-		<add><![CDATA[c.id_cat, c.name AS cat_name, c.cat_order, c.can_collapse, c.forumid
+		<add><![CDATA[, c.forumid
 		FROM {db_prefix}categories AS c
 			LEFT JOIN {db_prefix}boards AS b ON (b.id_cat = c.id_cat)
 		'.($reqid <> -1 ? 'WHERE c.forumid = {int:forumid}' : '').'
@@ -1679,8 +1684,8 @@ function EditBoard()
 				"forum = {int:forum}",]]></add>
 	</operation>
 	<operation>
-		<search position="replace"><![CDATA[global $context, $txt, $scripturl, $sourcedir;]]></search>
-		<add><![CDATA[global $context, $txt, $scripturl, $sourcedir, $forumid;
+		<search position="replace"><![CDATA[global $context, $txt, $sourcedir;]]></search>
+		<add><![CDATA[global $context, $txt, $sourcedir, $forumid;
 
 	$context['req_forumid'] = (int) (empty($_REQUEST['sub']) ? $forumid : $_REQUEST['sub']);]]></add>
 	</operation>
@@ -1762,7 +1767,7 @@ function EditBoard()
 
 	redirectexit('action=admin;area=portalblocks;sub=' . $context['req_forumid']);]]></add>
 	</operation>
-	<operation>
+	<operation error="ignore">
 		<search position="replace"><![CDATA[function sportal_admin_block_delete()
 {
 	global $smcFunc;]]></search>
@@ -1808,13 +1813,13 @@ function EditBoard()
 	<operation>
 		<search position="replace"><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null)
 {
-	global $smcFunc, $context, $settings, $options, $txt;
+	global $smcFunc, $context, $options, $txt;
 
 	$query = array();
 	$parameters = array();]]></search>
 		<add><![CDATA[function getBlockInfo($column_id = null, $block_id = null, $state = null, $show = null, $permission = null)
 {
-	global $smcFunc, $context, $settings, $options, $txt, $forumid;
+	global $smcFunc, $context, $options, $txt, $forumid;
 
 	$query = array('spb.forum = {int:forumid}');
 	$parameters = array(

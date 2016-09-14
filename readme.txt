@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.14[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.15[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -43,6 +43,8 @@ All recent posts, xml-based feeds, and other forum-related functionality works f
 o [b]integrate_subforum_subdomain[/b] - Hook for creating/deleting subdomains and/or domains
 
 [color=blue][b][size=12pt][u]To-Do List[/u][/size][/b][/color]
+o Add compatibility with [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards[/url] mod...
+o Add compatibility with [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] mod...
 o Copy a category/board from one subforum to another
 o Themes that are restricted to a single subforum
 o Additional permissions for "subforum admins" and the like
@@ -50,15 +52,26 @@ o Theme settings restricted to members registered on a subforum
 o Language settings restricted to members registered on a subforum
 
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
-This mod was tested on SMF 2.0.8, but should work on earlier versions.  SMF 1.x is not and will not be supported.
+This mod was tested on SMF 2.0.9, but should work on earlier versions.  SMF 1.x is not and will not be supported.
 
-[url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.5[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  Other versions of SimplePortal have not been tested for compatibility with this mod.
+[url=http://custom.simplemachines.org/mods/index.php?mod=1104]SimplePortal v2.3.6[/url] should be installed before this mod if you want subforum support for blocks within SimplePortal.  This mod may not install correctly with prior versions of SimplePortal installed in a clean install situation.
+
+[url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.2+[/url] should be installed prior to this mod.  Alias Boards mod has been altered so that it works only within a single subforum, meaning board 1 from category 1 can be aliased into category 2 in subforum 1, but [b]NOT[/b] into any category in subforum 2....
+
+This mod DOES NOT correctly work with [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url]!!!
 
 [color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
 Upgrade is possible from [b]v1.3[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
 [quote]
+[b][u]v1.15 - November 1st, 2014[/u][/b]
+o Moved code responsible for primary membership setting after loading forum settings...
+o Removed seperate cookie per subforum in favor of a more unified login process....
+o A user logging into one subforum will log that user into all subforums automatically.
+o Slight changes involved with changing SimplePortal compatibility from [b]v2.3.5[/b] to [b]2.3.6[/b].
+o [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.2+[/url] (found [url=http://www.simplemachines.org/community/index.php?topic=210421.msg3759408#msg3759408]here[/url]) now works within subforums.
+
 [b][u]v1.14 - October 15th, 2014[/u][/b]
 o Fixed database installer by removing the "gathering information from subforum table" code...
 o Converted admin menu changes into hook and removed changes from [b]Admin.php[/b]...
@@ -157,7 +170,7 @@ o Changed the method that subforum boards and categories are listed to a tabbed 
 o [b]edit_db.php[/b] modification to attempt to eliminate some weird error...
 
 [b][u]v1.0 - May 27th, 2014[/u][/b]
-o Initial Release
+o Initial Public Release
 [/quote]
 
 [hr]

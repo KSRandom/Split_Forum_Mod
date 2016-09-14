@@ -212,7 +212,9 @@ function template_modify_category()
 		{';
 	foreach ($subforum_tree as $subforum)
 		echo '
-			document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");';
+			document.getElementById("new_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			document.getElementById("alias_cat' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");
+			document.getElementById("alias_child' . $subforum['forumid'] . '").style.display = (forum == ' . $subforum['forumid'] . ' ? "" : "none");';
 	echo '
 			hideBoards(document.getElementById("new_cat" + forum).options[document.getElementById("new_cat" + forum).selectedIndex].value);
 		}
@@ -408,8 +410,6 @@ function template_modify_category()
 		<search position="replace"><![CDATA[<label for="delete_action1"><input type="radio" id="delete_action1" name="delete_action" value="1" class="input_radio"', count($context['category_order']) == 1 ? ' disabled="disabled"' : '', ' />', $txt['mboards_delete_option2'], '</label>:]]></search>
 		<add><![CDATA[<label for="delete_action1"><input type="radio" id="delete_action1" name="delete_action" value="1" class="input_radio"', count($context['category_order'][$_POST['forumid']]) == 1 ? ' disabled="disabled"' : '', ' />', $txt['mboards_delete_option2'], '</label>:]]></add>
 	</operation>
-
-//***************************************************************************
 	<operation>
 		<search position="replace"><![CDATA[// If this isn't the only category, let the user choose where this category should be positioned down the board index.
 	if (count($context['category_order']) > 1)
@@ -448,6 +448,62 @@ function template_modify_category()
 		echo '
 						</dd>';
 	}]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[</dt>
+							<dd>
+								<select name="alias_cat[]" multiple="multiple">
+									<option value="">', $txt['no_cat_selected'], '</option>';
+	foreach ($cat_tree as $category)
+		echo '
+									<option', !isset($context['board']['is_new']) && in_array($category['node']['id'], $context['board']['alias_cat']) ? ' selected="selected"' : '', ' value="', $category['node']['id'], '">', $category['node']['name'], '</option>';
+	echo '
+								</select>
+							</dd>]]></search>
+		<add><![CDATA[</dt>';
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		echo '
+							<dd id="alias_cat', $id, '"', ($_REQUEST['sub'] != $id ? ' style="display: none;"' : '') . '>
+								<select name="alias_cat' . $id . '[]" multiple="multiple">
+									<option value="">', $txt['no_cat_selected'], '</option>';
+		foreach ($cat_tree as $category)
+			if ($category['node']['forumid'] == $id)
+				echo '
+									<option', !isset($context['board']['is_new']) && in_array($category['node']['id'], $context['board']['alias_cat']) ? ' selected="selected"' : '', ' value="', $category['node']['id'], '">', $category['node']['name'], '</option>';
+		echo '
+								</select>
+							</dd>';]]></add>
+	</operation>
+	<operation error="ignore">
+		<search position="replace"><![CDATA[</dt>
+							<dd>
+								<select name="alias_child[]" multiple="multiple">
+									<option value="">', $txt['no_boards_selected'], '</option>';
+		foreach ($boards as $board)
+			echo '
+									<option', !isset($context['board']['is_new']) && in_array($board['id'], $context['board']['alias_child']) ? ' selected="selected"' : '', ' value="', $board['id'], '">', $board['name'], '</option>';
+	echo '
+								</select>
+							</dd>]]></search>
+		<add><![CDATA[</dt>';
+	foreach ($subforum_tree as $id => $subforum)
+	{
+		echo '
+							<dd id="alias_child', $id, '"', ($_REQUEST['sub'] != $id ? ' style="display: none;"' : '') . '>
+								<select name="alias_child' . $id . '[]" multiple="multiple">
+									<option value="">', $txt['no_boards_selected'], '</option>';
+		foreach ($boards as $board)
+		{
+			if ($cat_tree[$board['category']]['node']['forumid'] == $id)
+				echo '
+									<option', !isset($context['board']['is_new']) && in_array($board['id'], $context['board']['alias_child']) ? ' selected="selected"' : '', ' value="', $board['id'], '">', $board['name'], '</option>';
+		}
+		echo '
+								</select>
+							</dd>';
+	}
+	echo ']]></add>
 	</operation>
 </file>
 
