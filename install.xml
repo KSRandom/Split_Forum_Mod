@@ -2,7 +2,8 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.0</version>
+<version>1.2</version>
+
 <file name="$boarddir/index.php">
 	<operation>
 		<search position="before"><![CDATA['suggest' => array('Subs-Editor.php', 'AutoSuggestHandler'),]]></search>
@@ -12,6 +13,10 @@
 	</operation>
 </file>
 <file name="$sourcedir/Admin.php">
+	<operation>
+		<search position="replace"><![CDATA[loadTemplate('Admin', 'admin');]]></search>
+		<add><![CDATA[loadTemplate('Admin', array('admin', 'realtabs'));]]></add>
+	</operation>
 	<operation>
 		<search position="replace"><![CDATA[// Any files to include for administration?]]></search>
 		<add><![CDATA[// Subforum means no package manager and server settings access
@@ -162,6 +167,20 @@
 		<search position="before"><![CDATA[$catOptions['is_collapsible'] = isset($_POST['collapse']);]]></search>
 		<add><![CDATA[
 		$catOptions['forumid'] = (int)($_POST['forum_id']);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function ManageBoardsMain()
+{
+	global $txt, $context, $cat_tree, $boards, $boardList, $scripturl, $sourcedir, $txt;
+
+	loadTemplate('ManageBoards');]]></search>
+		<add><![CDATA[function ManageBoardsMain()
+{
+	global $txt, $context, $cat_tree, $boards, $boardList, $scripturl, $sourcedir, $txt;
+	global $boardurl, $forumid;
+
+	loadTemplate('ManageBoards');
+	$context['req_forumid'] = (isset($_REQUEST['sub']) ? ((int) $_REQUEST['sub']) : $forumid);]]></add>
 	</operation>
 </file>
 <file name="$sourcedir/ManageCalendar.php">
@@ -810,65 +829,40 @@ echo '
 		<div class="information">
 			<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=manageboards">', $txt['mboards_cancel_moving'], '</a>]', '</p>
 		</div>';
-
-	// No categories so show a label.
-	if (empty($context['categories']))
-		echo '
-		<div class="windowbg">
-			<span class="topslice"><span></span></span>
-			<div class="content centertext">
-				', $txt['mboards_no_cats'], '
-			</div>
-			<span class="botslice"><span></span></span>
-		</div>';
-
-	// Loop through every category, listing the boards in each as we go.
-	foreach ($context['categories'] as $category)
-	{
 ]]></search>
-		<add><![CDATA[global $context, $settings, $options, $scripturl, $txt, $modSettings, $subforum_tree, $cat_tree, $forumid;
+		<add><![CDATA[global $context, $settings, $options, $scripturl, $txt, $modSettings;
+	global $subforum_tree, $cat_tree, $forumid;
 
 	// Table header.
 	echo '
-	<div id="manage_boards">';
+	<div id="manage_boards">
+		<div class="title_bar">
+			<h3 class="titlebg">', $txt['boardsEdit'], '</h3>
+		</div>';
 
 	if (!empty($context['move_board']))
 		echo '
-		<div class="title_bar">
-			<h3 class="titlebg">', $txt['boardsEdit'], '</h3>
-		</div>
 		<div class="information">
 			<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=manageboards">', $txt['mboards_cancel_moving'], '</a>]', '</p>
 		</div>';
 
-	// No categories so show a label.
-	if (empty($context['categories']))
-		echo '
-		<div class="title_bar">
-			<h3 class="titlebg">', $txt['boardsEdit'], '</h3>
-		</div>
-		<div class="windowbg">
-			<span class="topslice"><span></span></span>
-			<div class="content centertext">
-				', $txt['mboards_no_cats'], '
-			</div>
-			<span class="botslice"><span></span></span>
-		</div>';
-
-	// Loop through every category, listing the boards in each as we go.
-	$last_forum = -1;
-	foreach ($context['categories'] as $category)
+	// Display the subforums as a tab at the top of the screen:
+	if (count($subforum_tree) > 1)
 	{
-		$forum_id = $cat_tree[$category['id']]['node']['forumid'];
-		if ($forum_id != $last_forum)
+		echo '
+		<div id="tabContainer">
+			<div class="tabs">
+				<ul>';
+		foreach ($subforum_tree as $id => $section)
 		{
-			if ($last_forum > -1) echo '<br />';
 			echo '
-		<div class="title_bar">
-			<h3 class="titlebg">', $txt['boardsEdit'], ($forumid == 0 ? ' - '.(empty($subforum_tree[$forum_id]['boardname']) ? '#'.$forum_id : $subforum_tree[$forum_id]['boardname']) : ''), '</h3>
-		</div>';
-			$last_forum = $forum_id;
+					<li', ($id == $context['req_forumid'] ? ' class="tabActiveHeader"' : ''), '><a href="', $scripturl, '?action=admin;area=manageboards;sa=main;sub=', $id, '">', $section['boardname'], '</a></li>';
 		}
+		echo '
+				</ul>
+			</div>
+		</div>';
+	}
 ]]></add>
 	</operation>
 	<operation>
@@ -923,6 +917,23 @@ $txt['favicon'] = 'Website Icon URL';
 	</operation>
 </file>
 <file name="$languagedir/Errors.english.php">
+	<operation>
+		<search position="before"><![CDATA[$txt['no_board'] = 'The board you specified doesn\'t exist';]]></search>
+		<add><![CDATA[
+$txt['wrong_forum'] = 'The board you specified is located on a different forum';]]></add>
+	</operation>
+</file>
+<file name="$languagedir/Admin.english-utf8.php">
+	<operation>
+		<search position="after"><![CDATA[?>]]></search>
+		<add><![CDATA[// Begin SubForum Mod
+$txt['favicon'] = 'Website Icon URL';
+// End SubForum Mod
+
+]]></add>
+	</operation>
+</file>
+<file name="$languagedir/Errors.english-utf8.php">
 	<operation>
 		<search position="before"><![CDATA[$txt['no_board'] = 'The board you specified doesn\'t exist';]]></search>
 		<add><![CDATA[

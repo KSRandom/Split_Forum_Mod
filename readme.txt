@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.0[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.2[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -43,8 +43,21 @@ o Language settings restricted to members registered on a subforum
 [color=blue][b][size=12pt][u]Compatibility Notes[/u][/size][/b][/color]
 This mod was tested on SMF 2.0.7, but should work on earlier versions.  SMF 1.x is not and will not be supported.
 
+This mod shares the [b]realtabs.css[/b] from [url=http://custom.simplemachines.org/mods/index.php?mod=3796]Real Tabs for Admin & Moderator Menus[/url], so you need to backup any customized [b]realtabs.css[/b] before installing the mod.
+
+[color=blue][b][size=12pt][u]Upgrade from Previous Version(s)[/u][/size][/b][/color]
+Upgrade is possible from [b]v1.0[/b] to [b]v1.1[/b].
+
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
-v1.0 - May 17, 2013
+[b][u]v1.2 - June 25, 2014[/u][/b]
+o Fixed REALLY bad problem in version 1.1 resulting in errors in admin screen!
+
+[b][u]v1.1 - June 23, 2014[/u][/b]
+o Added English UTF8 language strings
+o Changed the method that subforum boards and categories are listed to a tabbed system
+o [b]edit_db.php[/b] modification to attempt to eliminate some weird error...
+
+[b][u]v1.0 - May 17, 2013[/u][/b]
 o Initial Release
 
 [hr]

@@ -5,13 +5,14 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.0</version>
+	<version>1.2</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
 		<database>edit_db.php</database>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="realtabs.css" destination="$themedir/css" />
 		<require-file name="ManageSplitForums.template.php" destination="$boarddir/Themes/default" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="empty.png" destination="$imagesdir" />
@@ -23,10 +24,22 @@
 		<modification reverse="true">install.xml</modification>
 		<remove-file name="$sourcedir/ManageSplitForums.php" />
 		<remove-file name="$sourcedir/Subs-ManageSplitForums.php" />
+		<remove-file name="$themedir/css/realtabs.css" />
 		<remove-file name="$boarddir/Themes/default/ManageSplitForums.template.php" />
 		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForums.english.php" />
 		<remove-file name="$imagesdir/empty.png" />
 		<code>uninstall.php</code>
 	</uninstall>
+	
+	<upgrade from="1.0">
+		<readme parsebbc="true">upgrade.txt</readme>
+		<require-file name="realtabs.css" destination="$themedir/css" />
+		<modification>upgrade_1.0.xml</modification>
+	</upgrade>
+	<upgrade from="1.1">
+		<readme parsebbc="true">upgrade.txt</readme>
+		<require-file name="realtabs.css" destination="$themedir/css" />
+		<modification>upgrade_1.0.xml</modification>
+	</upgrade>
 
 </package-info>

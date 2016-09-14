@@ -45,6 +45,7 @@ $columns = array(
 		'type' => 'TINYINT',
 		'size' => 4,
 		'unsigned' => true,
+		'default' => 0,
 	),
 	array(
 		'name' => 'language',
@@ -66,6 +67,7 @@ $columns = array(
 		'type' => 'TINYINT',
 		'size' => 4,
 		'unsigned' => true,
+		'default' => 0,
 	),
 );
 $indexes = array(
@@ -83,14 +85,11 @@ $smcFunc['db_create_table']('{db_prefix}subforums', $columns, $indexes, array(),
 $smcFunc['db_insert']('replace',
 	'{db_prefix}subforums',
 	array(
-		'forumid' => 'int', 'cookiename' => 'text', 'boardurl' => 'text', 'boardname' => 'text', 
-		'subtheme' => 'int', 'language' => 'text', 'forumdir' => 'text', 'favicon' => 'text',
-		'primary_membergroup' => 'int',
+		'cookiename' => 'text', 'boardurl' => 'text', 'boardname' => 'text', 
+		'language' => 'text', 'forumdir' => 'text', 'favicon' => 'text',
 	),
-	array(
-		0, $cookiename, $boardurl, $mbname, 0, $language, $boarddir, '', 0,
-	),
-	array('forumid', 'cookiename', 'boardurl', 'boardname', 'subtheme', 'language', 'forumdir', 'favicon', 'primary_membergroup')
+	array( $cookiename, $boardurl, $mbname, $language, $boarddir, '' ),
+	array( 'cookiename', 'boardurl', 'boardname', 'language', 'forumdir', 'favicon' )
 );
         
 // Make sure that the settings file has the forumid number set by default:
