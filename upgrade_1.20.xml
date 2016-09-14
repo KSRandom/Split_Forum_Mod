@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.20</version>
+
+<file name="$sourcedir/Register.php">
+	<operation>
+		<search position="replace"><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid . '.');]]></search>
+		<add><![CDATA[$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-PrettyURLs.php" error="skip">
+	<operation>
+		<search position="replace"><![CDATA[function pretty_run_maintenance($installing = false)
+{
+	global ]]></search>
+		<add><![CDATA[function pretty_run_maintenance($installing = false)
+{
+	global $boardurl, ]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[$base = dirname($_SERVER['SCRIPT_NAME']);]]></search>
+		<add><![CDATA[$base = parse_url($boardurl);
+	$base = dirname($base['path']);]]></add>
+	</operation>
+</file>
+</modification>

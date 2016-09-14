@@ -187,7 +187,7 @@ Function EditSubForum($sub)
 function SaveSubForum($sub)
 {
 	global $context, $sourcedir, $txt, $scripturl, $modSettings, $settings, $forumid;
-	global $modSettings, $subforum_tree, $smcFunc, $boarddir, $forumdir;
+	global $modSettings, $subforum_tree, $smcFunc, $boarddir, $forumdir, $scripturl;
 
 	// Load the variables from the form:
 	checkSession();
@@ -290,9 +290,12 @@ function SaveSubForum($sub)
 		unlink($arr['forumdir'] . '/.htaccess');
 		require_once($sourcedir . '/Subs-PrettyUrls.php');
 		$old_boarddir = $boarddir;
-		$boarddir = $subforum_tree[$arr['forumid']]['forumdir'];
+		$boarddir = $arr['forumdir'];
+		$old_boardurl = $boardurl;
+		$boardurl = $arr['boardurl'];
 		pretty_update_filters();
 		$boarddir = $old_boarddir;
+		$boardurl = $old_boardurl;
 	}
 
 	// Write out the new ".htaccess" file for the subforum:

@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.19</version>
+	<version>1.20</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -48,6 +48,7 @@
 		<modification>upgrade_1.17.xml</modification>
 		<modification>upgrade_1.18.xml</modification>
 		<modification>upgrade_1.19.xml</modification>
+		<modification>upgrade_1.20.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
@@ -55,18 +56,25 @@
 		<modification>upgrade_1.17.xml</modification>
 		<modification>upgrade_1.18.xml</modification>
 		<modification>upgrade_1.19.xml</modification>
+		<modification>upgrade_1.20.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 	<upgrade from="1.17">
 		<modification>upgrade_1.18.xml</modification>
 		<modification>upgrade_1.19.xml</modification>
+		<modification>upgrade_1.20.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 	<upgrade from="1.18">
 		<modification>upgrade_1.19.xml</modification>
+		<modification>upgrade_1.20.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+	</upgrade>
+	<upgrade from="1.18">
+		<modification>upgrade_1.20.xml</modification>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
 	</upgrade>
 </package-info>

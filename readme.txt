@@ -1,5 +1,5 @@
 [hr]
-[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.19[/b][/size][/color]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.20[/b][/size][/color]
 [url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
 [/center]
 [hr]
@@ -65,140 +65,16 @@ This mod was tested on SMF 2.0.9, but should work on earlier versions.  SMF 1.x 
 Upgrade is possible from [b]v1.15[/b] to this version.
 
 [color=blue][b][size=12pt][u]Changelog[/u][/size][/b][/color]
-[quote]
-[b][u]v1.19 - November 29th, 2014[/u][/b]
-o Modifications made by [url=http://www.simplemachines.org/community/index.php?action=profile;u=394494]Greygal[/url] made it compatible with [url=http://custom.simplemachines.org/mods/index.php?mod=3238]Event Registration for SMF2[/url] mod.
-o Fixed subforum management code to include Pretty URLs htaccess modifications.  Thanks, [url=http://www.simplemachines.org/community/index.php?action=profile;u=394494]Greygal[/url]!
-o [b]upgrade_1.19.xml[/b] attempts to execute failed operation regarding Alias Boards mod.
-o Fixed [b]upgrade_1.18.xml[/b] to skip SimplePortal template operations if file doesn't exist.
+The changelog has been removed and can be seen at [url=http://www.xptsp.com/board/index.php?topic=17.msg328#msg328]XPtsp.com[/url].
 
-[b][u]v1.18 - November 24th, 2014[/u][/b]
-o Fixed install issue involving SimplePortal's block admin template...
-o Moved [b]Forum[/b] => [b]Subforums[/b] menu beneath [b]Boards[/b] in Admin menu.
+[color=blue][b][size=12pt][u]License[/u][/size][/b][/color]
+Copyright (c) 2015, Douglas Orend
+All rights reserved.
 
-[b][u]v1.17 - November 21th, 2014[/u][/b]
-o Fixed template-breaking typo in [b]Sources/ManageBoards.php[/b]
-o Fixed Modify Boards UI to work correctly without Alias Boards mod installed...
-o Fixed Modify Boards UI moving boards to bottom when making no position changes...
-o Fixed undefined variable error within the Edit Categories UI...
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-[b][u]v1.16 - November 19th, 2014[/u][/b]
-o Fixed a few security issues within database queries in the mod.
-o Fixed some query variable type-casting issues within the mod.
-o Modified Edit Category UI so that SubForum selection box is on top of the form.
-o Modified Recent Posts code so that it is limited to the subforum it is displaying for.
-o Fixed compatibility with [url=http://custom.simplemachines.org/mods/index.php?mod=636]Pretty URLs[/url] mod...
-o Fixed both the SSI bug report and undefined array element report in [b]Load.php[/b] by [b]SauloA[/b]...
-o Fixed a small bug for Manage Board UI.
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-[b][u]v1.15 - November 1st, 2014[/u][/b]
-o Moved code responsible for primary membership setting after loading forum settings...
-o Removed seperate cookie per subforum in favor of a more unified login process....
-o A user logging into one subforum will log that user into all subforums automatically.
-o Slight changes involved with changing SimplePortal compatibility from [b]v2.3.5[/b] to [b]2.3.6[/b].
-o [url=http://custom.simplemachines.org/mods/index.php?mod=1024]Alias Boards v1.2+[/url] (found [url=http://www.simplemachines.org/community/index.php?topic=210421.msg3759408#msg3759408]here[/url]) now works within subforums.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-[b][u]v1.14 - October 15th, 2014[/u][/b]
-o Fixed database installer by removing the "gathering information from subforum table" code...
-o Converted admin menu changes into hook and removed changes from [b]Admin.php[/b]...
-o Modified news admin and loader code in order to create seperate news per subforum.
-o Added "unreadglobal" action to see unread topics from all subforums.
-o Removed "subforums" action because of multiple issues, including security issues.
-o Modified calendar system to allow seperate events per subforum.
-
-[b][u]v1.13 - October 12th, 2014[/u][/b]
-o Fixed database installer by integrating multiple install scripts into one.
-o Fixed SimplePortal block copying function to correctly duplicate blocks.
-o Added ability to remove all defined blocks for a particular subforum.
-o Added ability to change the SubForums top menu title.  (Defaults now to "Sister Sites")
-o Fixed missing option description within SubForums Settings page.
-o Added standalone portal URL checks to try to load the correct subforum ID.
-o Added duplicate standalone portal URL check within Edit SubForum code.
-
-[b][u]v1.12 - October 8th, 2014[/u][/b]
-o Mod rearranged due to some servers having difficulty processing this mod correctly...
-
-[b][u]v1.11 - October 3rd, 2014[/u][/b]
-o Removed some forgotten debugging code left in [b]ManageSplitForum.php[/b].
-o Added new SubForums top menu item, which is visible with more than 1 subforum.
-o Added option to enable new SubForums top menu.
-o Added option to enable new SubForums top menu for ADMIN only.
-
-[b][u]v1.10 - September 6th, 2014[/u][/b]
-o Added code to attempt to change permissions of created folders and files.
-o Rewrote some code added by v1.9 so that it creates the folders properly (again)....
-
-[b][u]v1.9 - September 5th, 2014[/u][/b]
-o Added creation of [b].htaccess[/b] to redirect subdirectory requests to primary forum.
-o Fixed some undefined errors found in [b]ManageBoards.php[/b].
-o Fixed some undefined errors found in [b]ManageSplitForums.php[/b].
-o Fixed bugs in Manage Category UI so that category order can be changed again.
-o Fixed bugs in Delete Category UI so that categories to move to are selectable again.
-o Fixed bugs in Manage Board UI so that board order can be changed again if creating new board.
-o Fixed bug within rewritten SimplePortal block copying code because fields were omitted.
-o Minor compatibility fix within [b]upgrade_v1.4.xml[/b] for Pretty URL.  Functionality not changed.
-
-[b][u]v1.8 - August 24th, 2014[/u][/b]
-o Fixed some undefined errors found in [b]ManageSplitForums.php[/b].
-o Fixed issue with Manage Boards UI installed where copying blocks was selected by default.
-o Modified code so that domain names with and without [b]www.[/b] are properly recognized.
-o Rewrote function that copies SimplePortal blocks from one subforum to another.
-o Fixed bug with SimplePortal saving configuration settings because variable wasn't globalized.
-o Fixed variable type-casting bug with deleting SimplePortal blocks from a subforum.
-o Fixed mod installer issue for people without SimplePortal installed.
-
-[b][u]v1.7 - August 16th, 2014[/u][/b]
-o Added script to rebuild the subforum tree array correctly.
-o Fixed the javascript conditional statements so that subforum ID and path are editable.
-o Moved subdomain removal hook function so it is done immediately before removal of subforum.
-o Added fields to Manage Subforum UI to populate and/or copy SimplePortal blocks.
-o Added ability to change the portal mode per subforum for SimplePortal.
-o Modified SimplePortal's General Settings UI to update subforum settings.
-
-[b][u]v1.6 - August 11th, 2014[/u][/b]
-o Modified Create Subforum functions to properly create new subforums without conflicts
-o Modified Manage Boards UI so that when changing subforum and/or category, category and board list now changes.
-o Fixed browser compatibility issue with revised Manage Category UI.
-o Addition of a tabbed interface for SimplePortal block listing template.
-o Rewrite of SimplePortal template modifications introduced in version 1.5.
-o Added tab system to Blocks listing UI to make it easier to put seperate blocks in subforums.
-o Modified several SSI functions so that they return results for only that subforum.
-
-[b][u]v1.5 - August 3rd, 2014[/u][/b]
-o Fixed the subforum URL detection code that resulted in board doesn't exist errors....
-o Fixed Manage Boards UI so that boards aren't hidden when entering Manage Boards UI...
-o Updated [b]package-info.xml[/b] so that it redirects to clears the SMF file cache
-o Modified SimplePortal code to support subforums selection for blocks.
-
-[b][u]v1.4 - July 26th, 2014[/u][/b]
-o While changing the subforum a category is assigned to, the category order list now changes.
-o Added the ability to move boards between subforums
-o Fixed multiple Manage Boards UI bugs, resulting from subforum ID not being passed
-o Fixed an undeclared array element error found in [b]Load.php[/b]
-o Modified tab system so that it works better with revised move boards ability
-o Modified [b]db_install.php[/b] so that it doesn't overwrite previous subforum settings when installing
-o Removed code from [b]uninstall.php[/b] that automatically removes subforum files...
-
-[b][u]v1.3 - July 4th, 2014[/u][/b]
-o Changed name of new subforums to "SubForum # [n]" (where [n] is the new subforum ID)
-o Total rewrite of [b]edit_db.php[/b], now renamed to [b]db_install.php[/b]....
-o Added support for listing undefined subforum IDs present in the system.
-o Changed Database calls upon loading and subforum management to use arrays.
-o Seperated English and English-UTF8 language strings into their own file.
-o Added code to prevent global subforum administration from subforums.
-
-[b][u]v1.2 - June 25th, 2014[/u][/b]
-o Fixed REALLY bad problem in version 1.1 resulting in errors in admin screen!
-
-[b][u]v1.1 - June 23th, 2014[/u][/b]
-o Added English UTF8 language strings
-o Changed the method that subforum boards and categories are listed to a tabbed system
-o [b]edit_db.php[/b] modification to attempt to eliminate some weird error...
-
-[b][u]v1.0 - May 27th, 2014[/u][/b]
-o Initial Public Release
-[/quote]
-
-[hr]
-[url=http://creativecommons.org/licenses/by/3.0][img]http://i.creativecommons.org/l/by/3.0/80x15.png[/img][/url]
-This work is licensed under a [url=http://creativecommons.org/licenses/by/3.0]Creative Commons Attribution 3.0 Unported License[/url]
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

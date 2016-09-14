@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.19</version>
+<version>1.20</version>
 
 <file name="$boarddir/index.php">
 	<operation>
@@ -1366,7 +1366,7 @@ function EditBoard()
 		elseif (file_exists($boarddir . '/agreement.txt'))
 			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/agreement.txt'), true, 'agreement');]]></search>
 		<add><![CDATA[// Have we got a localized one?
-		$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid . '.');
+		$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);
 		if (file_exists($boarddir . '/' . $agree . $user_info['language'] . '.txt'))
 			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/' . $agree . $user_info['language'] . '.txt'), true, 'agreement_' . $user_info['language']);
 		elseif (file_exists($boarddir . '/' . $agree . '.txt'))
