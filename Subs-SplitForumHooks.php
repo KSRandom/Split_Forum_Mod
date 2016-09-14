@@ -123,44 +123,44 @@ function SplitForum_Actions(&$actions)
 **********************************************************************************/
 function SplitForum_Menu_Buttons(&$areas)
 {
-	global $txt, $scripturl, $subforum_tree, $modSettings, $context, $forumid;
+	global $txt, $scripturl, $subforum_tree, $modSettings, $forumid, $user_info;;
 
 	// Return if only one subforum is defined OR top menu option is turned completely off:
 	if (count($subforum_tree) <= 1 || empty($modSettings['subforum_settings_topmenu']))
 		return;
 
 	// Return if top menu for admin only option is set AND user isn't an admin:
-	if (!empty($modSettings['subforum_settings_topmenu_admin_only']) && !$context['allow_admin'])
-		return;
-
-	// Add the Subforums list to the top menu:
-	loadLanguage('ManageSplitForums');
-	$new = array();
-	foreach ($areas as $needle => $section)
-	{
-		$new[$needle] = $section;
-		if ($needle == 'home')
+	if (!empty($modSettings['subforum_settings_topmenu']) || (!empty($modSettings['subforum_settings_topmenu_admin_only']) && !$user_info['is_admin']))
+	{	
+		// Add the Subforums list to the top menu:
+		loadLanguage('ManageSplitForum');
+		$new = array();
+		foreach ($areas as $needle => $section)
 		{
-			$new['subforums'] = array(
-				'title' => (empty($modSettings['subforum_sister_sites']) ? $txt['subforum_sister_sites'] : $modSettings['subforum_sister_sites']),
-				'href' => $scripturl,
-				'show' => true,
-				'sub_buttons' => array(
-				),
-			);
-			foreach ($subforum_tree as $id => $subforum)
+			$new[$needle] = $section;
+			if ($needle == 'home')
 			{
-				if ($subforum['forumid'] == $forumid)
-					continue;
-				$new['subforums']['sub_buttons'][$id] = array(
-					'title' => $subforum['boardname'],
-					'href' => $subforum['boardurl'],
+				$new['subforums'] = array(
+					'title' => (empty($modSettings['subforum_sister_sites_title']) ? $txt['subforum_sister_sites'] : $modSettings['subforum_sister_sites_title']),
+					'href' => $scripturl,
 					'show' => true,
+					'sub_buttons' => array(
+					),
 				);
+				foreach ($subforum_tree as $id => $subforum)
+				{
+					if ($subforum['forumid'] == $forumid)
+						continue;
+					$new['subforums']['sub_buttons'][$id] = array(
+						'title' => $subforum['boardname'],
+						'href' => $subforum['boardurl'],
+						'show' => true,
+					);
+				}
 			}
 		}
+		$areas = $new;
 	}
-	$areas = $new;
 }
 
 /**********************************************************************************

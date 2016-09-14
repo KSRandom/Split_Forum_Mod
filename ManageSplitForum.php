@@ -363,7 +363,7 @@ function SaveSubForum($sub)
 			{
 				fwrite($handle, "<" . "?php" . "\n" . "require_once('" . $boarddir . "/index.php');" . "\n" . "?" . ">");
 				fclose($handle);
-				@chmod($arr['forumdir'] . '/index.php', 0755);
+				@chmod($arr['forumdir'] . '/index.php', 0644);
 			}
 		}
 
@@ -398,7 +398,7 @@ function SaveSubForum($sub)
 		{
 			fwrite($handle, $oldHtaccess);
 			fclose($handle);
-			@chmod($arr['forumdir'] . '/.htaccess', 0755);
+			@chmod($arr['forumdir'] . '/.htaccess', 0644);
 		}
 	}
 

@@ -32,6 +32,11 @@ foreach ($subforum_tree as $subforum)
 {
 	unset($subforum['cookiename']);
 	$tree[$subforum['forumid']] = $subforum;
+	if (!empty($subforum['forumid']) && !empty($subforum['forumdir']))
+	{
+		chmod($subforum['forumdir'] . '/.htaccess', 0x644);
+		chmod($subforum['forumdir'] . '/index.php', 0x644);
+	}
 }
 $subforum_tree = $tree;
 updateSettingsFile(array('subforum_tree' => "unserialize('" . serialize($subforum_tree) . "')", 'forumid' => 0));

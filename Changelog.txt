@@ -1,3 +1,9 @@
+v1.32 - March 3rd, 2016
+o Fixed mods' "Sister Sites" functionality so that it works now.
+o Fixed wrong permissions issue with creating new subforums.
+o Fixed mod packages' redirect instruction in [b]package-info.xml[/b].
+o Modified [b]settings_install.php[/b] to fix permissions on subforums on install.
+
 v1.31 - January 22nd, 2016
 o Fixed undefined variable error in [b]Sources/Who.php[/b].
 
