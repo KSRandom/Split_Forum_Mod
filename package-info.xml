@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+	<id>Dougiefresh:Split_Forum</id>
+	<name>Split Forum Mod</name>
+	<type>modification</type>
+	<version>1.0</version>
+
+	<install for="2.0 - 2.0.99">
+		<readme parsebbc="true">readme.txt</readme>
+		<database>edit_db.php</database>
+		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="ManageSplitForums.template.php" destination="$boarddir/Themes/default" />
+		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="empty.png" destination="$imagesdir" />
+		<modification>install.xml</modification>
+		<redirect timeout="5000" url="index.php?action=admin;area=subforums" />
+	</install>
+	<uninstall for="2.0 - 2.0.99">
+		<readme parsebbc="true">uninstall.txt</readme>
+		<modification reverse="true">install.xml</modification>
+		<remove-file name="$sourcedir/ManageSplitForums.php" />
+		<remove-file name="$sourcedir/Subs-ManageSplitForums.php" />
+		<remove-file name="$boarddir/Themes/default/ManageSplitForums.template.php" />
+		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForums.english.php" />
+		<remove-file name="$imagesdir/empty.png" />
+		<code>uninstall.php</code>
+	</uninstall>
+
+</package-info>

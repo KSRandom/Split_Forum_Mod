@@ -1,0 +1,932 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+<id>Dougiefresh:Split_Forum</id>
+<version>1.0</version>
+<file name="$boarddir/index.php">
+	<operation>
+		<search position="before"><![CDATA['suggest' => array('Subs-Editor.php', 'AutoSuggestHandler'),]]></search>
+		<add><![CDATA[// Split Forums Mod
+		'subforums' => array('ManageSplitForums.php', 'ManageSplitForums'),
+		]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Admin.php">
+	<operation>
+		<search position="replace"><![CDATA[// Any files to include for administration?]]></search>
+		<add><![CDATA[// Subforum means no package manager and server settings access
+	if ($forumid <> 0) 
+	{
+		unset($admin_areas['forum']['areas']['packages']);
+		unset($admin_areas['config']['areas']['serversettings']);
+	}
+	
+	// Any files to include for administration?]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function AdminMain()
+{
+	global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir]]></search>
+		<add><![CDATA[function AdminMain()
+{
+	global $txt, $context, $scripturl, $sc, $modSettings, $user_info, $settings, $sourcedir, $options, $smcFunc, $boarddir, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Load the language and templates....]]></search>
+		<add><![CDATA[// Load the language and templates....
+	loadLanguage('ManageSplitForums');]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['layout' => array(
+			'title' => $txt['layout_controls'],
+			'permission' => array('manage_boards', 'admin_forum', 'manage_smileys', 'manage_attachments', 'moderate_forum'),
+			'areas' => array(
+]]></search>
+		<add><![CDATA[				'subforums' => array(
+					'label' => $txt['subforums_list'],
+					'file' => 'ManageSplitForums.php',
+					'function' => 'ManageSplitForums',
+					'icon' => 'server.gif',
+					'subsections' => array(
+						'main' => array($forumid != 0 ? $txt['subforum_modify_header'] : $txt['subforums_list'], 'admin_forum'),
+						'newsub' => array($forumid != 0 ? '' : $txt['subforums_list_add'], 'admin_forum'),
+						'settings' => array($txt['settings'], 'admin_forum'),
+					),
+				),
+]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Load.php">
+	<operation>
+		<search position="replace"><![CDATA[function reloadSettings()
+{
+	global $modSettings, $boarddir, $smcFunc, $txt, $db_character_set, $context, $sourcedir;]]></search>
+		<add><![CDATA[function reloadSettings()
+{
+	global $modSettings, $boarddir, $smcFunc, $txt, $db_character_set, $context, $sourcedir;
+	global $boardurl, $cookiename, $boarddir, $forumid, $mbname, $subtheme, $language, $favicon;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></search>
+		<add><![CDATA[// Determine which subforum we are in and load settings for it:
+	$dir = $_SERVER['REQUEST_URI'];
+	$dir = 'http://' . $_SERVER['HTTP_HOST'] . substr($dir, 0, strrpos($dir, '/'));
+	$request = $smcFunc['db_query']('', '
+		SELECT * FROM {db_prefix}subforums WHERE boardurl = "{raw:boardurl}" LIMIT 1',
+		array(
+			'boardurl' => $dir,
+		)
+	);
+	if ($request)
+	{
+		$row = $smcFunc['db_fetch_assoc']($request);
+		$smcFunc['db_free_result']($request);
+	}
+	if (!empty($row))
+	{
+		// Assign global variables with row gleaned from database:
+		$forumid = $row['forumid'];
+		$boardurl = $row['boardurl'];
+		$forumdir = $row['forumdir'];
+		$subtheme = $row['subtheme'];
+		$mbname = $row['boardname'];
+		$cookiename = $row['cookiename'];
+		$language = $row['language'];
+		$favicon = $row['favicon'];
+		$modSettings['primary_membergroup'] = $row['primary_membergroup'];
+	}
+	else
+    $forumid = 0;
+
+	// UTF-8 in regular expressions is unsupported on PHP(win) versions < 4.2.3.]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $context, $settings, $options, $sourcedir, $ssi_theme, $smcFunc;]]></search>
+		<add><![CDATA[global $context, $settings, $options, $sourcedir, $ssi_theme, $smcFunc, $subtheme, $forumid;
+	
+	// load subforum theme if we are in one.
+	if ($forumid <> 0) $id_theme = $subtheme;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $scripturl, $context, $modSettings;]]></search>
+		<add><![CDATA[global $subtheme, $forumid, $txt, $scripturl, $context, $modSettings, $boardurl;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[b.id_parent, c.name AS cname,]]></search>
+		<add><![CDATA[b.id_parent, c.name AS cname, c.forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Set the current board.]]></search>
+		<add><![CDATA[if ((int)$row['forumid'] != $forumid) {
+				// Find the right subforum to redirect to:
+				$request = $smcFunc['db_query']('', '
+					SELECT boardurl FROM {db_prefix}subforums WHERE forumid = {int:forumid}',
+					array( 'forumid' => (int) $row['forumid'] )
+				);
+				$sub = $smcFunc['db_fetch_assoc']($request);
+				$smcFunc['db_free_result']($request);
+
+				// If the "subforum_redirect_wrong" variable is set and $sub isn't empty, then redirect:
+				if ($modSettings['subforum_redirect_wrong'] == 1 && (!empty($sub)))
+					redirectexit(str_replace($boardurl, $sub['boardurl'], 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+
+				// Throw error about wrong forum:
+				loadPermissions();
+				loadTheme();
+				fatal_lang_error('wrong_forum', false);
+			}
+
+			]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageBoards.php">
+	<operation>
+		<search position="replace"><![CDATA[global $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc;]]></search>
+		<add><![CDATA[global $forumid, $context, $txt, $sourcedir, $modSettings, $scripturl, $smcFunc;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['can_collapse' => true,]]></search>
+		<add><![CDATA[
+			'forumid' => 0,]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['can_collapse' => !empty($cat_tree[$_REQUEST['cat']]['node']['can_collapse']),]]></search>
+		<add><![CDATA[
+			'forumid' => (int)($cat_tree[$_REQUEST['cat']]['node']['forumid']),]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$catOptions['is_collapsible'] = isset($_POST['collapse']);]]></search>
+		<add><![CDATA[
+		$catOptions['forumid'] = (int)($_POST['forum_id']);]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageCalendar.php">
+	<operation>
+		<search position="replace"><![CDATA[global $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc;]]></search>
+		<add><![CDATA[global $forumid, $modSettings, $context, $settings, $txt, $boarddir, $sourcedir, $scripturl, $smcFunc;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageMaintenance.php">
+	<operation>
+		<search position="replace"><![CDATA[	global $context, $smcFunc, $txt;
+
+	// Let's load up the boards in case they are useful.]]></search>
+		<add><![CDATA[	global $forumid, $context, $smcFunc, $txt;
+
+	// Let's load up the boards in case they are useful.]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageRegistration.php">
+	<operation>
+		<search position="replace"><![CDATA[function ModifyRegistrationSettings($return_config = false)
+{
+	global $txt, $context, $scripturl, $modSettings, $sourcedir;
+
+	// This is really quite wanting.
+	require_once($sourcedir . '/ManageServer.php');
+]]></search>
+		<add><![CDATA[function ModifyRegistrationSettings($return_config = false)
+{
+	global $txt, $context, $scripturl, $modSettings, $sourcedir, $smcFunc;
+
+	// This is really quite wanting.
+	require_once($sourcedir . '/ManageServer.php');
+
+    // Build an array for the membergroup list:
+    loadLanguage('Profile');
+	$group_list = array($txt['admin_register_group_none']);
+	$request = $smcFunc['db_query']('', '
+		SELECT group_name, id_group, min_posts
+		FROM {db_prefix}membergroups
+		WHERE id_group > {int:moderator_group}
+		ORDER BY min_posts, group_name',
+		array(
+			'moderator_group' => 3,
+		)
+	);
+    while ($row = $smcFunc['db_fetch_assoc']($request))
+		if ($row['min_posts'] != -1) $group_list[$row['id_group']] = $row['group_name'];
+    $smcFunc['db_free_result']($request);
+
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[array('check', 'send_welcomeEmail'),]]></search>
+		<add><![CDATA[array('check', 'send_welcomeEmail'),
+			array('select', 'primary_membergroup', $group_list),]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function EditAgreement()
+{
+	global $txt, $boarddir, $context, $modSettings, $smcFunc, $settings;]]></search>
+		<add><![CDATA[function EditAgreement()
+{
+	global $txt, $boarddir, $context, $modSettings, $smcFunc, $settings, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Try to figure out if we have more agreements.
+	foreach ($context['languages'] as $lang)
+	{
+		if (file_exists($boarddir . '/agreement.' . $lang['filename'] . '.txt'))
+		{
+			$context['editable_agreements']['.' . $lang['filename']] = $lang['name'];
+			// Are we editing this?
+			if (isset($_POST['agree_lang']) && $_POST['agree_lang'] == '.' . $lang['filename'])
+				$context['current_agreement'] = '.' . $lang['filename'];
+		}
+	}
+
+	if (isset($_POST['agreement']))
+	{
+		checkSession();
+
+		// Off it goes to the agreement file.
+		$fp = fopen($boarddir . '/agreement' . $context['current_agreement'] . '.txt', 'w');
+		fwrite($fp, str_replace("\r", '', $_POST['agreement']));
+		fclose($fp);
+
+		updateSettings(array('requireAgreement' => !empty($_POST['requireAgreement'])));
+	}
+
+	$context['agreement'] = file_exists($boarddir . '/agreement' . $context['current_agreement'] . '.txt') ? htmlspecialchars(file_get_contents($boarddir . '/agreement' . $context['current_agreement'] . '.txt')) : '';
+	$context['warning'] = is_writable($boarddir . '/agreement' . $context['current_agreement'] . '.txt') ? '' : $txt['agreement_not_writable'];]]></search>
+		<add><![CDATA[// Try to figure out if we have more agreements.
+	$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);
+	foreach ($context['languages'] as $lang)
+	{
+		if (file_exists($boarddir . '/' . $agree . $lang['filename'] . '.txt'))
+		{
+			$context['editable_agreements']['.' . $lang['filename']] = $lang['name'];
+			// Are we editing this?
+			if (isset($_POST['agree_lang']) && $_POST['agree_lang'] == '.' . $lang['filename'])
+				$context['current_agreement'] = '.' . $lang['filename'];
+		}
+	}
+
+	if (isset($_POST['agreement']))
+	{
+		checkSession();
+
+		// Off it goes to the agreement file.
+		$fp = fopen($boarddir . '/' . $agree . $context['current_agreement'] . '.txt', 'w');
+		fwrite($fp, str_replace("\r", '', $_POST['agreement']));
+		fclose($fp);
+
+		updateSettings(array('requireAgreement' => !empty($_POST['requireAgreement'])));
+	}
+
+	$context['agreement'] = file_exists($boarddir . '/' . $agree . $context['current_agreement'] . '.txt') ? htmlspecialchars(file_get_contents($boarddir . '/' . $agree . $context['current_agreement'] . '.txt')) : '';
+	$context['warning'] = is_writable($boarddir . '/' . $agree . $context['current_agreement'] . '.txt') ? '' : $txt['agreement_not_writable'];]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/ManageServer.php">
+	<operation>
+		<search position="replace"><![CDATA[array('cachedir', $txt['cachedir'], 'file', 'text', 36),]]></search>
+		<add><![CDATA[array('cachedir', $txt['cachedir'], 'file', 'text', 36),
+		array('favicon', $txt['favicon'], 'file', 'text', 36),]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['boarddir', 'sourcedir', 'cachedir',]]></search>
+		<add><![CDATA['boarddir', 'sourcedir', 'cachedir', 'favicon',]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/News.php">
+	<operation>
+		<search position="replace"><![CDATA[function getXmlNews($xml_format)
+{
+	global $user_info, $scripturl, $modSettings, $board;]]></search>
+		<add><![CDATA[function getXmlNews($xml_format)
+{
+	global $user_info, $scripturl, $modSettings, $board, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function getXmlRecent($xml_format)
+{
+	global $user_info, $scripturl, $modSettings, $board;]]></search>
+		<add><![CDATA[function getXmlRecent($xml_format)
+{
+	global $user_info, $scripturl, $modSettings, $board, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (b.id_cat = c.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (b.id_cat = c.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[AND t.approved = {int:is_approved}' : '') . ']]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[AND m.approved = {int:is_approved}' : '') . ']]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['is_approved' => 1,]]></search>
+		<add><![CDATA[
+			'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['current_board' => $board,
+				'is_approved' => 1,
+				'optimize_msg' => $optimize_msg,]]></search>
+		<add><![CDATA['current_board' => $board,
+				'is_approved' => 1,
+				'optimize_msg' => $optimize_msg,
+				'forumid' => $forumid,]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Packages.php">
+	<operation>
+		<search position="replace"><![CDATA[function Packages()
+{
+	global $txt, $scripturl, $sourcedir, $context;]]></search>
+		<add><![CDATA[function Packages()
+{
+	global $txt, $scripturl, $sourcedir, $context, $forumid;
+
+	if ($forumid <> 0) { // subforum means no packages access
+		isAllowedTo('admin_forum');
+		require_once($sourcedir . '/Subs-Package.php');
+		loadLanguage('Packages');
+		loadTemplate('Packages', 'packages');
+		$context[$context['admin_menu_name']]['tab_data'] = array(
+			'title' => &$txt['package_manager'],
+			'description' => $txt['package_manager_desc'],
+			'tabs' => array());
+		fatal_lang_error('no_pack_in_subforum', false);
+	}]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/PostModeration.php">
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $scripturl, $context, $user_info, $sourcedir, $smcFunc;]]></search>
+		<add><![CDATA[global $forumid, $txt, $scripturl, $context, $user_info, $sourcedir, $smcFunc;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Profile-Modify.php">
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile;]]></search>
+		<add><![CDATA[global $forumid, $txt, $user_info, $context, $modSettings, $smcFunc, $cur_profile;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Recent.php">
+	<operation>
+		<search position="replace"><![CDATA[global $user_info, $scripturl, $modSettings, $smcFunc;]]></search>
+		<add><![CDATA[global $user_info, $scripturl, $modSettings, $smcFunc, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}messages AS ml ON (ml.id_msg = b.id_last_msg)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (b.id_cat = c.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[AND ml.approved = {int:is_approved}]]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['recycle_board' => $modSettings['recycle_board'],
+			'is_approved' => 1,]]></search>
+		<add><![CDATA[
+			'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$sourcedir, $board, $smcFunc]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board)]]></search>
+		<add><![CDATA[
+			INNER JOIN {db_prefix}categories AS c ON (b.id_cat = c.id_cat)]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[AND m.approved = {int:is_approved}]]></search>
+		<add><![CDATA[
+			AND c.forumid = {int:forumid}]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['limit' => 10,]]></search>
+		<add><![CDATA[
+			'forumid' => $forumid,]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[$scripturl, $sourcedir]]></search>
+		<add><![CDATA[, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board, b.id_parent
+			FROM {db_prefix}boards AS b
+			WHERE {query_wanna_see_board}
+				AND b.child_level > {int:no_child}
+				AND b.id_board NOT IN ({array_int:boards})
+			ORDER BY child_level ASC
+			',
+			array(
+				'no_child' => 0,
+				'boards' => $boards,
+			)
+		);]]></search>
+		<add><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board, b.id_parent
+			FROM {db_prefix}boards AS b
+				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			WHERE {query_wanna_see_board}
+				AND b.child_level > {int:no_child}
+				AND b.id_board NOT IN ({array_int:boards})
+				AND c.forumid = {int:forumid}
+			ORDER BY child_level ASC
+			',
+			array(
+				'no_child' => 0,
+				'boards' => $boards,
+				'forumid' => $forumid,
+			)
+		);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board
+			FROM {db_prefix}boards AS b
+			WHERE {query_see_board}
+				AND b.id_board IN ({array_int:board_list})',
+			array(
+				'board_list' => $_REQUEST['boards'],
+			)
+		);]]></search>
+		<add><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board
+			FROM {db_prefix}boards AS b
+				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_Cat)
+			WHERE {query_see_board}
+				AND b.id_board IN ({array_int:board_list})
+				AND c.forumid = {int:forumid}',
+			array(
+				'board_list' => $_REQUEST['boards'],
+				'forumid' => $forumid,
+			)
+		);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board
+			FROM {db_prefix}boards AS b
+			WHERE ' . $user_info[$see_board] . '
+				AND b.id_cat IN ({array_int:id_cat})',
+			array(
+				'id_cat' => $_REQUEST['c'],
+			)
+		);]]></search>
+		<add><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board
+			FROM {db_prefix}boards AS b
+				INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)
+			WHERE ' . $user_info[$see_board] . '
+				AND b.id_cat IN ({array_int:id_cat})
+				AND c.forumid = {int:forumid}',
+			array(
+				'id_cat' => $_REQUEST['c'],
+				'forumid' => $forumid,
+			)
+		);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board
+			FROM {db_prefix}boards AS b
+			WHERE ' . $user_info[$see_board] . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+				AND b.id_board != {int:recycle_board}' : ''),
+			array(
+				'recycle_board' => (int) $modSettings['recycle_board'],
+			)
+		);]]></search>
+		<add><![CDATA[		$request = $smcFunc['db_query']('', '
+			SELECT b.id_board
+			FROM {db_prefix}boards AS b
+				INNER JOIN {db_prefix}categories AS c ON (b.id_cat = c.id_cat)
+			WHERE ' . $user_info[$see_board] . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+				AND b.id_board != {int:recycle_board}' : '').
+				' AND c.forumid = {int:forumid}',
+			array(
+				'recycle_board' => (int) $modSettings['recycle_board'],
+				'forumid' => $forumid
+			)
+		);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[			fatal_lang_error('error_no_boards_selected');
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></search>
+		<add><![CDATA[			fatal_lang_error('wrong_forum', false);
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[			fatal_lang_error('error_no_boards_selected');
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></search>
+		<add><![CDATA[			fatal_lang_error('wrong_forum', false);
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[			fatal_lang_error('error_no_boards_selected');
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></search>
+		<add><![CDATA[			fatal_lang_error('wrong_forum', false);
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[			fatal_lang_error('error_no_boards_selected');
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></search>
+		<add><![CDATA[			fatal_lang_error('wrong_forum', false);
+
+		$query_this_board = 'id_board IN ({array_int:boards})';]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Register.php">
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $boarddir, $context, $settings, $modSettings, $user_info]]></search>
+		<add><![CDATA[global $txt, $boarddir, $context, $settings, $modSettings, $user_info, $forumid]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[// Have we got a localized one?
+		if (file_exists($boarddir . '/agreement.' . $user_info['language'] . '.txt'))
+			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/agreement.' . $user_info['language'] . '.txt'), true, 'agreement_' . $user_info['language']);
+		elseif (file_exists($boarddir . '/agreement.txt'))
+			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/agreement.txt'), true, 'agreement');]]></search>
+		<add><![CDATA[// Have we got a localized one?
+		$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid . '.');
+		if (file_exists($boarddir . '/' . $agree . $user_info['language'] . '.txt'))
+			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/' . $agree . $user_info['language'] . '.txt'), true, 'agreement_' . $user_info['language']);
+		elseif (file_exists($boarddir . '/' . $agree . '.txt'))
+			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/' . $agree . '.txt'), true, 'agreement');]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Reports.php">
+	<operation>
+		<search position="replace"><![CDATA[global $context, $txt, $sourcedir, $smcFunc;]]></search>
+		<add><![CDATA[global $forumid, $context, $txt, $sourcedir, $smcFunc;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Search.php">
+	<operation>
+		<search position="replace"><![CDATA[global $txt, $scripturl, $modSettings, $user_info, $context, $smcFunc, $sourcedir;]]></search>
+		<add><![CDATA[global $forumid, $txt, $scripturl, $modSettings, $user_info, $context, $smcFunc, $sourcedir;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[SELECT b.id_cat, c.name AS cat_name, b.id_board, b.name, b.child_level]]></search>
+		<add><![CDATA[SELECT b.id_cat, c.name AS cat_name, c.forumid, b.id_board, b.name, b.child_level]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// This category hasn't been set up yet..]]></search>
+		<add><![CDATA[		if ((int)$row['forumid'] != $forumid) // non-viewable board
+			continue;
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[global $scripturl, $modSettings, $sourcedir, $txt, $db_connection;]]></search>
+		<add><![CDATA[global $forumid, $scripturl, $modSettings, $sourcedir, $txt, $db_connection;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[INNER JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs.php">
+	<operation>
+		<search position="before"><![CDATA[function setupMenuContext()
+{
+	global $context, $modSettings, $user_info, $txt, $scripturl;]]></search>
+		<add><![CDATA[
+	global $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA['href' => $scripturl . '?action=admin;area=packages',
+						'show' => allowedTo('admin_forum'),]]></search>
+		<add><![CDATA['href' => $scripturl . '?action=admin;area=packages',
+						'show' => allowedTo('admin_forum') && ($forumid == 0),]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Admin.php">
+	<operation>
+		<search position="replace"><![CDATA[function updateSettingsFile($config_vars)
+{
+	global $boarddir, $cachedir;]]></search>
+		<add><![CDATA[function updateSettingsFile($config_vars)
+{
+	global $boarddir, $cachedir, $smcFunc, $forumid;
+
+	// Put available data in the Split Forums database:
+	if (isset($config_vars['mbname']))
+		$smcFunc['db_query']('', '
+			UPDATE {db_prefix}subforums SET boardname = {raw:txt} WHERE forumid = ' . $forumid, 
+			array('txt' => $config_vars['mbname']));
+	if (isset($config_vars['boardurl']))
+		$smcFunc['db_query']('', '
+			UPDATE {db_prefix}subforums SET boardurl = {raw:txt} WHERE forumid = ' . $forumid, 
+			array('txt' => $config_vars['boardurl']));
+	if (isset($config_vars['boardurl']))
+		$smcFunc['db_query']('', '
+			UPDATE {db_prefix}subforums SET forumdir = {raw:txt} WHERE forumid = ' . $forumid, 
+			array('txt' => $config_vars['boardurl']));
+	if (isset($config_vars['cookiename']))
+		$smcFunc['db_query']('', '
+			UPDATE {db_prefix}subforums SET cookiename = {raw:txt} WHERE forumid = ' . $forumid, 
+			array('txt' => $config_vars['cookiename']));
+	if (isset($config_vars['favicon']))
+		$smcFunc['db_query']('', '
+			UPDATE {db_prefix}subforums SET favicon = {raw:txt} WHERE forumid = ' . $forumid, 
+			array('txt' => $config_vars['favicon']));
+	unset($config_vars['favicon']);]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-BoardIndex.php">
+	<operation>
+		<search position="replace"><![CDATA[global $settings, $context;]]></search>
+		<add><![CDATA[global $forumid, $settings, $context;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[// Haven't set this category yet.]]></search>
+		<add><![CDATA[			if ((int)$row_board['id_cat'] == 0)
+				continue; // skip this board, as its category parent is not visible
+			
+]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Boards.php">
+	<operation>
+		<search position="replace"><![CDATA[function getBoardTree()
+{
+	global $cat_tree, $boards, $boardList, $txt, $modSettings, $smcFunc;
+
+	// Getting all the board and category information you'd ever wanted.]]></search>
+		<add><![CDATA[function getBoardTree($reqid = -1)
+{
+	global $cat_tree, $boards, $boardList, $txt, $modSettings, $smcFunc, $forumid, $subforum_tree;
+
+	// Build the subforum tree array:
+	$request = $smcFunc['db_query']('', '
+		SELECT * FROM {db_prefix}subforums'.($forumid <> 0 ? ' WHERE forumid = {int:forumid}' : '').' ORDER BY forumid',
+		array(
+			'forumid' => (int) $forumid,
+		)
+	);
+	$subforum_tree = array();
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+	{
+		$subforum_tree[$row['forumid']] = $row;
+	}
+	$smcFunc['db_free_result']($request);
+	
+	// Getting all the board and category information you'd ever wanted.
+	$reqid = (int) ($forumid == 0 ? (isset($_REQUEST['sub']) ? $_REQUEST['sub'] : $reqid) : $forumid);]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[c.id_cat, c.name AS cat_name, c.cat_order, c.can_collapse
+		FROM {db_prefix}categories AS c
+			LEFT JOIN {db_prefix}boards AS b ON (b.id_cat = c.id_cat)
+		ORDER BY c.cat_order, b.child_level, b.board_order',
+		array(]]></search>
+		<add><![CDATA[c.id_cat, c.name AS cat_name, c.cat_order, c.can_collapse, c.forumid
+		FROM {db_prefix}categories AS c
+			LEFT JOIN {db_prefix}boards AS b ON (b.id_cat = c.id_cat)
+		'.($reqid <> -1 ? 'WHERE c.forumid = {int:forumid}' : '').'
+		ORDER BY c.forumid, c.cat_order, b.child_level, b.board_order',
+		array(
+			'forumid' => (int) $reqid,]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA['can_collapse' => $row['can_collapse']]]></search>
+		<add><![CDATA[,
+					'forumid' => $row['forumid']]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Categories.php">
+	<operation>
+		<search position="after"><![CDATA[	// Do the updates (if any).]]></search>
+		<add><![CDATA[	// Which forum will this category be displayed on?
+	if (isset($catOptions['forumid']))
+	{
+		$catUpdates[] = 'forumid = {int:forumid}';
+		$catParameters['forumid'] = (int)$catOptions['forumid'];
+	}
+
+	]]></add>
+	</operation>
+</file>
+<file name="$sourcedir/Subs-Members.php">
+	<operation>
+		<search position="replace"><![CDATA['id_post_group' => 4,]]></search>
+		<add><![CDATA['id_group' => !empty($modSettings['primary_membergroup']) ? $modSettings['primary_membergroup'] : '0',
+	'id_post_group' => 4,]]></add>
+	</operation>
+</file>	
+<file name="$sourcedir/Subs-MessageIndex.php">
+	<operation>
+		<search position="replace"><![CDATA[global $smcFunc, $user_info;]]></search>
+		<add><![CDATA[global $forumid, $smcFunc, $user_info;]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat)]]></search>
+		<add><![CDATA[LEFT JOIN {db_prefix}categories AS c ON (c.id_cat = b.id_cat AND c.forumid = '.$forumid.')]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[	$request = $smcFunc['db_query']('messageindex_fetch_boards', ']]></search>
+		<add><![CDATA[	$where[] = 'b.id_cat = c.id_cat';
+]]></add>
+	</operation>
+</file>
+<file name="$themedir/index.template.php">
+	<operation>
+		<search position="replace"><![CDATA[function template_html_above()
+{
+	global $context, $settings, $options, $scripturl, $txt, $modSettings;]]></search>
+		<add><![CDATA[function template_html_above()
+{
+	global $context, $settings, $options, $scripturl, $txt, $modSettings, $favicon;]]></add>
+	</operation>
+	<operation>
+		<search position="after"><![CDATA[
+</head>]]></search>
+		<add><![CDATA[';
+	if (!empty($favicon))
+		echo '<link rel="shortcut icon" href="'.$favicon.'" type="image/x-icon" />
+<link rel="icon" href="'.$favicon.'" type="image/x-icon" />';
+echo '
+]]></add>
+	</operation>
+</file>
+<file name="$themedir/ManageBoards.template.php">
+	<operation>
+		<search position="replace"><![CDATA[global $context, $settings, $options, $scripturl, $txt, $modSettings;
+
+	// Table header.
+	echo '
+	<div id="manage_boards">
+		<div class="title_bar">
+			<h3 class="titlebg">', $txt['boardsEdit'], '</h3>
+		</div>';
+
+	if (!empty($context['move_board']))
+		echo '
+		<div class="information">
+			<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=manageboards">', $txt['mboards_cancel_moving'], '</a>]', '</p>
+		</div>';
+
+	// No categories so show a label.
+	if (empty($context['categories']))
+		echo '
+		<div class="windowbg">
+			<span class="topslice"><span></span></span>
+			<div class="content centertext">
+				', $txt['mboards_no_cats'], '
+			</div>
+			<span class="botslice"><span></span></span>
+		</div>';
+
+	// Loop through every category, listing the boards in each as we go.
+	foreach ($context['categories'] as $category)
+	{
+]]></search>
+		<add><![CDATA[global $context, $settings, $options, $scripturl, $txt, $modSettings, $subforum_tree, $cat_tree, $forumid;
+
+	// Table header.
+	echo '
+	<div id="manage_boards">';
+
+	if (!empty($context['move_board']))
+		echo '
+		<div class="title_bar">
+			<h3 class="titlebg">', $txt['boardsEdit'], '</h3>
+		</div>
+		<div class="information">
+			<p>', $context['move_title'], ' [<a href="', $scripturl, '?action=admin;area=manageboards">', $txt['mboards_cancel_moving'], '</a>]', '</p>
+		</div>';
+
+	// No categories so show a label.
+	if (empty($context['categories']))
+		echo '
+		<div class="title_bar">
+			<h3 class="titlebg">', $txt['boardsEdit'], '</h3>
+		</div>
+		<div class="windowbg">
+			<span class="topslice"><span></span></span>
+			<div class="content centertext">
+				', $txt['mboards_no_cats'], '
+			</div>
+			<span class="botslice"><span></span></span>
+		</div>';
+
+	// Loop through every category, listing the boards in each as we go.
+	$last_forum = -1;
+	foreach ($context['categories'] as $category)
+	{
+		$forum_id = $cat_tree[$category['id']]['node']['forumid'];
+		if ($forum_id != $last_forum)
+		{
+			if ($last_forum > -1) echo '<br />';
+			echo '
+		<div class="title_bar">
+			<h3 class="titlebg">', $txt['boardsEdit'], ($forumid == 0 ? ' - '.(empty($subforum_tree[$forum_id]['boardname']) ? '#'.$forum_id : $subforum_tree[$forum_id]['boardname']) : ''), '</h3>
+		</div>';
+			$last_forum = $forum_id;
+		}
+]]></add>
+	</operation>
+	<operation>
+		<search position="replace"><![CDATA[function template_modify_category()
+{
+	global $context, $settings, $options, $scripturl, $txt;]]></search>
+		<add><![CDATA[function template_modify_category()
+{
+	global $context, $settings, $options, $scripturl, $txt, $subforum_tree, $forumid;]]></add>
+	</operation>
+	<operation>
+		<search position="before"><![CDATA[<dt>
+							<strong>' . $txt['collapse_enable'] . '</strong><br />
+							<span class="smalltext">' . $txt['collapse_desc'] . '</span>
+						</dt>
+						<dd>
+							<input type="checkbox" name="collapse"', $context['category']['can_collapse'] ? ' checked="checked"' : '', ' tabindex="', $context['tabindex']++, '" class="input_check" />
+						</dd>';]]></search>
+		<add><![CDATA[
+	// If this isn't the only subforum, let the user choose which subforum it should be placed in:
+	if (count($subforum_tree) > 1)
+	{
+		echo '
+						<dt>
+							<strong>' . $txt['forumid_title']. '</strong><br />
+							<span class="smalltext">' . $txt['forumid_desc'] . '</span>
+						</dt>
+						<dd>
+							<select name="forum_id">';
+		// Print every existing category into a select box.
+		foreach ($subforum_tree as $row)
+			echo '
+								<option', $context['category']['forumid'] == $row['forumid'] ? ' selected="selected"' : '', ' value="', $row['forumid'], '">', $row['boardname'], '</option>';
+		echo '
+							</select>
+						</dd>';
+	} else {
+		echo '
+						<input type="hidden" name="forum_id" value="', $forumid, '" size="4" tabindex="', $context['tabindex']++, '" />';
+	}
+]]></add>
+	</operation>
+</file>
+<file name="$languagedir/Admin.english.php">
+	<operation>
+		<search position="after"><![CDATA[?>]]></search>
+		<add><![CDATA[// Begin SubForum Mod
+$txt['favicon'] = 'Website Icon URL';
+// End SubForum Mod
+
+]]></add>
+	</operation>
+</file>
+<file name="$languagedir/Errors.english.php">
+	<operation>
+		<search position="before"><![CDATA[$txt['no_board'] = 'The board you specified doesn\'t exist';]]></search>
+		<add><![CDATA[
+$txt['wrong_forum'] = 'The board you specified is located on a different forum';]]></add>
+	</operation>
+</file>
+</modification>

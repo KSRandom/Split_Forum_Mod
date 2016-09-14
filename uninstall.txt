@@ -1,0 +1,11 @@
+[hr]
+[center][color=red][size=16pt][b]SPLIT FORUM MOD v1.0[/b][/size][/color]
+[url=http://www.simplemachines.org/community/index.php?action=profile;u=253913][b]By Dougiefresh[/b][/url] -> [url=http://custom.simplemachines.org/mods/index.php?mod=3730]Link to Mod[/url]
+[/center]
+[hr]
+
+Per Simple Machines Forum mod-creation guidelines, uninstalling a mod must remove all files and directories created by the mod (and optionally database changes, if the user desires).  
+
+This mod creates a directory per subforum that contain a [b]index.php[/b] file, and copies of the [b]agreement.txt[/b] file, all of which will be removed during the uninstall of this mod.  All other data (such as posts, topics, attachments, etc) is stored at the main forum directory.  Categories belonging to subforums will be become visible to the main forum after uninstallation.
+
+Please backup your data and necessary files before proceeding with uninstallation.
