@@ -14,11 +14,11 @@ if (!defined('SMF'))
 **********************************************************************************/
 function SplitForum_Admin_Menu(&$areas)
 {
-	global $txt, $scripturl, $subforum_tree, $modSettings, $context, $forumid;
+	global $txt, $scripturl, $subforum_tree, $modSettings, $context, $forumid, $forum_version;
 
 	// Load some stuff:
 	loadLanguage('ManageSplitForums');
-	loadTemplate('Admin', 'splitforum');
+	loadTemplate('Admin', 'splitforum_' . (substr($forum_version, 0, 7) == 'SMF 2.1' ? '21' : '20'));
 
 	// Insert the Subforums area into the admin menu:
 	$temp = array();

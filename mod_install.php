@@ -87,4 +87,17 @@ foreach ($subforum_tree as $subforum)
 if (SMF == 'SSI')
    echo 'Congratulations! You have successfully installed this mod!';
 
+function relativePath($from, $to, $ps = DIRECTORY_SEPARATOR)
+{
+	$arFrom = explode($ps, rtrim($from, $ps));
+	$arTo = explode($ps, rtrim($to, $ps));
+	while(count($arFrom) && count($arTo) && ($arFrom[0] == $arTo[0]))
+	{
+		array_shift($arFrom);
+		array_shift($arTo);
+	}
+	$base = str_pad("", count($arFrom) * 3, '..' . $ps) . implode($ps, $arTo);
+	return str_replace(DIRECTORY_SEPARATOR, '/', $base);
+}
+
 ?>

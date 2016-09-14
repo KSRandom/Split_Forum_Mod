@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.23</version>
+	<version>1.24</version>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -18,7 +18,7 @@
 		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
 		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
-		<require-file name="splitforum.css" destination="$themedir/css" />
+		<require-file name="splitforum_20.css" destination="$themedir/css" />
 		<require-file name="ManageSplitForums.template.php" destination="$boarddir/Themes/default" />
 		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
 		<require-file name="empty.png" destination="$imagesdir" />
@@ -33,14 +33,48 @@
 		<remove-file name="$sourcedir/Subs-ManageSplitForums.php" />
 		<remove-file name="$sourcedir/Subs-SplitForumAdminHooks.php" />
 		<remove-file name="$sourcedir/Subs-SplitForumHooks.php" />
-		<remove-file name="$themedir/css/splitforum.css" />
+		<remove-file name="$themedir/css/splitforum_20.css" />
 		<remove-file name="$boarddir/Themes/default/ManageSplitForums.template.php" />
 		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForums.english.php" />
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
 
-	<upgrade from="1.22">
-		<modification>upgrade_1.23.xml</modification>
+	<install for="2.1 Beta 1 - 2.1.99">
+		<readme parsebbc="true">readme.txt</readme>
+		<code>add_remove_hooks.php</code>
+		<code>mod_install.php</code>
+		<database>db_install.php</database>
+		<modification>install_21x.xml</modification>
+		<modification>language_english.xml</modification>
 		<require-file name="ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-ManageSplitForums.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
+		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
+		<require-file name="splitforum_21.css" destination="$themedir/css" />
+		<require-file name="ManageSplitForums.template.php" destination="$boarddir/Themes/default" />
+		<require-file name="ManageSplitForums.english.php" destination="$boarddir/Themes/default/languages" />
+		<require-file name="empty.png" destination="$imagesdir" />
+		<redirect timeout="5000" url="?action=admin;area=maintain;sa=routine;activity=cleancache" />
+	</install>
+	<uninstall for="2.1 Beta 1 - 2.1.99">
+		<code>add_remove_hooks.php</code>
+		<code>mod_uninstall.php</code>
+		<modification reverse="true">install_21x.xml</modification>
+		<modification reverse="true">language_english.xml</modification>
+		<remove-file name="$sourcedir/ManageSplitForums.php" />
+		<remove-file name="$sourcedir/Subs-ManageSplitForums.php" />
+		<remove-file name="$sourcedir/Subs-SplitForumAdminHooks.php" />
+		<remove-file name="$sourcedir/Subs-SplitForumHooks.php" />
+		<remove-file name="$themedir/css/splitforum_21.css" />
+		<remove-file name="$boarddir/Themes/default/ManageSplitForums.template.php" />
+		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForums.english.php" />
+		<remove-file name="$imagesdir/empty.png" />
+	</uninstall>
+
+	<upgrade from="1.22 - 1.23">
+		<require-file name="ManageSplitForums.template.php" destination="$boarddir/Themes/default" />
+		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
+		<require-file name="splitforum_20.css" destination="$themedir/css" />
+		<remove-file name="$themedir/css/splitforum.css" />
 	</upgrade>
 </package-info>

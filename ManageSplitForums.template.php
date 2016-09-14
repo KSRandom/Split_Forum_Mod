@@ -14,7 +14,10 @@ if (!defined('SMF'))
 
 function template_subforums_list()
 {
-	global $context, $settings, $scripturl, $txt, $subforum_tree;
+	global $context, $settings, $scripturl, $txt, $subforum_tree, $forum_version;
+
+	// Flag that will be used to add SMF 2.1 elements to the template:
+	$smf21 = (substr($forum_version, 0, 7) == 'SMF 2.1');
 
 	// Let's get this template started:
 	echo '
@@ -24,7 +27,15 @@ function template_subforums_list()
 				<h3 class="catbg">', $txt['subforums_list_header'], '</h3>
 			</div>
 			<div class="windowbg">
-				<span class="topslice"><span></span></span>
+				<span class="topslice"><span></span></span>';
+	if ($smf21)
+		echo '
+				<div class="sub_bar">
+					<h3 class="subbg">
+						', $txt['subforums_list'], '
+					</h3>
+				</div>';
+	echo '
 				<div class="content">
 					<ul style="float:left; width:100%;">';
 
@@ -39,10 +50,10 @@ function template_subforums_list()
 							<span class="floatright">';
 		if ($subforum['forumid'] != 0)
 		echo '
-								<span class="modify_boards"><a href="', $context['post_url'], ';sa=delete;sub=', $subforum['forumid'], '" onclick="return confirm(\'', $txt['subforum_modify_confirm'], '\');">', $txt['subforums_list_delete'], '</a></span>';
+								<span class="modify_boards"><a href="', $context['post_url'], ';sa=delete;sub=', $subforum['forumid'], '" onclick="return confirm(\'', $txt['subforum_modify_confirm'], '\');"', ($smf21 ? ' class="button"' : ''), '>', $txt['subforums_list_delete'], '</a></span>';
 		echo '
-								<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sub=', $subforum['forumid'], '">', $txt['subforums_list_boards'], '</a></span>
-								<span class="modify_boards"><a href="', $context['post_url'], ';sa=edit;sub=', $subforum['forumid'], '">', $txt['mboards_modify'], '</a></span>
+								<span class="modify_boards"><a href="', $scripturl, '?action=admin;area=manageboards;sub=', $subforum['forumid'], '"', ($smf21 ? ' class="button"' : ''), '>', $txt['subforums_list_boards'], '</a></span>
+								<span class="modify_boards"><a href="', $context['post_url'], ';sa=edit;sub=', $subforum['forumid'], '"', ($smf21 ? ' class="button"' : ''), '>', $txt['mboards_modify'], '</a></span>
 							</span>
 							<br style="clear: right;" />
 						</li>';
