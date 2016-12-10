@@ -5,7 +5,7 @@
 	<id>Dougiefresh:Split_Forum</id>
 	<name>Split Forum Mod</name>
 	<type>modification</type>
-	<version>1.36</version>
+	<version>1.37</version>
 	
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true">readme.txt</readme>
@@ -84,23 +84,4 @@
 		<remove-file name="$boarddir/Themes/default/languages/ManageSplitForum.spanish_latin-utf8.php" />
 		<remove-file name="$imagesdir/empty.png" />
 	</uninstall>
-
-	<upgrade for="2.0 - 2.0.99" from="1.35">
-		<code>add_remove_hooks.php</code>
-		<modification reverse="true">upgrade_20x_1.36.xml</modification>
-		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForum.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
-		<require-file name="ManageSplitForum.english.php" destination="$boarddir/Themes/default/languages" />
-	</upgrade>
-	<upgrade for="2.1 Beta 2 - 2.1.99" from="1.35">
-		<code>add_remove_hooks.php</code>
-		<modification reverse="true">upgrade_21x_1.36.xml</modification>
-		<require-file name="ManageSplitForum.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForum.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumHooks.php" destination="$sourcedir" />
-		<require-file name="Subs-SplitForumAdminHooks.php" destination="$sourcedir" />
-		<require-file name="ManageSplitForum.english.php" destination="$boarddir/Themes/default/languages" />
-	</upgrade>
 </package-info>

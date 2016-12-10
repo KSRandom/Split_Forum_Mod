@@ -1,3 +1,8 @@
+v1.37 - November 18th, 2016
+o [b]SMF 2.0.x:[/b] Fixed Edit Membergroup and Add Membergroup functions to fix board selection bug.
+o Fixed missing closing operation tag in [b]install_20x.xml[/b].
+o Removed upgrade ability from mod.
+
 v1.36 - August 12th, 2016
 o Added code to deny subforum access to membergroups using on permission system.
 o Fixed code issue produced by v1.34-to-1.35 upgrade XML files.
