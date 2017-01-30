@@ -2,7 +2,7 @@
 <!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
 <modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
 <id>Dougiefresh:Split_Forum</id>
-<version>1.37/version>
+<version>1.38</version>
 
 <!---------------------------------------------------------------------------->
 <!-- Source File Edits														-->
@@ -907,7 +907,7 @@ function EditBoard()
 	$context['agreement'] = file_exists($boarddir . '/agreement' . $context['current_agreement'] . '.txt') ? htmlspecialchars(file_get_contents($boarddir . '/agreement' . $context['current_agreement'] . '.txt')) : '';
 	$context['warning'] = is_writable($boarddir . '/agreement' . $context['current_agreement'] . '.txt') ? '' : $txt['agreement_not_writable'];]]></search>
 		<add><![CDATA[// Try to figure out if we have more agreements.
-	$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';
+	$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);
 	foreach ($context['languages'] as $lang)
 	{
 		if (file_exists($boarddir . '/' . $agree . $lang['filename'] . '.txt'))
@@ -1372,7 +1372,7 @@ function EditBoard()
 		elseif (file_exists($boarddir . '/agreement.txt'))
 			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/agreement.txt'), true, 'agreement');]]></search>
 		<add><![CDATA[// Have we got a localized one?
-		$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid) . '.';
+		$agree = 'agreement' . ($forumid == 0 ? '' : '.forum' . $forumid);
 		if (file_exists($boarddir . '/' . $agree . $user_info['language'] . '.txt'))
 			$context['agreement'] = parse_bbc(file_get_contents($boarddir . '/' . $agree . $user_info['language'] . '.txt'), true, 'agreement_' . $user_info['language']);
 		elseif (file_exists($boarddir . '/' . $agree . '.txt'))
